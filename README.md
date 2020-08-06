@@ -56,3 +56,5 @@ Also, check out the accompanying [video series](https://nickchk.com/videos.html#
 [Example R Dashboard](https://nickch-k.github.io/DataCommSlides/Lecture_17_Example_Dashboard.html#/)
 
 [Lecture 18: Dashboards in R, Part 2 - Shiny](https://nickch-k.github.io/DataCommSlides/Lecture_18_Dashboards_in_R_Part_2_Shiny.html#/)
+
+[Example Shiny Dashboard](https://nickch-k.shinyapps.io/Lecture_18_Example_Shiny/)
