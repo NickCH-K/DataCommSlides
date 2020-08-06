@@ -1,0 +1,173 @@
+---
+title: "Lecture 10: Notebooks and Tidy Tuesday"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(knitr)
+
+rinline <- function(code){
+  html <- '<code  class="r">``` `r CODE` ```</code>'
+  sub("CODE", code, html)
+}
+```
+
+
+
+## Notebooks
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- One of the reasons Excel gets a (deserved) bad rep is because there's *no paper trail*
+- We want the source of our analysis and the way we did it to be clear
+- We want work to be *reproducible*
+- One great development recently has been increasing use of *notebooks*
+
+## Notebooks
+
+- Notebooks are files (HTML, Word, whatever) that contain both the code you use AND the output
+- In many places (R, Python, many more) this can be automated - you put your code in the notebook source, and it includes the output in the same place.
+- Makes it very easy to share your output!
+
+## Notebooks
+
+- In a business context, you might not need to share your code with the higher-ups, but the other people working with you would like to see it very much! 
+- RMarkdown (R) and Jupyter (Python) are very common internally in many places
+- Plus, the underlying code that makes the doc is all text, making it easy to do version control and share things on GitHub
+
+## GitHub
+
+- Git is a process for version control
+- There's a central repository that you can branch off from, make changes, then "commit" those changes to the branch, and "push" them back to the central branch
+- Most software development works this way, much of it through GitHub
+- We won't be going over it too much but it's worth looking into. See [these slides](https://raw.githack.com/uo-ec607/lectures/master/02-git/02-Git.html#1) by Grant McDermott
+
+## Notebooks
+
+- Back to notebooks!
+- Let's go over the basics of setting up an RMarkdown notebook
+- These can be set up in one click in RStudio
+- And editing proceeds using the simple RMarkdown language
+- Output can be broad - PDFs, Word, slides (these slides are all RMarkdown). We'll focus on straightforward webpage output
+
+## Notebooks
+
+- In RStudio, start a new notebook with File $\rightarrow$ New File $\rightarrow$ RMarkdown
+- Title it and select HTML output. Notice the file that it opens up for you gives a nice template.
+
+## RMarkdown
+
+- Up at the top we have the "YAML" document info
+
+```
+---
+title: "Untitled"
+author: "Nick Huntington-Klein"
+date: "4/29/2020"
+output: html_document
+---
+```
+
+- This lets us set the title and author of the document. If we want the date to just be "The date we compiled the doc", set date to `r knitr::inline_expr("format(Sys.time(), '%d %B, %Y')")` 
+- Output can be changed to make PDFs, slides, etc.
+
+## Rmarkdown
+
+- Next we have our first *code chunk*
+- Code chunks start with three backticks - ` (usually on the same key as ~) and the name of the language, with a name and options following it
+- `r knitr::inline_expr("setup, include=FALSE")` shows that this is a chunk of R code to be run. The chunk is called "setup" (name optional). 
+- "include = FALSE" means to not include the output in the actual document, just for R internally.
+
+## Rmarkdown options
+
+- Other important options for chunks: "echo = TRUE" (show code or FALSE for don't), "eval = TRUE" (run code and show output, or don't), and "fig.width", "fig.height" etc. for when your output includes an image
+- The `knitr::opts_chunk$set(echo = TRUE)` is option-setting code for the document. Other options include "warnings = FALSE", "messages = FALSE" and others. 
+- These are minor but mostly I just want to introduce you to the idea of code being in these chunks
+- You can also include code in-line with single backticks
+
+## Code chunks
+
+- Further down we can see how you can run code in chunks and see the output in the document
+- What do we see in the doc from that `summary(cars)` if we set "echo=TRUE"?
+
+```{r cars, echo=TRUE}
+summary(cars)
+```
+
+## Code chunks
+
+- How about with that plot with `echo=FALSE`?
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+## RMarkdown
+
+- Include all your code in there, top to bottom, as you normally would
+- Make sure *all* the code is in there. Any `library()` or data read-in has to be included. It must run on a freshly-opened R session
+
+## Markdown
+
+- Writing in markdown! Markdown is a standard basic markup language, RMarkdown is one implementation. See [this guide too](https://rmarkdown.rstudio.com/authoring_basics.html)
+- Sections start with # and ##
+- Italicize with \*, bold with \*\*
+- Lists with - or \* or 1. 2. 3.
+- Links with `[linkname](URL)` and images with `![caption](filepath)` or, better, `knitr::include_graphics()`
+- Also just toss in HTML for anything that's not <span style="color:red">standard</span>
+
+## Knitting
+
+- As you go, you can hit the green arrow to run a code chunk to see its output
+- Once you're done, hit the "Knit" button to build the document
+- Fix any errors and do it again until it builds
+- It will pop up the result
+- You can publish it to the internet with one click with the "Publish to RPubs" button
+
+## Practice
+
+- Make an RMarkdown document
+- Add a **ggplot2** graph of anything - maybe a point graph of `mtcars` of `mpg` against `hp`?
+- Make sure the code and image are both visible
+- Add some text above your code explaining what your graph is.
+- Add the sentence in a separate section:
+
+This document has **a graph** in it. MPG on the graph has a mean of `r mean(mtcars$mpg)`. Think you can find a better graph? Try on [Google Images](images.google.com).
+
+## More ggplot!
+
+- Let's flex our RMarkdown and **ggplot** muscles
+- We'll each be doing a Tidy Tuesday in RMarkdown
+- We'll share as we work and iterate on our designs together
+
+## Tidy Tuesday
+
+- Head to the Tidy Tuesday GitHub repo [https://github.com/rfordatascience/tidytuesday](https://github.com/rfordatascience/tidytuesday)
+- Let's go to the most recent one and see if that works (whatever it is now)
+- I'll show you how to use `read_csv` to get the data into R
+
+## Tidy Tuesday
+
+- Make a graph in an RMarkdown document and publish on RPubs, then post your link
+- We'll look at them, see what ideas are coming up, and do revisions
+- Ideally we can do a few rounds
