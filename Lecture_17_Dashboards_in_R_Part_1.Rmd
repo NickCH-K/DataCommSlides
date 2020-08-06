@@ -124,6 +124,9 @@ p <- mtcars %>%
 ## Plotly
 
 - Most things will translate right over; for others we might need to look a little bit into the **plotly** docs - notice how the legend will still show up despite us turning it off, and the annotation doesn't carry over.
+- Let's take a look on the next slide
+
+## Plotly
 
 ```{r, echo = TRUE}
 plotly::ggplotly(p)

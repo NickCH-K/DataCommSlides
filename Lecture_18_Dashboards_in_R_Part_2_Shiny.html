@@ -1834,7 +1834,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <section>
     <h1 class="title">Lecture 18: Dashboards in R Part 2 - Shiny</h1>
     <h2 class="author">Nick Huntington-Klein</h2>
-    <h3 class="date">20 July, 2020</h3>
+    <h3 class="date">06 August, 2020</h3>
 </section>
 
 <section id="dashboards-in-r" class="slide level2">
@@ -1910,7 +1910,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <h2>selectInput</h2>
 <ul>
 <li>This could be well used to, for example, choose which of many ways to look at the data, or which variable to graph, or which subset of the data to look at</li>
-<li>The syntax is <code>selectInput(inputID, label, choices, selected = NULL, multiple = FALSE, selectize = TRUE, width = NULL, size = NULL)</code></li>
+<li>The syntax is <code>selectInput(inputID, label, choices,</code> <code>selected = NULL, multiple = FALSE,</code> <code>selectize = TRUE, width = NULL,</code> <code>size = NULL)</code></li>
 <li>(the = parts are just the defaults)</li>
 <li>The <code>inputID</code> is the slot in <code>input$</code> where the result will be stored. so with <code>inputID = &#39;subset&#39;</code>, you can later use <code>input$subset</code> to know what was selected. That’s not what the user sees for a title though, they see <code>label</code></li>
 </ul>
@@ -1918,7 +1918,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 <section id="selectinput-1" class="slide level2">
 <h2>selectInput</h2>
 <ul>
-<li><code>choices</code> are the options, with default <code>selected</code>, in a standard vector format. So maybe to choose whether to graph independent or chain restaurants, <code>choices = c(&#39;Choose Restaurant Type&#39; = &#39;&#39;,&#39;Independent&#39;,&#39;Chain&#39;)</code></li>
+<li><code>choices</code> are the options, with default <code>selected</code>, in a standard vector format. So maybe to choose whether to graph independent or chain restaurants, <code>choices = c(&#39;Choose Restaurant Type&#39; = &#39;&#39;,</code> <code>&#39;Independent&#39;,&#39;Chain&#39;)</code></li>
 <li><code>multiple</code> determines whether multiple options can be selected</li>
 <li>Then the minute details, with presentation on the page with <code>width</code>, number to show in the box before scrolling with <code>size</code>, and whether and how to use the <code>selectize</code> JavaScript package with <code>selectize</code> and <code>options</code>.</li>
 </ul>
@@ -1932,8 +1932,7 @@ document.getElementsByTagName('head')[0].appendChild(style);
 </section>
 <section id="output-1" class="slide level2">
 <h2>Output</h2>
-<p>(Using fake data) in the global chunk: <code>library(tidyverse)</code> and <code>data(RestaurantData)</code></p>
-<p>In the sidebar column, an R chunk with:</p>
+<p>(Using fake data) in the global chunk: <code>library(tidyverse)</code> and <code>data(RestaurantData)</code>. In the sidebar column, an R chunk with:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">selectInput</span>(<span class="st">&#39;restaurantType&#39;</span>, <span class="dt">label =</span> <span class="st">&#39;Type of Restaurant&#39;</span>, <span class="dt">choices =</span> <span class="dt">choices =</span> <span class="kw">c</span>(<span class="st">&#39;Choose Restaurant Type&#39;</span> =<span class="st"> &#39;&#39;</span>,<span class="st">&#39;Independent&#39;</span>,<span class="st">&#39;Chain&#39;</span>))</span></code></pre></div>
 <p>And then in the next column,</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">renderTable</span>({</span>

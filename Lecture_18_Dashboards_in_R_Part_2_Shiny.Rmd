@@ -87,13 +87,13 @@ cat("
 ## selectInput
 
 - This could be well used to, for example, choose which of many ways to look at the data, or which variable to graph, or which subset of the data to look at
-- The syntax is `selectInput(inputID, label, choices, selected = NULL, multiple = FALSE, selectize = TRUE, width = NULL, size = NULL)`
+- The syntax is `selectInput(inputID, label, choices,` `selected = NULL, multiple = FALSE,` `selectize = TRUE, width = NULL,` `size = NULL)`
 - (the = parts are just the defaults)
 - The `inputID` is the slot in `input$` where the result will be stored. so with `inputID = 'subset'`, you can later use `input$subset` to know what was selected. That's not what the user sees for a title though, they see `label`
 
 ## selectInput
 
-- `choices` are the options, with default `selected`, in a standard vector format. So maybe to choose whether to graph independent or chain restaurants, `choices = c('Choose Restaurant Type' = '','Independent','Chain')`
+- `choices` are the options, with default `selected`, in a standard vector format. So maybe to choose whether to graph independent or chain restaurants, `choices = c('Choose Restaurant Type' = '',` `'Independent','Chain')`
 - `multiple` determines whether multiple options can be selected
 - Then the minute details, with presentation on the page with `width`, number to show in the box before scrolling with `size`, and whether and how to use the `selectize` JavaScript package with `selectize` and `options`.
 
@@ -104,9 +104,7 @@ cat("
 
 ## Output
 
-(Using fake data) in the global chunk: `library(tidyverse)` and `data(RestaurantData)`
-
-In the sidebar column, an R chunk with:
+(Using fake data) in the global chunk: `library(tidyverse)` and `data(RestaurantData)`. In the sidebar column, an R chunk with:
 
 ```{r, echo = TRUE, eval = FALSE}
 selectInput('restaurantType', label = 'Type of Restaurant', choices = choices = c('Choose Restaurant Type' = '','Independent','Chain'))
