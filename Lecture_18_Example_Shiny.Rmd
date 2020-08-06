@@ -1,0 +1,51 @@
+---
+title: "mtcars Dashboard with Shiny"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+data(mtcars)
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')))
+```
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+The mean of a variable by whether the car is an automatic or a manual.
+
+```{r}
+selectInput("varname", label = "Variable to Analyze:",
+            choices = names(mtcars), selected = 'mpg')
+
+textInput('col1', label = 'Color for Automatics', value = 'red')
+
+textInput('col2', label = 'Color for Manuals', value = 'black')
+```
+
+Column
+-----------------------------------------------------------------------
+
+### Mean by Transmission Type
+
+```{r}
+renderPlot({
+ggplot(mtcars, aes_string(x = 'Transmission', y = input$varname, fill = 'Transmission')) + 
+  geom_bar(stat = 'summary', fun = 'mean') + 
+  labs(y = input$varname) + 
+  theme_minimal() + 
+  scale_fill_manual(values = c(ifelse(input$col1 %in% colors(), input$col1, 'black'), 
+                                ifelse(input$col2 %in% colors(), input$col2, 'black'))) +
+  guides(fill = FALSE)
+})
+
+
+```
+
+

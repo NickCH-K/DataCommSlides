@@ -1,0 +1,175 @@
+---
+title: "Lecture 14: More Tableau"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(knitr)
+library(paletteer)
+library(ggrepel)
+library(directlabels)
+library(gghighlight)
+library(lubridate)
+
+rinlinevarname <- function(code){
+  html <- '<code  class="r">``` `CODE` ```</code>'
+  sub("CODE", code, html)
+}
+```
+
+
+## Tableau
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- Last time we got some basic graphs going and got familiar with the software
+- This time we'll go a little deeper!
+- First, working our way around the decoration and customization options (very Excel-like)
+- Then, making some more complex graphs with Table Calculations and Shelves
+
+## Decoration
+
+- We can adjust the presentation of most elements of the graph by double clicking on them, Excel style
+- For example, axes
+- From here we can adjust tick marks, scale, consistency of scale across multi-part graphs, and numerical formatting, as well as things like "include 0 on the axis or no?"
+
+---
+
+```{r}
+knitr::include_graphics('Lecture_14_Axis.png')
+```
+
+## Formatting Numbers
+
+- We can also see on the left when we click on an axis the "Scale" segment
+- We can set things like percentages being .1 or 10%, or the units of the variable (like $)
+- (If you're having trouble, RIGHT-click the axis and hit Format)
+
+## Decoration
+
+- Let's take the example worksheet and walk through adjusting the axis
+- Look at Sheet 1
+- Make the y-axis tick marks percentages with one decimal place
+- And make the x-axis only have ticks on days 0, 10, 20, 30.
+- Also change axis titles to "Day of Month" and "Percent Cancelled
+
+## Decoration
+
+```{r}
+knitr::include_graphics('Lecture_14_Tickmarks.png')
+```
+
+## Decoration
+
+```{r}
+knitr::include_graphics('Lecture_14_Percent.png')
+```
+
+
+## The Result
+
+```{r}
+knitr::include_graphics('Lecture_14_CancelledFlights.png')
+```
+
+## Colors
+
+- We can make a variable be distinguished by color by dragging it to the Color part of the Marks pane
+- (This will add color to the *variable*, not its position, so drag it from the left variables pane, not away from its column/row if it's there!)
+- Then click Color to manually adjust the colors used or pick a palette, or pick opacity
+
+## Other Axes
+
+- Just like the axes in our **ggplot2** `aes()`thetic, we can similarly drag variables to be used on the Size, Label, etc. axes
+- Having variables *just* on these axes and not Column or Row will create different kinds of output - Labels-only will give a table, for example
+- Also, not really an axis, but by clicking data points we can zoom in on them, exclude them, or exclude others
+- The Marks card is the home of these, and we can edit things directly there
+
+## Decoration
+
+- On Sheet 2
+- Let's color our data by Cancelled
+- And make the size differ by Distance
+- And exclude flights before 3AM
+- Make an annotation of an area (What story does this tell?)
+- And title it "Departure Times and Delays"
+
+## Decoration
+
+```{r}
+knitr::include_graphics('Lecture_14_MiddayFlightsAxes.png')
+```
+
+---
+
+```{r}
+knitr::include_graphics('Lecture_14_MiddayFlights.png')
+```
+
+
+## Table Calculations
+
+- By clicking the down-arrow on a numeric variable on an axis, we can change it from being presented raw to being presented relative to other stuff
+- We already covered how we can make it a calculation/summary: mean, median, etc.
+- Table Calculations extend the analysis to make the presentation *relative to other calculations*
+- i.e. changing a line graph from the values to growth-from-previous-period, or moving average
+- Or making a bar graph percent-of-total, or rank
+
+
+## Table Calculations
+
+- Let's change the bar graph from count to percent of total
+- Now you change the line graph from percent to change-since-previous
+- (Also, while we're at it, add data point labels to the line graph)
+- (And right-click an empty space to add an annotation)
+
+## Sharing Work
+
+- Tableau workbooks can be saved and shared
+- If you want them to be interactive for someone without Tableau, have them use [Tableau Reader](https://www.tableau.com/products/reader)
+- Or just a static image with Worksheet $\rightarrow$ Export
+- Or make a dashboard (we'll get to that next time)!
+
+
+## Practice
+
+- Let's walk through creating the graph on the following slide...
+
+---
+
+```{r}
+knitr::include_graphics('Lecture14_CumulativeCancellations.png')
+```
+
+## Practice
+
+- Now you recreate this graph
+
+```{r}
+knitr::include_graphics('Lecture14_DelaybyDAy.png')
+```
+
+
+## Practice
+
+- Make your own graph with this data
