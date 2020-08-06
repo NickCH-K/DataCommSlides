@@ -1,0 +1,459 @@
+---
+title: "Lecture 7: Structuring ggplot2"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggrepel)
+```
+
+
+
+## Structuring ggplot
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- Last time we went through the basics of the grammar of graphics
+- And how to put together a ggplot graph:
+- Data, aesthetics, geometry
+
+## Today!
+
+- We'll talk about different ways of changing the *structure* of your ggplot
+- Scales and coordinates, labels and legends, new geometries
+- There are infinite possibilities here, we can't cover everything
+- The goal is to reduce unknown unknowns so you know where to look/Google
+- Also, just start typing in RStudio and see what autocompletes!
+
+## Scales
+
+- Every axis (aesthetic element) has a *scale*
+- These scales are fully manipulable and label-able!
+- `scale_axisname_type`
+
+## Discrete and Continuous Scales
+
+- For example:
+- `scale_x_continuous` for a continuous x-axis
+- `scale_x_discrete` for a discrete one
+- Or similarly `scale_y_continuous`, `scale_color_continuous`, `scale_color_gradient`, `scale_fill_discrete`, and so on and so on
+
+## Discrete and Continuous Scales
+
+- Use to:
+- Set colors, set limits (want the axis to extend beyond its values? `limits`)
+- Name the scale
+- Label values (for dicrete values, or perhaps as percents?)
+
+## Setting Values Manually
+
+- `scale_x_manual` for discrete plots will let you set things by hand
+- For example if `x` is different companies and you want to pick each company's brand color for its bar
+
+## Examples
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+data <- tibble(category = c('Apple','Banana','Carrot','Apple','Banana','Carrot'),
+               person = c('Me','Me','Me','You','You','You'),
+               quality = c(.06,.04,.03,.01,.06,.03))
+ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge')
+```
+
+## Setting Scales
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge') + 
+  scale_y_continuous(labels = scales::percent, limits = c(0,.1)) +
+  scale_x_discrete(position = 'top') + 
+  scale_fill_manual(values = c('Apple'='red','Banana'='yellow','Carrot'='orange'))
+```
+
+## Setting Color or Fill Scales
+
+- Selecting a color scale is important - we've discussed discrete and continuous palettes
+- The **paletteer** package ([see documentation](https://emilhvitfeldt.github.io/paletteer/)) compiles a whole buncha palettes and is easy to use - use `palettes_d_names` or `palettes_c_names` to list discrete and continuous palettes in the package
+- Or `palettes_dynamic_names` to see continuous binned palettes where the colors used depend on how many shades you need
+- **RColorBrewer** is also a classic
+
+## Setting Color or Fill Scales
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+library(paletteer)
+ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge') + 
+  scale_y_continuous(labels = scales::percent, limits = c(0,.1)) +
+  scale_x_discrete(position = 'top') + 
+  scale_fill_paletteer_d('yarrr::google')
+```
+
+
+## Setting Color or Fill Scales
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(data, aes(x = person, y = quality, group = category, fill = quality)) + geom_col(position = 'dodge') + 
+  scale_y_continuous(labels = scales::percent, limits = c(0,.1)) +
+  scale_x_discrete(position = 'top') + 
+  scale_fill_paletteer_c('pals::coolwarm')
+```
+
+## Transformations
+
+- We can transform values as we plot them
+- Many `scale_something_continuous` entries have a `trans` option, set to `date`, `log`, `probability`, `reciprocal`, `sqrt`, `reverse`, etc. etc. to perform that transformation before plotting 
+- Typically that's something from the `scales` package. Other options like `scales::percent`
+- You can also do things like `scale_x_log10` or `scale_y_reverse` for some common transforms
+- `scale_something_binned()` takes a continuous value and puts it in bins, handy sometimes for simplification
+
+## Transformations
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + 
+  geom_point()
+```
+
+## Transformations
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + 
+  geom_point() + 
+  scale_x_log10() + 
+  scale_y_continuous(trans='reverse') + 
+  scale_color_binned()
+```
+
+## Log Scales
+
+When to use log scales?
+
+- When data is highly skewed, so a few huge observations are drawing all focus
+- When the relationship is multiplicative so you want to show, say, percentage growth
+
+## Documentation
+
+- There are a zillion options
+- Be sure to use `help(whatever)` before using something
+- Not sure what the function is? Check the **ggplot2** documentation page
+- Or just start typing `scales_` or whatever and see what pops up in autocomplete in RStudio
+
+## Labels with labs()
+
+- Please label your axes and graphs!!
+- Label legends too by naming their axes
+- Captions and subcaptions available too
+- Annotation and labeling data points we'll do next time
+
+## All Kinds of Labels
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+data(mtcars)
+mtcars <- mtcars %>% mutate(CarName = row.names(mtcars))
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
+  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
+  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight',
+       title = 'Title', subtitle = 'Subtitle', caption = 'Caption')
+```
+
+## Moving the Legend
+
+- Working with **ggplot2** legends is one of the trickier things
+- we'll do a lot more with aesthetic details next time but for now let's just move it and outline it.
+
+## Moving the Legend
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
+  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
+  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight',
+       title = 'Title', subtitle = 'Subtitle', caption = 'Caption') +
+  theme(legend.position = c(.9,.3), legend.box.background = element_rect(color='black'))
+```
+
+## Or Removing It
+
+I Google this every time
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
+  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
+  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight') +
+  guides(color = FALSE)
+```
+
+## Overlaid Graphs
+
+- In addition to adding chart elements, we can add whole new geometries over the top
+- Some stack naturally (adding a `geom_smooth` best fit line over top, for example)
+- For others we may have to change the data or aesthetic as we go
+
+## Overlaid Graphs
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
+  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
+  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight') +
+  geom_smooth(method='lm', se = FALSE)
+```
+
+## Overlaid Graphs
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
+  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
+  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight') +
+  geom_text_repel(data = mtcars %>% slice(1:5),aes(label = CarName),hjust=-1)
+```
+
+## Facets
+
+- Separate graphs by group!
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp)) + geom_point() + 
+  facet_wrap('cyl') + 
+  labs(x = 'Miles per Gallon', y = 'Horsepower', title = 'Horsepower vs. MPG by Cylinders')
+```
+
+## Downloadable Geometries
+
+- There are so, so many **ggplot2** geometries available
+- Way too many to cover - see the [ggplot2 extension gallery](https://exts.ggplot2.tidyverse.org/gallery/) in addition to the base-**ggplot2** cheat sheet from last time
+- I will go over some popular ones. Google package names for more detailed explanations
+- We won't go deeply into how to use these, this is more to show you they exist and an example so you can look further yourself if you're interested
+
+## geom_text to geom_repel
+
+- We covered geom_text last time
+- But the text gets in the way! How did I handle this in that `mtcars` graph I just did?
+
+```{r, echo = FALSE, fig.height = 4, fig.width = 6}
+data(mtcars)
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')),
+         CarName = row.names(mtcars))
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
+  geom_text()
+```
+
+## geom_text_repel
+
+```{r, echo = TRUE, fig.height = 3.75, fig.width = 6}
+library(ggrepel); data(mtcars)
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')),
+         CarName = row.names(mtcars))
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
+  geom_text_repel() + labs(x = 'MPG',y='HP')
+```
+
+## geom_label_repel adds boxes
+
+- That was still pretty busy. Text graphs really only work with a smaller number of labels (or short ones)
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars[1:10,], aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
+  geom_label_repel() + labs(x = 'MPG',y='HP', caption = 'First ten cars only')
+```
+
+
+## ggridges
+
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+#A common need is to graph distributions across groups
+library(ggridges)
+ggplot(mtcars, aes(x = mpg, y = factor(cyl), fill = factor(cyl))) + 
+  geom_density_ridges(alpha = .6) + 
+  labs(x = 'Miles per Gallon', y = 'Cylinders') + 
+  guides(fill = FALSE)
+```
+
+
+## ggmap
+
+- **ggplot2** has *extensive* mapping capabilities
+- For this class I'll recommend the much-simpler Excel or Tableau for maps
+- But for the heavy stuff there's a whole world here, linked to Google Maps (including having an actual map underneath your data-map)
+- Including straightforward-ish map *animations* with the **tmap** package
+- Also see libraries **choloropleth**, **tigris**, **tmap**, **sf**, **fiftystater**
+
+## ggalluvial
+
+- Those neato-looking Sankey graphs are all the rage. Make sure it is actually helpful!
+
+```{r, echo = TRUE, eval = FALSE}
+library(ggalluvial)
+mtcars <- mtcars %>%
+  group_by(cyl,vs,gear) %>%
+  mutate(Frequency = n())
+ggplot(mtcars, aes(y=Frequency,axis1=factor(cyl),
+                   axis2=factor(vs),axis3=factor(gear),fill=factor(am))) + 
+         geom_alluvium() + 
+  scale_x_discrete(limits = c("Cylinder","Engine Type","Number of Gears")) +
+  geom_stratum() + geom_text(stat = "stratum", infer.label = TRUE)
+```
+
+## ggalluvial
+
+Gives us...
+
+```{r, echo = FALSE, eval=TRUE, fig.height = 4, fig.width = 6}
+# Those neato-looking Sankey graphs are all the rage. Make sure it makes sense!
+library(ggalluvial)
+mtcars <- mtcars %>%
+  group_by(cyl,vs,gear) %>%
+  mutate(Frequency = n())
+ggplot(mtcars, aes(y=Frequency,axis1=factor(cyl),
+                   axis2=factor(vs),axis3=factor(gear),fill=factor(am))) + 
+         geom_alluvium() + 
+  scale_x_discrete(limits = c("Cylinder","Engine Type","Number of Gears")) +
+  geom_stratum() + geom_text(stat = "stratum", infer.label = TRUE)
+```
+
+## ggalluvial
+
+- Or for changes over something more continuous...
+- Like a stacked bar chart changing over time, slightly better (this example is ugly)
+
+```{r, echo = TRUE, eval = FALSE}
+data(gss_cat, package='forcats')
+gss_cat <- gss_cat %>%
+  group_by(year,marital) %>%
+  summarize(Proportion = n()/nrow(gss_cat))
+ggplot(gss_cat, aes(x = year, y = Proportion, 
+                    alluvium = marital, fill = marital, color = marital)) + 
+  geom_alluvium() 
+
+```
+
+## ggalluvial
+
+```{r, echo = FALSE, eval=TRUE, fig.height = 4, fig.width = 6}
+data(gss_cat, package='forcats')
+gss_cat <- gss_cat %>%
+  group_by(year,marital) %>%
+  summarize(Proportion = n()/nrow(gss_cat))
+ggplot(gss_cat, aes(x = year, y = Proportion, 
+                    alluvium = marital, fill = marital, color = marital)) + 
+  geom_alluvium() 
+
+```
+
+
+## ggforce
+
+- **ggforce** is a package with LOTS of extras, especially for facets
+- An especially handy one is `facet_zoom` for showing all data but focusing in on some
+- Focus focus focus your audience!
+- Can also be used to focus on a range with `xlim` or `ylim`
+
+## ggforce's facet_zoom
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+library(ggforce)
+ggplot(iris, aes(Petal.Length, Petal.Width, colour = Species)) +
+  geom_point() +
+  facet_zoom(x = Species == 'versicolor')
+```
+
+## ggalt
+
+- **ggalt** is another package with lots of additional geoms
+- Including some functions to automatically encircle your data (setting things apart!)
+- Two nice ones are `geom_lollipop` for lollipop charts (a nice-looking alternative to a bar chart)
+- and `geom_dumbbell` for dumbbell charts (nice for "to-and-from" changes within groups)
+
+## `geom_lollipop`
+
+```{r, echo = TRUE, eval = FALSE}
+library(ggalt); data(gss_cat, package='forcats')
+gss_cat <- gss_cat %>%
+  group_by(marital) %>%
+  summarize(PropAbove = mean(rincome == '$25000 or more')) 
+ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
+  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
+```
+
+## `geom_lollipop`
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+library(ggalt); data(gss_cat, package='forcats')
+gss_cat <- gss_cat %>%
+  group_by(marital) %>%
+  summarize(PropAbove = mean(rincome == '$25000 or more')) 
+ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
+  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
+```
+
+## geom_dumbbell
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+top_bottom <- mtcars %>% group_by(cyl) %>%
+  summarize(worst = max(mpg), best = min(mpg))
+ggplot(top_bottom, aes(y = cyl, x = best, xend = worst)) + 
+  geom_dumbbell(size = 3, color = 'gray',colour_x = 'blue', colour_xend = 'red')
+
+```
+
+## gganimate
+
+- The **gganimate** package makes it fairly straightforward to animate your graphs
+- Take a graph and use a `transition_` command to have it assign one axis to *time*
+- Make sure this actually adds something! This limits where the graph can be shown
+
+## gganimate
+
+```{r, echo = TRUE, eval = FALSE}
+library(gganimate)
+data(gapminder)
+options(gganimate.dev_args = list(width = 650, height = 400))
+p <- ggplot(gapminder,
+       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       title = "GDP and Life Expectancy by Country, 1952-2007",
+       color = 'Continent') + 
+  transition_time(year))
+animate(p,nframes = 200,end_pause = 30)
+```
+
+## gganimate
+
+```{r}
+library(gganimate); data(gapminder, package='gapminder')
+options(gganimate.dev_args = list(width = 650, height = 400))
+p <- ggplot(gapminder,
+       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       title = "GDP and Life Expectancy by Country, 1952-2007",
+       color = 'Continent') + 
+  transition_time(year)
+animate(p,nframes = 200,end_pause = 30)
+```
+
+## Imitation and Flattery
+
+- Pick one of these graphs or from the previous lecture
+- Go into the geometry's help file and recreate an example, or the graph in these slides
+- Mess with the scales and labels! Try to get it to work!
