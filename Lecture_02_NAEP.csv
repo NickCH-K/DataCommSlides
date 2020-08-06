@@ -1,0 +1,53 @@
+State,StateCode,Score,Coastal
+Minnesota ,MN,248,0
+Massachusetts ,MA,247,1
+Virginia ,VA,247,1
+Florida ,FL,246,1
+New Jersey ,NJ,246,1
+Wyoming ,WY,246,0
+Indiana ,IN,245,0
+New Hampshire ,NH,245,0
+Pennsylvania ,PA,244,0
+Utah ,UT,244,0
+Nebraska ,NE,244,0
+Texas ,TX,244,0
+Connecticut ,CT,243,1
+North Dakota ,ND,243,0
+Idaho ,ID,242,0
+Colorado ,CO,242,0
+Wisconsin ,WI,242,0
+North Carolina ,NC,241,1
+South Dakota ,SD,241,0
+Ohio ,OH,241,0
+Montana ,MT,241,0
+Maine ,ME,241,1
+Mississippi ,MS,241,0
+Iowa ,IA,241,0
+Tennessee ,TN,240,0
+Washington ,WA,240,1
+Kansas ,KS,239,0
+Rhode Island ,RI,239,1
+Delaware ,DE,239,1
+Kentucky ,KY,239,0
+Vermont ,VT,239,0
+Hawaii ,HI,239,1
+Maryland ,MD,239,1
+Missouri ,MO,238,0
+Georgia ,GA,238,1
+Arizona ,AZ,238,0
+Illinois ,IL,237,0
+Oklahoma ,OK,237,0
+South Carolina ,SC,237,1
+New York ,NY,237,1
+Oregon ,OR,236,1
+Michigan ,MI,236,0
+Nevada ,NV,236,0
+California ,CA,235,1
+District of Columbia ,DC,235,1
+Arkansas ,AR,233,0
+Alaska ,AK,232,1
+West Virginia ,WV,231,0
+Louisiana ,LA,231,0
+New Mexico ,NM,231,0
+Alabama ,AL,230,0
+Puerto Rico ,PR,185,1

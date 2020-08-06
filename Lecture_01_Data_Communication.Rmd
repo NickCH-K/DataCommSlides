@@ -1,0 +1,280 @@
+---
+title: "Lecture 1: Data Communication"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+      
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(gganimate)
+```
+
+## Data Communication
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+Welcome to Data Communication!
+
+## Data Communication
+
+This class is about
+
+- How to turn data into a message
+- How to cleanly communicate that message
+- Technically, how to create that communication
+
+## Media
+
+This will largely focus on *data visualization* but will also cover:
+
+- Tables
+- Slides
+- Notebooks
+
+## Admin
+
+Let's do some housekeeping:
+
+- Course website
+- Syllabus
+- Expectations and assignments
+
+## Resources
+
+In addition to the course website and Knaflic's *Storytelling with Data*:
+
+- The [R Graphics Cookbook](https://r-graphics.org/)
+- Kieran Healy's [Data Visualization](https://kieranhealy.org/publications/dataviz/)
+- [Data Visualization blogs](https://www.tableau.com/learn/articles/best-data-visualization-blogs)
+- The internet writ large
+- Code for all these slides (RMarkdown and ggplot2 examples) are on the course GitHub page
+
+## What is Data Communication?
+
+- There is a lot of information in the world
+- And a lot of information at your fingertips
+- *Too much*
+- And so we simplify to tell the *story* underlying the data
+
+## The Map and the Territory
+
+- Someone asks you for directions to Dick's on Broadway
+- Do you hand them your 3.2GB perfectly detailed shapefile of Capitol Hill?
+- The answer is in there, and much more precisely than you could possibly tell them
+- But it doesn't really answer their question, right?
+
+## The Map and the Territory
+
+- The goal of a data *analyst* is to take that shapefile and figure out how to get to Dick's
+- The goal of a data communicator is to take what the data analyst figured out and figure out *what part of the map to show you to help you understand how to get to Dick's*
+- A good data communicator will make understanding the directions easy and obvious
+
+## Goals
+
+- Figure out what the question is (you $\leftarrow$ them)
+- Explore the data to answer the question (analysis)
+- (don't use the data to get the answer you want!)
+- Make the viewer understand the answer and *why* that's the answer (you $\rightarrow$ them)
+
+## Storytelling With Data
+
+1. Understand the context
+2. Choose an appropriate visual display
+3. Eliminate clutter
+4. Focus attention where you want it
+5. Think like a designer
+6. Tell a story
+
+## Examples Outside of Data
+
+- Let's consider some examples of effective communication of information outside the narrow range of "data communication"
+
+
+## How Does This Faucet Work?
+
+```{r, out.width="650px"}
+knitr::include_graphics("Lecture_1_Faucet.jpg")
+```
+
+## Understand the context
+
+The person who designed this faucet understands, hopefully, how water pipes work and how opening a valve can allow water to flow
+
+They know *what is important for the audience to know* - how they can turn the water on
+
+## Choose an appropriate visual display
+
+We have a handle close to the source of the water
+
+It implies the ways the handle can be turned - towards us or away, left and right
+
+<div style="color:red">The display doesn't allow us any information about how those directions relate to pressure or temperature</div> (what version of a faucet might?)
+
+## Eliminate clutter
+
+Nothin' but handle
+
+We could have other stuff here - sink stopper, an LCD with the weather report, but do we need it?
+
+## Focus attention where you want it
+
+There's nowhere to look but the handle (other than the spigot, not pictured)
+
+The shape and design pushes you towards it - it calls for a hand!
+
+## Think like a designer
+
+We want the user to understand that they can pull or rotate the handle to affect the water flow
+
+This design *affords* both of those uses
+
+And nothing else
+
+There aren't a lot of ways to use this wrong, other than messing up pressure vs. temperature
+
+## Tell a story
+
+Water flow can be controlled by twisting this handle
+
+If you were a monkey who had never experienced plumbing, it would only take you about ten seconds to follow the design to that handle, pull it, and learn about the connection between handles and water flow
+
+## Gapminder
+
+- Let's move into some data
+- Gapminder (from the Gapminder institute) is a data set that, among other things, shows how differences between countries change over time
+- One thing it is commonly used to show is that economic development aids health development
+- GDP per capita $\rightarrow$ life expectancy
+- Also, generally, both of those things have improved over time
+
+## Gapminder
+
+```{r}
+data(gapminder, package = 'gapminder')
+gapminder
+```
+
+## Understand the Context
+
+What do we want people to learn?
+
+- GDP per capita and life expectancy go together strongly
+- Both GDP per capita and life expectancy have increased a lot over time
+
+## Choose an appropriate visual display
+
+- We want something that will show a relationship between two variables with many observations
+
+```{r, fig.width=6, fig.height=4}
+ggplot(gapminder,
+       aes(x = gdpPercap, y = lifeExp)) + 
+  geom_point() + 
+  labs(x = "GDP per Capita", y = "Life Expectancy")
+```
+
+## Eliminate clutter
+
+- That's a lot of dots! Can we tell the same story by focusing on just a few countries?
+- Also, that's a lot of background ink...
+
+```{r, fig.width=6, fig.height=4}
+ggplot(gapminder %>%
+         filter(country %in% c('Brazil','India','Spain')),
+       aes(x = gdpPercap, y = lifeExp, color = country)) + 
+  geom_line() + 
+  theme_minimal() +
+  labs(x = "GDP per Capita", y = "Life Expectancy",
+       color = 'Country') + 
+  theme(legend.position = c(.8,.2),
+        legend.background = element_rect())
+```
+
+## Focus attention where you want it
+
+- Those few high-GDP observations are drawing a LOT of space, as opposed to that left blob. Let's put the x-axis on a log scale
+
+```{r, fig.width=6, fig.height=4}
+ggplot(gapminder %>%
+         filter(country %in% c('Brazil','India','Spain')),
+       aes(x = gdpPercap, y = lifeExp, color = country)) + 
+  geom_line() + 
+  theme_minimal() +
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       color = 'Country') + 
+  theme(legend.position = c(.8,.2),
+        legend.background = element_rect())
+```
+
+## Think like a designer
+
+- Why make the reader work?
+- Also, realize this graph sort of feels like it's moving forward in time. Uh-oh...
+
+```{r, fig.width=6, fig.height=4}
+ggplot(gapminder %>%
+         filter(country %in% c('Brazil','India','Spain')),
+       aes(x = gdpPercap, y = lifeExp, color = country)) + 
+  geom_line() + 
+  theme_minimal() +
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       color = 'Country') +
+  annotate('text',x = 2300, y = 66, label = 'India', color = 'green') + 
+  annotate('text',x = 10000, y = 68, label = 'Brazil', color = 'red') + 
+  annotate('text',x = 25000, y = 75, label = 'Spain', color = 'blue') + 
+  guides(color = FALSE)
+```
+
+## Tell a story
+
+- Realize that we've lost the "things get better over time" angle
+- And also lost the part where we want to talk about the whole world!
+- Use what we've done so far to think about how we can show the dual GDP-and-life-expectancy improvements *over time* for everyone
+
+## What could still be improved?
+
+```{r}
+options(gganimate.dev_args = list(width = 650, height = 400))
+(ggplot(gapminder,
+       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
+  geom_point() + 
+  theme_minimal() +
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       title = "GDP and Life Expectancy by Country, 1952-2007",
+       color = 'Continent') + 
+  transition_time(year) + 
+   theme(axis.title.x = element_text(size=15),
+         axis.title.y = element_text(size=15),
+         title = element_text(size=15))) %>%
+  animate(nframes = 200,end_pause = 30)
+```
+
+## Let's See What We Can Get
+
+- Find a "good" chart from [informationisbeautiful.net](https://informationisbeautiful.net)
+- And a "bad" chart from [junkcharts.typepad.com/](https://junkcharts.typepad.com/)
+- And go through our steps. What are they trying to say? How do they do it? What mistakes do they make? What is unclear?
+- We will discuss
+
+

@@ -1,0 +1,452 @@
+---
+title: "Lecture 3: Focus"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(lubridate)
+library(gghighlight)
+library(ggthemes)
+library(directlabels)
+library(RColorBrewer)
+```
+
+
+
+## Clutter and Focus
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- We want to tell a story with our data
+- Some stories are clear
+- Others are complex
+- They all need to be clear
+- And we may need to walk the reader along
+
+## The Three Rules of Presentation
+
+- Tell them what you're going to tell them
+- Tell them
+- Tell them what you told them
+
+## Presentation
+
+- Your audience does not know what you know
+- In many cases they may not care as much as you care
+- And even if they know and care, they may not understand the way you think about it
+- Don't be afraid to hold their hand
+
+## Presentation
+
+- When transmitting information, always let the reader know where to go
+- Really well-done research or argumentative writing makes the reader think of the next point you're going to make before you even make it
+- Similarly, well done data communication doesn't assume knowledge of the reader and is willing to direct their attention.
+
+## Focus
+
+- We are already trying to focus our reader by making the viz in the first place
+- After all, we could avoid focusing them entirely by just showing the full data set, but we don't do that
+- Can we focus them further to make the story even clearer?
+
+## Preattentive Attributes
+
+- Our brain knows what to look out for
+- How can we direct the eye where we need it to go?
+- Thankfully, (most of) you have been looking with your eyes your whole life!
+- So this should be pretty intuitive
+
+---
+
+```{r}
+knitr::include_graphics('Lecture_03_Preattentive.png')
+```
+
+## Preattentive Attributes in Images
+
+- Note some overlap here with our attributes for categorizing things
+- But here the purpose is not to distinguish two equal things
+- But rather to emphasize one important thing!
+- Let's go through some commonly usable ones:
+
+## Color
+
+```{r}
+data(gapminder, package='gapminder')
+
+ggplot(gapminder %>%
+         filter(year == 2007), 
+       aes(x = gdpPercap, y = lifeExp, color = continent == 'Asia')) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = 'GDP Per Capita (log scale)',
+       y = 'Life Expectancy',
+       title = 'Asia\'s Low-Income Countries have High Life Expectancy') + 
+  theme_minimal() + 
+  guides(color = FALSE) + 
+  scale_color_manual(values = c('#33ccFF','red')) +
+  annotate(geom='text',x=20000,y=65,color='red',label='Asia',size=8)
+```
+
+## Intensity
+
+```{r}
+ggplot(gapminder %>%
+         filter(year == 2007), 
+       aes(x = gdpPercap, y = lifeExp, color = continent == 'Asia', alpha = continent == 'Asia')) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = 'GDP Per Capita (log scale)',
+       y = 'Life Expectancy',
+       title = 'Asia\'s Low-Income Countries have High Life Expectancy') + 
+  theme_minimal() + 
+  guides(color = FALSE, alpha = FALSE) + 
+  scale_color_manual(values = c('#33ccFF','red')) +
+  scale_alpha_manual(values = c(.4,1)) + 
+  annotate(geom='text',x=20000,y=65,color='red',label='Asia',size=8)
+```
+
+## Size
+
+
+```{r}
+ggplot(gapminder %>%
+         filter(year == 2007), 
+       aes(x = gdpPercap, y = lifeExp, 
+           color = continent == 'Asia', 
+           alpha = continent == 'Asia',
+           size = continent == 'Asia')) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = 'GDP Per Capita (log scale)',
+       y = 'Life Expectancy',
+       title = 'Asia\'s Low-Income Countries have High Life Expectancy') + 
+  theme_minimal() + 
+  guides(color = FALSE, alpha = FALSE, size = FALSE) + 
+  scale_color_manual(values = c('#33ccFF','red')) +
+  scale_alpha_manual(values = c(.4,1)) + 
+  scale_size_manual(values = c(1,2)) + 
+  annotate(geom='text',x=20000,y=65,color='red',label='Asia',size=8)
+```
+
+## Width
+
+```{r}
+gapyrs<- gapminder %>%
+  group_by(continent, year) %>%
+  summarize(lifeExp = mean(lifeExp))
+
+ggplot(gapyrs, aes(x = year, y = lifeExp, group = continent, size = continent == 'Asia')) + 
+  geom_line() + 
+  geom_dl(aes(x = year + .5,label = continent), method = 'last.bumpup') + 
+  scale_x_continuous(limits = c(1950,2015)) +
+  labs(x = 'Year',
+       y = 'Average Life Expectancy',
+       title = 'Overall Life Expectancy in Asia is Low') + 
+  scale_size_manual(values = c(.5, 1.5)) + 
+  guides(size = FALSE) + 
+  theme_tufte()
+```
+
+## Enclosure
+
+```{r}
+ggplot(gapminder %>%
+         filter(year == 2007), 
+       aes(x = gdpPercap, y = lifeExp)) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = 'GDP Per Capita (log scale)',
+       y = 'Life Expectancy',
+       title = 'There is a Small Cluster of Rich and Long-Lived Countries') + 
+  theme_minimal() + 
+  annotate('rect', xmin = 16000, xmax = 50000, ymin = 68, ymax= 85, alpha = .2)+
+  annotate('text', x = 16000, y = 62, hjust = 0,
+           label = 'Even here,\nthere is a\npositive\nrelationship.')
+```
+
+
+## Preattentive Attributes in Text
+
+- These are more obvious
+- Bold, color, italics, size, spatial separation, enclosure, underline
+
+## Keep in Mind
+
+- With all of these attributes, some are more important than others!
+- And more intensity generally means more attention
+- Rather than providing a direct order, remember that it's subjective - try things out, see what is intuitive
+
+## An Example
+
+```{r}
+data(SPrail, package='pmdplyr')
+
+SPrail_dow <- SPrail %>%
+  filter(!is.na(fare)) %>%
+  mutate(fare = factor(fare)) %>%
+  mutate(dow = factor(weekdays(start_date), levels = c('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'))) %>%
+  group_by(fare, dow) %>%
+  summarize(price = mean(price, na.rm = TRUE))
+
+ggplot(SPrail_dow, aes(x = fare, y = price, fill = dow)) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Day of Week',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_minimal()
+
+```
+
+## Use Color Sparingly
+
+```{r}
+SPrail_dow <- SPrail %>%
+  filter(!is.na(fare)) %>%
+  mutate(fare = factor(fare)) %>%
+  mutate(dow = factor(weekdays(start_date), levels = c('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'))) %>%
+  mutate(weekend = dow %in% c('Saturday','Sunday')) %>%
+  group_by(fare, dow, weekend) %>%
+  summarize(price = mean(price, na.rm = TRUE)) %>%
+  ungroup()
+
+ggplot(SPrail_dow, aes(x = fare, y = price, group = dow, fill = weekend)) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Weekend',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_minimal()
+
+```
+
+## Choose Colors for Focus
+
+```{r}
+
+ggplot(SPrail_dow, aes(x = fare, y = price, group = dow, fill = weekend)) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Weekend',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_minimal() + 
+  scale_fill_manual(values = c('#33ccFF','red'))
+
+```
+
+
+## Also Make Them Look Good
+
+```{r}
+ggplot(SPrail_dow, aes(x = fare, y = price, group = dow, fill = weekend)) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Weekend',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_minimal() + 
+  scale_fill_manual(values = c('gray','#33ccFF'))
+```
+
+## Choose Intensity for Focus
+
+```{r}
+ggplot(SPrail_dow, aes(x = fare, 
+                       y = price, 
+                       group = dow, 
+                       fill = weekend,
+                       alpha = fare == 'Flexible')) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Weekend',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_tufte() + 
+  scale_fill_manual(values = c('gray','#33ccFF')) + 
+  scale_alpha_manual(values = c(.4,1)) + 
+  guides(alpha = FALSE)
+```
+
+## Proximity for Focus and Comparison
+
+```{r}
+SPrail_dow <- SPrail %>%
+  filter(!is.na(fare)) %>%
+  mutate(fare = factor(fare, levels = c('Adulto ida','Promo','Promo +','Flexible'))) %>%
+  mutate(dow = factor(weekdays(start_date), levels = c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))) %>%
+  mutate(weekend = dow %in% c('Saturday','Sunday')) %>%
+  group_by(fare, dow, weekend) %>%
+  summarize(price = mean(price, na.rm = TRUE)) %>%
+  ungroup()
+
+ggplot(SPrail_dow, aes(x = fare, 
+                       y = price, 
+                       group = dow, 
+                       fill = weekend,
+                       alpha = fare == 'Flexible')) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Weekend',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_tufte() + 
+  scale_fill_manual(values = c('gray','#33ccFF')) + 
+  scale_alpha_manual(values = c(.4,1)) + 
+  guides(alpha = FALSE)
+```
+
+## Declutter
+
+- Labels might not even be necessary!
+
+```{r}
+ggplot(SPrail_dow, aes(x = fare, 
+                       y = price, 
+                       group = dow, 
+                       fill = weekend,
+                       alpha = fare == 'Flexible')) + 
+  geom_bar(position = 'dodge', stat = 'identity') + 
+  labs(fill = 'Weekend',
+       x = 'Fare Type',
+       y = 'Average Price',
+       title = 'Flexible-Ticket Resale Prices are Lower on Weekends') + 
+  theme_tufte() + 
+  scale_fill_manual(values = c('gray','#33ccFF')) + 
+  scale_alpha_manual(values = c(.4,1)) + 
+  guides(alpha = FALSE,fill = FALSE) + 
+  annotate('text',x = .87, y = 36, label = 'Weekday',color = 'darkgray', alpha = 1) +
+  annotate('text',x = 1.34, y = 36, label = 'Weekend',color = '#33ccFF', alpha = 1)
+```
+
+## Annotation
+
+- Annotation can be a great way of pointing out features of the data
+- But don't go wild! Reserve it
+- Remember - *walk your audience through the data*, and don't be afraid to interpret for them!
+
+
+## Could we Go Further?
+
+- Declutter with days-of-week $\rightarrow$ just one point for weekday, one for weekend
+- Do we need the other ticket types?
+- Slope graph?
+- Move the title in closer?
+
+## Color
+
+- Color is a very important element here
+- Often the easiest tool for distinguishing things
+- And very important in making the graph look good
+
+## Things to Know about Color
+
+- Matching color schemes and complementary colors (uh, ask someone else)
+- Types of color palettes (in most software, available prepackaged!)
+- Designing for the colorblind
+
+## Color Palettes
+
+Two main kinds of palettes:
+
+- Sequential, for showing variation along an axis (more and less) 
+- (Divergent sequential for low-middle-high)
+- Distinct/qualitative, for showing different groups
+
+## Sequential Palettes
+
+```{r}
+display.brewer.all(type='seq')
+```
+
+
+## Divergent Sequential Palettes
+
+```{r}
+display.brewer.all(type='div')
+```
+
+## Distinct/Qualitative Sequential Palettes
+
+```{r}
+display.brewer.all(type='qual')
+```
+
+## Color Blindness
+
+- Most common is red/green/(orange)
+- Blue/yellow also relatively common
+- Some people have zero color vision
+
+## Color Blindness
+
+- When picking colors, avoid having your contrasts be red/green or blue/yellow. Red/blue is a popular choice here.
+- For complete accessibility, focus on highly contrasting *shades*
+- People who are colorblind can still generally differentiate opacity and intensity
+- Colorblind-friendly palettes are available!
+
+## Colorblind-friendly palettes
+
+```{r}
+display.brewer.all(colorblindFriendly = TRUE)
+```
+
+## Designing for Focus
+
+- Highlight what's important
+- Remove distractions
+- Unimportant stuff CAN be backgrounded
+
+## Together
+
+- Let's work with some data and figure out our ideal design together
+
+```{r}
+library(Ecdat)
+library(vtable)
+
+data(Airline)
+
+vt(Airline, labels = c('Airline','Year','Cost in Thousands',
+                       'Output in Revenue Passenger Miles',
+                       'Fuel Price',
+                       'Load Factor'))
+```
+
+## Exploring
+
+```{r}
+ggplot(Airline, aes(x = cost, y = output, color = factor(airline))) + geom_point()
+```
+
+## Exploring
+
+```{r}
+ggplot(Airline, aes(x = year, y = cost, color = factor(airline))) + geom_point()
+```
+
+## Exploring
+
+```{r}
+ggplot(Airline, aes(x = year, y = pf, color = factor(airline))) + geom_point()
+```
