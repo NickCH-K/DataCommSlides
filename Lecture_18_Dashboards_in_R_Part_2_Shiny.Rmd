@@ -122,7 +122,7 @@ This will show a table of all the data, letting you pick whether to show indepen
 
 ## Example
 
-- Let's see the example dashboard I have here
+- Let's see the example dashboard I have [here](https://nickch-k.shinyapps.io/Lecture_18_Example_Shiny/)
 - I have used the `mtcars` data we've used many times before
 - I've included a `geom_bar(stat='summary',fun = 'mean')` graph summarizing the mean of a variable by the type of transmission
 - But I let you pick the variable! (with `selectInput`) (Hint: use `aes_string` to input a string variable to **ggplot2**, this means everything must be a string in it)
