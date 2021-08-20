@@ -47,9 +47,11 @@ This class is about
 
 This will largely focus on *data visualization* but will also cover:
 
+- Exploratory data analysis
 - Tables
-- Slides
 - Notebooks
+- Workflow
+- Data cleaning and manipulation
 
 ## Admin
 
@@ -63,8 +65,8 @@ Let's do some housekeeping:
 
 In addition to the course website and Knaflic's *Storytelling with Data*:
 
-- The [R Graphics Cookbook](https://r-graphics.org/)
 - Kieran Healy's [Data Visualization](https://kieranhealy.org/publications/dataviz/)
+- The [R Graphics Cookbook](https://r-graphics.org/)
 - [Data Visualization blogs](https://www.tableau.com/learn/articles/best-data-visualization-blogs)
 - The internet writ large
 - Code for all these slides (RMarkdown and ggplot2 examples) are on the course GitHub page
@@ -88,13 +90,6 @@ In addition to the course website and Knaflic's *Storytelling with Data*:
 - The goal of a data *analyst* is to take that shapefile and figure out how to get to Dick's
 - The goal of a data communicator is to take what the data analyst figured out and figure out *what part of the map to show you to help you understand how to get to Dick's*
 - A good data communicator will make understanding the directions easy and obvious
-
-## Goals
-
-- Figure out what the question is (you $\leftarrow$ them)
-- Explore the data to answer the question (analysis)
-- (don't use the data to get the answer you want!)
-- Make the viewer understand the answer and *why* that's the answer (you $\rightarrow$ them)
 
 ## Storytelling With Data
 
