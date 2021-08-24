@@ -1,0 +1,247 @@
+---
+title: "Lecture 15: Interactive Visuals in R"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(paletteer)
+library(DT)
+library(dygraphs)
+library(leaflet)
+library(vtable)
+library(ggiraph)
+options("kableExtra.html.bsTable" = T)
+rinlinevarname <- function(code){
+  html <- '<code  class="r">``` `CODE` ```</code>'
+  sub("CODE", code, html)
+}
+```
+
+
+## Dashboards
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- Y'know, back in *my* day we had static images and gosh darnit we appreciated what we had!!!
+- These days, it's sort of expected that a lot of visuals are interactive, especially dashboards
+- Thankfully there are some straightforward ways to make interactive visuals in R
+- Note that these will all be reliant on HTML. You won't be able to output these to Word or PDF etc.
+
+## Dashboards
+
+Three main approaches we'll take today:
+
+- **htmlwidgets**, focusing on **leaflet** (maps), **DT** (tables), and **dygraphs** (line graphs and time series)
+- **ggiraph** for interactivity via tooltip closely tied to **ggplot2**
+- **shiny** controls in our **flexdashboard** dashboards
+
+But of course there is a universe of other stuff
+
+## htmlwidgets
+
+- **htmlwidgets** is a set of R front-ends for a bunch of different JavaScript-based visualization packages
+- We can stroll through the gallery [here](https://www.htmlwidgets.org/showcase_leaflet.html)
+- There are many, but I'll focus on just a few to recommend:
+- **leaflet** for maps, **DT** for tables, and **dygraphs** for line graphs and time series
+
+## DT
+
+- Let's do an easy one first. **DT** makes tables interactive. No futzin'
+
+```{r, echo = TRUE}
+iris %>% vtable(out = 'return', lush = TRUE) %>% datatable()
+```
+
+## dygraphs
+
+- For plotting time series data as a line graph! Requires time series data (`xts`) input
+
+```{r, echo = TRUE}
+ggplot2::economics %>% tbl2xts::tbl_xts(cols_to_xts = 'uempmed') %>%
+  dygraph(ylab = 'Unemployment Rate and the 08-09 recession', height = 300) %>% dyShading(from = '2008-07-01', to = '2009-07-01')
+```
+
+## leaflet
+
+- Leaflet is for making maps. It's quite easy (and while not **ggplot2**-compatible, functions in a similar way to **ggplot2** in a lot of ways), especially since it lets you skip the hardest part of graphing maps: messing with *shapefiles*
+- Shapefiles are basically the data of the map itself, and you have to find it, download it, and then deal with the eight zillion different file formats and converting between them
+- It's definitely possible, and not even all that bad once you've done a few (and there are plenty of resources out there for working with, say, **ggmap** or `geom_polygon`) but also you can just skip that with **leaflet**
+- (also, just a heads up, but the *Excel* map-making tool is also pretty neat and doesn't require shapefiles)
+
+## leaflet
+
+- The example uses location markers, but area/polygons work too (or a dataset of entries so you don't have to put them in one at a time)
+
+
+```{r, echo = TRUE, eval = FALSE}
+leaflet() %>% addTiles() %>%
+  addCircleMarkers(lng = -122.3172284009, lat = 47.6105934921, popup = 'Seattle University', color = '#AA0000') %>%
+  addCircleMarkers(lng = -122.303200, lat = 47.655548, popup = 'University of Washington', color = '#363C74')
+```
+
+## leaflet
+
+```{r, echo = FALSE, eval = TRUE}
+leaflet() %>% addTiles() %>%
+  addCircleMarkers(lng = -122.3172284009, lat = 47.6105934921, popup = 'Seattle University', color = '#AA0000') %>%
+  addCircleMarkers(lng = -122.303200, lat = 47.655548, popup = 'University of Washington', color = '#363C74')
+```
+
+
+## ggiraph
+
+- Shouldn't we just be able to make an interactive **ggplot2** graph? Yes!
+- **ggiraph** slots super easily in to standard **ggplot2** usage, and adds interactivity
+- It's not fully interactive (you can check out `ggplotly` in **plotly** for that, although you lose a lot of the customization) but it adds highlighting and tooltips, which often is all you need
+- Just replace the geometry with an `_interactive` version and add a `tooltip` aesthetic. That's it!
+- (note: line graphs are a bit tricky, but you can also easily overlay a `geom_point_interactive` on top of a `geom_line`)
+
+## ggiraph
+
+```{r, echo = TRUE, eval = FALSE}
+p <- ggplot2::economics %>% mutate(tooltip = paste0(date, '\n', scales::percent(uempmed/100, accuracy = .1))) %>%
+  ggplot(aes(x = date, y = uempmed)) + geom_line() + labs(x = 'Date', y = 'Unemployment Rate') + 
+  scale_y_continuous(labels = function(x) scales::percent(x/100, accuracy = 1)) +
+  geom_point_interactive(aes(tooltip = tooltip), size = .5) + 
+  theme_classic() + theme(text = element_text(family = 'serif', size = 13))
+ggiraph(ggobj = p)
+```
+
+## ggiraph
+
+```{r, echo = FALSE, eval = TRUE}
+p <- ggplot2::economics %>% mutate(tooltip = paste0(date, '\n', scales::percent(uempmed/100, accuracy = .1))) %>%
+  ggplot(aes(x = date, y = uempmed)) + geom_line() + labs(x = 'Date', y = 'Unemployment Rate') + 
+  scale_y_continuous(labels = function(x) scales::percent(x/100, accuracy = 1)) +
+  geom_point_interactive(aes(tooltip = tooltip), size = .5) + 
+  theme_classic() + theme(text = element_text(family = 'serif', size = 13))
+ggiraph(ggobj = p)
+```
+
+## Making a tooltip
+
+- It's generally a good idea with **ggiraph** to make the tooltip by hand.
+- You can do this by `mutate`ing a new variable where you `paste0()` all the information you want together, using `\n` to break lines
+
+```{r, echo = TRUE, eval = FALSE}
+p <- iris %>% group_by(Species) %>% summarize(`Sepal Length` = mean(Sepal.Length)) %>%
+  mutate(tooltip = paste0('Species: ', stringr::str_to_title(Species), '\nAverage Sepal Length: ', `Sepal Length`)) %>%
+  ggplot(aes(x = Species, y = `Sepal Length`, tooltip = tooltip)) + 
+  geom_col_interactive(fill = 'firebrick') + 
+  theme_minimal()
+ggiraph(ggobj = p)
+```
+
+## Shiny
+
+- **shiny** is a way of making RMarkdown completely interactive. You can basically build web apps with it in a very straightforward way
+- **shiny** output can even be stored for free (with limited traffic access) on [shinyapps.io](shinyapps.io)
+- While there's a dedicated **shiny** environment for programming with complete flexibility, we'll focus on the kind that's easy to slot into a **flexdashboard** by adding `runtime: shiny` at the top
+
+## Shiny
+
+- **shiny** gives us the ability to put interactive controls on our dashboard (selectors, etc.)
+- And then in `render` or `reactive()` functions, we can make our analysis update based on the controls!
+- So for one example, maybe there's a dropdown menu to pick a brand: Pepsi or Coke, and once you select it, the graphs update to only show Pepsi or Coke
+
+## Shiny and flexdashboard
+
+- Let's walk through [https://rmarkdown.rstudio.com/flexdashboard/shiny.html](https://rmarkdown.rstudio.com/flexdashboard/shiny.html)
+- Pay close attention to the source code for the example
+- How do the input functions come together, and how are the choices referred to in the visualization?
+- (Even deeper documentation at [https://mastering-shiny.org](https://mastering-shiny.org) or the [Shiny Dev Center](https://shiny.rstudio.com/))
+
+## Inputs
+
+- What kinds of inputs can we have?
+- Dropdown menu (`selectInput`), a slider (`sliderInput`), radio buttons (`radioButtons`), text (`textInput`), numbers (`numericInput`), a checkbox (`checkboxInput`), dates or date ranges (`dateInput` and `dateRangeInput`) and file upload (`fileInput`)
+- For each, there are options for layout and the available choices.
+- Let's look at one in more detail, `selectInput`
+
+## selectInput
+
+- This could be well used to, for example, choose which of many ways to look at the data, or which variable to graph, or which subset of the data to look at
+- The syntax is `selectInput(inputID, label, choices,` `selected = NULL, multiple = FALSE,` `selectize = TRUE, width = NULL,` `size = NULL)`
+- (the = parts are just the defaults)
+
+## selectInput 
+
+- The `inputID` is the slot in `input$` where the result will be stored. so with `inputID = 'subset'`, you can later use `input$subset` to know what was selected. That's not what the user sees for a title though, they see `label`
+- `choices` are the options, with default `selected`, in a standard vector format. So maybe to choose whether to graph independent or chain restaurants, `choices = c('Choose Restaurant Type' = '',` `'Independent','Chain')`
+- `multiple` determines whether multiple options can be selected
+- Then the minute details
+
+
+## Output
+
+- You can include output to be updated as the options change with `renderPlot()` (for plots), `renderPrint()` (for any object being printed / shown on its own), `renderTable()` for tables of data, and `renderText()` for actual text output.
+- Inside of these functions we just take a regular plot / object / data table / text, refer to elements from the sidebar with `input$inputID`, wrap that in `{}`, and wrap THAT in the appropriate `render` function
+
+## Output
+
+(Using fake data) in the global chunk: `library(tidyverse)` and `data(RestaurantData)`. In the sidebar column, an R chunk with:
+
+```{r, echo = TRUE, eval = FALSE}
+selectInput('restaurantType', label = 'Type of Restaurant', choices = choices = c('Choose Restaurant Type' = '','Independent','Chain'))
+```
+
+## Output
+
+And then in the next column,
+
+```{r, echo = TRUE, eval = FALSE}
+renderTable({
+  RestaurantType %>% filter(type == input$restaurantType)
+})
+```
+
+This will show a table of all the data, letting you pick whether to show independent or chain restaurants.
+
+## Example
+
+- Let's see the example dashboard I have [here](https://nickch-k.shinyapps.io/Lecture_18_Example_Shiny/) and also the example code.
+- I have used the `mtcars` data we've used many times before
+- I've included a `geom_bar(stat='summary',fun = 'mean')` graph summarizing the mean of a variable by the type of transmission
+- But I let you pick the variable! (with `selectInput`) (Hint: use `aes_string` to input a string variable to **ggplot2**, this means everything must be a string in it)
+- And also the color scheme (with `textInput`). Note if you put in something that's not a color (which I check with `%in% colors()`) it will correct to black.
+
+## The global chunk
+
+- Code in a **shiny** dash really comes in three parts: the `global` chunk, and then (as we've covered) the sidebar and the main part
+- Everything in `global` will only be run *once*, very handy and speedy for when you change a control!
+- Put as much as possible - *everything* that won't need to be updated when a control changes - in the global chunk
+
+## Dynamic Documents
+
+- We're not going to do it in this class, but a nice heads up is that you can use shiny and flexdashboard to create *automatic documents*
+- The `params` argument in the YAML can take in inputs
+- And you can set whatever settings you want on your dashboard and hit a button to make it create a customized report in RMarkdown using those settings!
+- Huge time-saver, either for documents to be created automatically or for creating a frontend for people at your company to easily create customized reports
+- Alternate extra credit opportunity for this class: Make an automatic report generator
+
+## Practice
+
+- Play around! Load up some data with `data()`. 
+- Make an **htmlwidget**
+- Make a **ggiraph** plot
+- Open up the default **flexdashboard**, make it shiny, add a graph and a control to filter the data for that graph

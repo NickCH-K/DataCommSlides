@@ -1,0 +1,404 @@
+---
+title: "Lecture 10: Styling ggplot2"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggrepel)
+library(ggpubr)
+```
+
+
+
+## Styling ggplot
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- We should have a decent idea at this point of how to put a **ggplot2** graph together
+- But how do we make it look good?
+
+## Today!
+
+- We'll talk about how to set aesthetic attributes along every axis
+- As well as overall styling and theming
+- Highlighting, putting graphs together, making them interactive, annotating...
+- **Think about this stuff**. Your graphs will look unprofessional if you don't, and I'll start grading down all-default styling or missed opportunities for improvement.
+
+## Aesthetic Characteristics
+
+- As you'd expect, we'll be setting the values of certain aesthetic properties
+- Which ones apply depend on the geometry. See [this page](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html). Some common ones:
+- color, linetype, fill, size, shape
+- Text aesthetics: family (font), fontface, hjust, vjust (see **extrafont** package to use all your system fonts)
+
+## Decorating Axes vs. Decorating Geometries
+
+- When a characteristic is set *inside* of an `aes()`, it becomes an axis and must be mapped to a variable name
+- *Outside* of an `aes()` (and in the geometry), it's a setting applied to the entire geometry
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+# We've seen this before
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')))
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + 
+  geom_point()
+```
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, 
+                   size = wt, shape = Transmission)) + 
+  geom_point()
+```
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, 
+                   size = wt)) + 
+  geom_point(shape = 10)
+```
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = Transmission, fill = factor(cyl))) + 
+  geom_bar(position = 'dodge', linetype = 'dashed', color = 'black')
+```
+
+## Coordinates
+
+- Everything *behind* the geometries can be manipulated as well
+- For example, we can change the coordinate system (usually to `coord_flip` it for bar graphs)
+- Or, we can change the legends, axis labels, etc., with `theme()`.
+- The options are endless! See `help(theme)`
+
+## Coordinates
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+library(ggalt)
+mtcars2 <- mtcars %>% group_by(Transmission) %>% summarize(count = n())
+ggplot(mtcars2, aes(x = Transmission,y=count)) + geom_lollipop()
+```
+
+## Coordinates
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+# geom_lollipop in particular has a 'horizontal' option anyway
+# so this is just for demonstration
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip()
+```
+
+## Axes
+
+- We can control axis text with `axis.text` and the ticks we mark on the `scale`
+- `element_text` provides text objects
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  labs(x = '', y = '') + 
+  scale_y_continuous(breaks = c(10,20), limits = c(0,20)) + 
+  theme(axis.text.x = element_text(size = 12,family='serif'),
+        axis.text.y = element_text(size = 16,family='serif', angle = 10))
+```
+
+## Axes
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  labs(x = '', y = '') + 
+  scale_y_continuous(breaks = c(10,20), limits = c(0,20)) + 
+  theme(axis.text.x = element_text(size = 12,family='serif'),
+        axis.text.y = element_text(size = 16,family='serif', angle = 10))
+```
+
+
+## Axes
+
+- Order for discrete axes can be changed with `limits`
+
+```{r, echo = TRUE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() +
+  scale_x_discrete(limits = c("Manual", "Automatic"))
+```
+
+## Axes
+
+- Change axis and tick lines with `axis.line` and `element_line`
+- Most everything can be changed generally (`axis.line` or even `line`) or specifically (`axis.ticks.x`)
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  labs(x = '', y = '') + 
+  scale_y_continuous(breaks = c(10,20), limits = c(0,20)) + 
+  theme(axis.line = element_line(color = 'red'),
+        axis.ticks.x = element_line(size = 5))
+```
+
+## Axes
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  labs(x = '', y = '') + 
+  scale_y_continuous(breaks = c(10,20), limits = c(0,20)) + 
+  theme(axis.line = element_line(color = 'red'),
+        axis.ticks.x = element_line(size = 5))
+```
+
+## Background
+
+- Work on the `panel` to change what goes behind that geometry! `element_rect` might come up!
+- Pretty much ANY element can be eliminated with `element_blank()`
+- This gonna be ugly
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  theme(panel.background = element_rect(color = 'blue', fill = 'yellow'),
+        panel.grid.major.x = element_line(color = 'green'),
+        panel.grid.major.y = element_blank())
+```
+
+## Background
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  theme(panel.background = element_rect(color = 'blue', fill = 'yellow'),
+        panel.grid.major.x = element_line(color = 'green'),
+        panel.grid.major.y = element_blank())
+```
+
+## Legends
+
+- We showed a bit last time how legends can be changed.
+- Note in `element_text` (and elsewhere, like annotation or `geom_text`), `hjust` and `vjust` align text horizontally and vertically. Set 0/1 for L/R or Top/Bottom
+- `legend.position` is in portion of the frame. .8 = 80% to the right.
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme(legend.text = element_text(hjust = .5, family = 'serif'),
+        legend.title = element_text(hjust = 1, family = 'serif', face = 'bold'),
+        legend.background = element_rect(color = 'black', fill = 'white'),
+        legend.position = c(.8,.7))
+```
+
+## Legends
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme(legend.text = element_text(hjust = .5, family = 'serif'),
+        legend.title = element_text(hjust = 1, family = 'serif', face = 'bold'),
+        legend.background = element_rect(color = 'black', fill = 'white'),
+        legend.position = c(.8,.7))
+```
+
+## Themes
+
+- The theme is immensely flexible. We didn't even cover everything, like the plot title/caption
+- You can save your `theme()` settings as an object to use repeatedly as a house style
+- Or use a prepackaged one! You can even tack on more `theme()` customization afterwards.
+- Many `theme_` settings you can tack on. I only use a few...
+- (many many others... want to look like FiveThirtyEight or The Economist? Check **ggthemes**)
+
+## Prepackaged Themes: Default
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point()
+```
+
+## Prepackaged Themes: Classic
+
+```{r, echo = TRUE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme_classic()
+```
+
+## Prepackaged Themes: void (for things like flowcharts)
+
+```{r, echo = TRUE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme_void()
+```
+
+## Prepackaged Themes: tufte (in ggthemes)
+
+```{r, echo = TRUE, eval = TRUE, fig.height = 4, fig.width = 6}
+library(ggthemes)
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme_tufte()
+```
+
+## Prepackaged Themes: theme_pubr (in ggpubr), my go-to
+
+```{r, echo = TRUE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme_pubr()
+```
+
+## Other Styling
+
+- Let's move on to some other ways we can build focus and clarity
+- Highlight and annotations!
+
+## Highlighting
+
+- Highlight certain values and gray others with the **gghighlight** package
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+library(gghighlight); data(gapminder, package = 'gapminder')
+ggplot(gapminder, aes(x = year, y = lifeExp, color=country)) + geom_line(size = 1.5) + 
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2015),
+                     breaks = c(1950,1970,1990,2010))+
+  gghighlight(country %in% c('United States','Canada','Mexico'),
+              unhighlighted_params = aes(size=.1), 
+              label_params=list(direction='y',nudge_x=10)) + 
+  theme_minimal(base_family='serif') 
+```
+
+## Highlighting 
+
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+library(gghighlight); data(gapminder, package = 'gapminder')
+ggplot(gapminder, aes(x = year, y = lifeExp, color=country)) + geom_line(size = 1.5) + 
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2015),
+                     breaks = c(1950,1970,1990,2010))+
+  gghighlight(country %in% c('United States','Canada','Mexico'),
+              unhighlighted_params = aes(size=.1), 
+              label_params=list(direction='y',nudge_x=10)) + 
+  theme_minimal(base_family='serif') 
+```
+
+## Annotation
+
+- There are also many options for *annotating* our data
+- For direct data point annotation, especially of line graphs, you can do this with some data manipulation and `geom_text`
+- For putting a block of text I recommend **ggannotate**
+- I also recommend looking into [**ggtext**](https://wilkelab.org/ggtext/) which allows rich-text formatting of all text on the graph, but we won't be covering it here.
+
+## Direct Line Labels
+
+```{r, echo = TRUE, eval = TRUE, fig.height = 4, fig.width = 6}
+p <- gapminder %>%
+  group_by(country) %>%
+  mutate(country_label = ifelse(year == max(year), as.character(country), NA_character_)) %>%
+  filter(country %in% c('United States','Canada','Mexico')) %>%
+  ggplot(aes(x = year, y = lifeExp, color=country)) + geom_line(size = 1.5) + 
+  scale_x_continuous(limits = c(1950,2025))+ theme_classic()+guides(color='none')+
+  geom_text(aes(x = year + 2,label = country_label), hjust = 0)
+p
+```
+
+## Overall Annotation
+
+- You can use the regular **ggplot2** `annotate()` function, but this takes some work
+- **ggannotate** will let you work hands-on with it, and it gives you code at the end
+- Also works for adding lines and arrows
+- The `geom_mark` functions from **ggforce** are good for shape highlights ([here](https://ggforce.data-imaginist.com/reference/geom_mark_circle.html))
+- Excel-esque but the end result is more rigorous
+- Install with `remotes::install_github` `("mattcowgill/ggannotate")`, not `install.packages()`
+
+## ggannotate
+
+- Let's see what happens when we run this...
+
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+# Remember we created p a few slides ago
+ggannotate::ggannotate(p)
+```
+
+## ggannotate
+
+- We get code chunks to add to our graph to get our annotations
+
+```{r, echo=FALSE, eval =TRUE, fig.height = 5, fig.width = 7}
+p + geom_text(data = data.frame(x = 1994.88673320614, y = 60.8970008395899, label = "Mexico catches up considerably\nthrough the latter half of the 20th century."),
+mapping = aes(x = x, y = y, label = label),
+inherit.aes = FALSE) +
+  geom_curve(data = data.frame(x = 1994.11374242598, y = 63.8009475579236, xend = 1991.27944289874, yend = 69.80243744248),
+mapping = aes(x = x, y = y, xend = xend, yend = yend),
+arrow = arrow(30L, unit(0.1, "inches"),
+"last", "closed"),
+inherit.aes = FALSE)
+```
+
+## Export
+
+- Alright, we've crafted our perfect graph
+- What do we do now?
+- `ggsave()` will save our result to file (or we can Export Image in the Plots frame of RStudio)
+- But we have some more options still!
+
+## Sticking Graphs Together
+
+- If you have multiple plots that go together, consider using **patchwork** to put them all into one
+- With the library loaded, you can just add plots together and they get stitched!
+- Let's stitch together some of the plots from this presentation
+- `+` to stick together, `|` to put "beside", `-` to move to next column, `/` for the next row
+
+
+## Patchwork
+
+```{r, echo = FALSE, eval = TRUE}
+p1 <- ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme_tufte()
+p2 <- ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, 
+                   size = wt, shape = Transmission)) + 
+  geom_point()
+p3 <- ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  theme(panel.background = element_rect(color = 'blue', fill = 'yellow'),
+        panel.grid.major.x = element_line(color = 'green'),
+        panel.grid.major.y = element_blank())
+p4 <- ggplot(mtcars, aes(x = Transmission, fill = factor(cyl))) + 
+  geom_bar(position = 'dodge', linetype = 'dashed', color = 'black')
+```
+
+
+```{r, echo= TRUE, eval = TRUE, fig.height = 5, fig.width = 12}
+library(patchwork)
+# Named and saved these earlier
+(p1 | p2 - p3)/p4
+```
+
+
+## Practice
+
+- We may not have time today to practice much of this
+- But I want you to take a basic graph, a real basic one, like this:
+- `ggplot(mtcars, aes(x = mpg, y = hp)) +` `geom_point()`
+- And just see how you can make it look. Mess around with it
+- The only goal is to try stuff out.

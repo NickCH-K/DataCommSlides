@@ -1,0 +1,65 @@
+---
+title: "Lecture_05_Example_SPrail"
+author: "Nick Huntington-Klein"
+date: "7/8/2021"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+
+{
+  library(tidyverse)
+  library(purrr)
+  library(kableExtra)
+  library(lubridate)
+}
+
+SPrail <- list.files(pattern = 'SPrail_') %>%
+  map(read_csv) %>%
+  bind_rows()
+
+```
+
+## Is the data tidy?
+
+
+```{r}
+head(SPrail)
+```
+
+Looks like one row per ticket (albeit without any sort of identifier) and everything is in its own column. Seems tidy to me! Although an ID would be nice. We could make one with `mutate(id = 1:n())`
+
+## Data Processing
+
+```{r}
+SPrail <- SPrail %>%
+  filter(fare == 'Promo') %>%
+  mutate(month = month(start_date))
+
+months <- tibble(month = 1:12, monthname = month.name)
+
+SPrail <- SPrail %>%
+  left_join(months)
+```
+
+## Now to Make a Table!
+
+```{r}
+meanprice <- SPrail %>%
+  group_by(destination, monthname) %>%
+  summarize(meanprice = mean(price, na.rm = TRUE), N = n()) %>%
+  ungroup() %>%
+  arrange(-meanprice) %>%
+  slice(1:5)
+
+meanprice %>%
+  mutate(meanprice = scales::dollar(meanprice)) %>%
+  knitr::kable() %>%
+  kable_styling(bootstrap_options = 'striped')
+```
+
+The most expensive tickets are for `r meanprice %>% slice(1) %>% pull(destination)` in `r meanprice %>% slice(1) %>% pull(monthname)`, at a price of  `r meanprice %>% slice(1) %>% pull(meanprice) %>% scales::dollar()`. On average the five most expensive routes sold `r meanprice %>% pull(N) %>% mean()` tickets apiece.

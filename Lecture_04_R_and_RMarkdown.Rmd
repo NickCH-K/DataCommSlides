@@ -1,0 +1,143 @@
+---
+title: "Lecture 4: R and RMarkdown"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+{
+library(tidyverse)
+library(lubridate)
+library(gghighlight)
+library(ggthemes)
+library(directlabels)
+library(RColorBrewer)
+}
+rinline <- function(code) {
+  sprintf('``` `r %s` ```', code)
+}
+```
+
+## Tech!
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- As we go through the course, we're going to need to kep data visualization and communication principles close at hand
+- But it's also unavoidable that actually using them will require some technical skill on our part
+- In this class we'll be using R
+- Specifically, the **tidyverse** set of packages, and RMarkdown
+- I don't expect you to become R experts. You're not learning R so much as learning **dplyr** and **ggplot2** and some extra details
+
+## R
+
+- Why R instead of Python?
+- It's good to know more than one language (nothing ever lasts!)
+- **ggplot2** is a top-tier visualization package and makes it much easier to implement our principles
+- Data-cleaning is a bit more intuitive than in **pandas** (and faster too if you're using **data.table** but we aren't)
+- Python > R in designing software for production, or in some machine learning apps. But we aren't doing those!
+
+## R - The Basics
+
+- Let's switch over to an RStudio walkthrough. We'll cover:
+- Getting set up
+- The RStudio window
+- Using basic R elements
+- I'll also show you how to set up the **swirl** package so you can do some walkthroughs on your own
+
+## RMarkdown
+
+- RMarkdown is a text and code processing system
+- Text and code in -> Formatted output out (HTML, Word, PDF, slides, books, etc.)
+- These slides are made in RMarkdown. I write books and papers in it too.
+
+## Markdown
+
+- Markdown is a "markup language" like HTML or LaTeX. All your formatting goes in as raw text, and then you run it through an interpreter to get output
+- Markdown is *super super simple*
+- Let's walk through the [Markdown cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
+- Note HTML code also works!
+
+## Markdown
+
+- Why Markdown instead of, like, Word? or JuPyteR?
+- Can be automated. Includes code and output directly in the document, including for in-line numbers
+- Much easier to share via something like, e.g., GitHub
+- Output is in standard formats like Word or HTML so they don't need any sort of setup to see it
+
+## The YAML
+
+- The YAML is the set of text at the top of an RMarkdown that tells it how to interpret all that text. Here's the YAML for these slides:
+
+```{r, eval = FALSE, echo = TRUE}
+---
+title: "Lecture 4: R and RMarkdown"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+```
+
+## The YAML
+
+- Here's a more standard YAML, the default from File -> New Rmarkdown:
+- Common option: toc: TRUE to turn on the table of contents on the left
+
+```{r, eval = FALSE, echo = TRUE}
+---
+title: "Untitled"
+author: "Nick Huntington-Klein"
+date: "7/5/2021"
+output: html_document
+---
+```
+
+## Code Chunks
+
+- Include code in-line (fantastic for memos) with `r rinline('mean(1:3)')` which makes `r mean(1:3)`
+- Include code chunks with triple backticks. Let's take a look at an example RMarkdown doc
+- Note: want a data frame to nicely format as a table? use `knitr::kable()`.
+
+## Code Chunks
+
+- Common options to set in each code chunk, or altogther in `knitr::opts_chunk$set()`:
+- `echo`: Show code or not?
+- `eval`: Evaluate the code inside or not?
+- `warning` and `message`: Show warnings and messages from the code?
+- `include`: Include *any output at all* or not?
+
+## Let's do it
+
+- Make a new RMarkdown HTML document
+- YAML: Turn the toc on, title it and add your name
+- Make one big section and title it (#) and two small (##)
+- In the setup chunk, load the **tidyverse** and load `data(storms)`
+- Write some text in the first small one, including a link to something
+- In the second, add a code chunk that does a `summary()` of `storms`
+- Then, some more text, with an in-line text to get the mean of `storms$wind`.
+- Bonus: load the **scales** package and use `number()` to format the in-line text.

@@ -1,0 +1,112 @@
+---
+title: "Bob Ross Style"
+author: "Nick Huntington-Klein"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Our setup code:
+
+```{r, echo = TRUE}
+# install.packages('ggpubr','ggforce','ggalt')
+
+library(tidyverse)
+library(ggpubr)
+library(ggforce)
+library(ggalt)
+
+google <- read_csv('https://github.com/NickCH-K/causalbook/raw/main/EventStudies/google_stock_data.csv') %>%
+  pivot_longer(cols = c('Google_Return','SP500_Return'))
+spend <- read_csv('https://vincentarelbundock.github.io/Rdatasets/csv/stevedata/gss_spending.csv')
+#https://vincentarelbundock.github.io/Rdatasets/doc/stevedata/gss_spending.html
+```
+
+# Google's Alphabet Announcement
+
+On August 10, 2015, Google announced that they were reorganizing the company to fit underneath Alphabet, a new umbrella company. The GOOG stock would now be stock in Alphabet. Did this announcement affect the Google stock price?
+
+```{r, echo = FALSE}
+gdata <- google %>%
+  mutate(name = case_when(
+    name == 'Google_Return' ~ 'Google Return',
+    name == "SP500_Return" ~ "S&P 500 Return"
+  ))
+
+ggplot(gdata, aes(x = Date, y = value, linetype = name, color = name)) + 
+  geom_line(size = 1) + 
+  geom_vline(aes(xintercept = as.Date('2015-08-10')), linetype = 'dashed') +
+  annotate(geom = 'label',x = as.Date('2015-08-10'), y = .1,
+                               label = 'Alphabet\nAnnouncement',
+           family = 'serif', size = 13/.pt,
+           hjust = .5)+
+  scale_y_continuous(labels = scales::percent) +
+  scale_color_manual(values = c('red','gray')) +
+  theme_pubr() + 
+  theme(text = element_text(family = 'serif', size = 13),
+        legend.position = c(.2, .9)) +
+  labs(y = 'Daily Return', title = 'Google Stock Return Around Alphabet Announcement',
+       color = NULL) + 
+  guides(linetype = 'none') +
+  facet_zoom(xlim = c(as.Date('2015-08-05'),as.Date('2015-08-15')), zoom.size = 1)
+  
+```
+
+
+# Life by Education
+
+```{r, echo = FALSE}
+spend <- read_csv('https://vincentarelbundock.github.io/Rdatasets/csv/stevedata/gss_spending.csv')
+#https://vincentarelbundock.github.io/Rdatasets/doc/stevedata/gss_spending.html
+
+spend <- spend %>%
+  filter(!is.na(degree)) %>%
+  transmute(BA = degree >= 3,
+         income_above_median = rincom16 >= median(rincom16, na.rm = TRUE),
+         conservative = polviews >= 5,
+         news_reader = news %in% 1:2,
+         full_time = wrkstat == 1) %>%
+  group_by(BA) %>%
+  summarize(across(.fns = function(x) mean(x, na.rm = TRUE)))
+
+vtable::vtable(spend, labels = c('Has Bachelor or Grad Degree',
+                                 'Income above median',
+                                 '5-7 on political views scale',
+                                 'Reads news at least a few times a week or daily',
+                                 'Works full-time'))
+```
+
+```{r, echo = FALSE}
+knitr::kable(spend) %>% kableExtra::kable_styling(bootstrap_options = 'striped')
+```
+
+```{r, echo = TRUE}
+spend <- spend %>%
+  pivot_longer(cols = c('income_above_median','conservative','news_reader','full_time'))
+no_ba <- spend %>% 
+  slice(1:4) %>%
+  rename(no_ba_value = value)
+ba <- spend %>%
+  slice(5:8) %>%
+  rename(ba_value = value)
+df <- no_ba %>% 
+  left_join(ba, by = 'name')
+```
+
+```{r}
+ggplot(df, aes(x = no_ba_value, xend = ba_value, y = name)) + 
+  geom_dumbbell(size_x = 3, size_xend = 3, colour = 'black', colour_x = 'red', colour_xend = 'blue') + 
+  labs(x = 'Proportion', y = NULL,
+       title = 'A Different Financial World for BA-Holders') + 
+  annotate(geom = 'text', x = df$no_ba_value[3], y = 'news_reader', label = 'No BA', vjust = -1) +
+  annotate(geom = 'text', x = df$ba_value[3], y = 'news_reader', label = 'BA', vjust = -1) +
+  theme_minimal() + 
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        text = element_text(size = 15)) +
+  scale_x_continuous(labels = scales::percent, limits = c(0,1)) + 
+  scale_y_discrete(labels = c( 'Conservative', 'Works Full-Time','Income above Median','Frequent News Reader'))
+```

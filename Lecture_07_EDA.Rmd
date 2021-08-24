@@ -1,0 +1,265 @@
+---
+title: "Lecture 6: Exploratory Data Analysis"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+{
+library(tidyverse)
+library(lubridate)
+library(gghighlight)
+library(ggthemes)
+library(directlabels)
+library(RColorBrewer)
+}
+rinline <- function(code) {
+  sprintf('``` `r %s` ```', code)
+}
+```
+
+## The Purpose of Analysis
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- What are we even *doing* with data?
+- We want to see what sorts of stuff is in the data, so that we know what things we *should* be reporting on
+- This requires us to *explore* the data
+- Even if we come in with a strong idea of what we want to find, learning about what the data looks like is a good idea
+
+## The Purpose of Analysis
+
+We want to:
+
+- Understand our data (read the docs, too!!!)
+- Detect mistakes
+- Get a sense of what our variables look like
+- Figure out what some of the relationships are
+
+## The Purpose of Analysis
+
+Always be on the lookout (in EDA and in your code!)
+
+- Things that are different that shouldn't be different ("why does this one person have a height 8x that of anyone else?")
+- Things that are the same that shouldn't be the same ("Why is the mean income for Americans and Canadians exactly preciely the same to the 8th decimal place?")
+- Relationships that are very surprising ("Why is age negatively correlated with height?")
+
+## Exploring Data
+
+- Univariate non-graphical
+- Univariate graphical
+- Multivariate non-graphical
+- Multivariate graphical
+
+## Univariate Exploratory Analysis
+
+Looking for:
+
+- What kind of values we have
+- Are there massive outliers? Are there values that look *incorrect*?
+- What is the distribution? Is there skew? If it's a factor, does one category dominate?
+- You'll want to do this with nearly every variable you have
+- Getting all the little presentation details is less important, but the graph should still be readable (labels etc.) On that note, EDA isn't always *concise* - some tables/graphs will slip off the edge of these slides.
+
+## Univariate Exploratory Analysis
+
+- Think about *what features of the variable it makes sense to explore*
+- Central tendencies (mean, median, etc.?)
+- Tails? Skew? Percentiles?
+- If it's a factor, is showing *all* the categories informative? Do you need to collapse first? Or summarize?
+
+## Univariate Exploratory Analysis Tools
+
+- `summary()` shows lots of good info about a variable's distribution (also works to summarize other objects)
+
+```{r, echo = TRUE}
+summary(iris$Sepal.Length)
+summary(iris$Species)
+```
+
+
+## Univariate Exploratory Analysis Tools
+
+- `str()` shows variable classes (important!) and some values
+
+```{r, echo = TRUE}
+str(iris)
+```
+
+## Univariate Exploratory Analysis Tools
+
+- `vtable()` in **vtable** is a more readable and flexible version of that. `lush = TRUE` for more info
+
+```{r, echo = TRUE}
+library(vtable)
+vtable(iris, lush = TRUE)
+```
+
+## Univariate Exploratory Analysis Tools
+
+- `sumtable()` in **vtable** is a full table of summary statistics
+
+```{r, echo = TRUE}
+sumtable(iris)
+```
+
+
+## Univariate Exploratory Analysis Tools
+
+- Moving on to graphical tools! In **ggplot**, `geom_density()` and `geom_histogram()` can both show full distributions (when might this *not* be useful?)
+
+```{r, echo = TRUE, fig.height = 3}
+ggplot(iris, aes(x = Sepal.Length)) + geom_density()
+```
+
+## Univariate Exploratory Analysis Tools
+
+- Boxplots aren't for general-audience consumption but they show some easy summary statistics
+
+```{r, echo = TRUE, fig.height = 3}
+ggplot(iris, aes(x = Sepal.Length)) + geom_boxplot() + coord_flip()
+```
+
+## Univariate Exploratory Analysis
+
+- Load the `gov_transfers` data from the **causaldata** package
+- Read the docs! `help(gov_transfers)`
+- Explore the variables that are in there on a univariate basis
+
+## Multivariate Exploratory Analysis
+
+- We want to know *how variables are related* in multivariate analysis
+- Again, *fit the analysis to the context*. Don't treat a continuous variable as a factor, and if you treat a discrete variable as continuous know that a scatterplot won't work! etc.
+- Don't just fire and forget. Think about whether the output is actually informative.
+- more than 2 variables are possible too! Just add more groups/aesthetics.
+
+## Multivariate Exploratory Analysis Tools
+
+- For continuous vs. continuous, nothing wrong with starting with a linear correlation!
+- Bivariate OLS is just a rescaled correlation
+
+```{r, echo = TRUE}
+cor(iris$Sepal.Length, iris$Sepal.Width)
+lm(Sepal.Length ~ Sepal.Width, data = iris)
+```
+
+
+## Multivariate Exploratory Analysis Tools
+
+- If one variable is discrete or a factor, don't underestimate plain ol' `group_by() %>% summarize()`
+- In fact, many headaches of trying to get R to do something for you can be avoided by just doing `group_by() %>% summarize()` yourself
+- Don't forget `na.rm = TRUE` as appropriate
+
+```{r, echo = TRUE}
+iris %>%
+  group_by(Species) %>%
+  summarise(mean.SL = mean(Sepal.Length, na.rm = TRUE),
+            sd.SL = sd(Sepal.Length, na.rm = TRUE))
+```
+
+## Multivariate Exploratory Analysis Tools
+
+- `sumtable` has a `group` option for the same purpose (note `summ` can customize the summary functions)
+
+```{r, echo = TRUE}
+iris %>% sumtable(group = 'Species')
+```
+
+## Multivariate Exploratory Analysis Tools
+
+- `tabyl` in **janitor** is great for discrete vs. discrete; use `adorn` functions to get percents instead of counts. Watch the denominator! It affects interpretation a LOT
+
+```{r, echo = TRUE}
+library(janitor)
+mtcars %>% tabyl(am, vs) %>%
+  adorn_percentages(denominator = 'row') %>%
+  adorn_pct_formatting() %>% adorn_title()
+```
+
+## Multivariate Exploratory Analysis
+
+- Moving on to graphs!
+- If one variable is a factor/discrete you can do pretty much any kind of graph you like, but grouped
+
+```{r, echo = TRUE, fig.height = 3}
+mtcars %>% group_by(vs, am) %>%
+  summarize(mean_mpg = mean(mpg)) %>%
+  ggplot(aes(x = vs, fill = factor(am), y = mean_mpg)) + geom_col(position = 'dodge')
+```
+
+## Multivariate Exploratory Analysis
+
+- When it comes to densities, typical geoms look cluttered. I recommend `geom_density_ridges` in **ggridges** or `geom_violin` (or use facets)
+
+```{r, echo = TRUE, fig.height = 3}
+library(ggridges); library(patchwork)
+p1 <- ggplot(iris, aes(x = Sepal.Length, y = Species, fill = Species)) + geom_density_ridges()
+p2 <- ggplot(iris, aes(x = Species, y = Sepal.Length, fill = Species)) + geom_violin()
+p1 + p2
+```
+
+## Multivariate Exploratory Analysis
+
+- For two continuous variables, things can be tricky, but a scatterplot is a good place to start
+
+```{r, echo = TRUE, fig.height = 4}
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) + geom_point()
+```
+
+## Automation
+
+- As a starting place, `ggpairs` in **GGally** will automatically pick univariate and multivariate comparisons to start
+
+```{r, echo = TRUE, eval = FALSE}
+GGally::ggpairs(iris)
+```
+
+## Automation
+
+```{r}
+GGally::ggpairs(iris)
+```
+
+## Multivariate Exploratory Analysis
+
+- Let's do some of this in our `gov_transfers` data!
+
+## Going into Detail
+
+- This has all been running with little input from us at this point
+- Yes we have to figure out which kind makes sense but we're just exploring
+- Going for a bit more detail requires us to  have a *question* to answer, and then we can look into that
+- This targets us towards the variables/relationships to study, and *how* to explore them further
+- Perhaps, for example, checking trivariate relationships, one example being "*in this subgroup* how are X and Y related?"
+
+## Careful!
+
+Be aware of what EDA does not do:
+
+- Checking *every* relationship will tend to uncover non-real relationships by random chance
+- Consider doing EDA on a random subset data for this reason, so you can check if something interesting actually is there in the other/full data and don't trick yourself
+- Hardly ever establishes a *causal relationship* - avoid causal language unless you can really back it up!
+
+## Let's Do It (if there's time)
+
+- [https://vincentarelbundock.github.io/Rdatasets/csv/Stat2Data/Clothing.csv](https://vincentarelbundock.github.io/Rdatasets/csv/Stat2Data/Clothing.csv)
+- Data description: [https://rdrr.io/rforge/Stat2Data/man/Clothing.html](https://rdrr.io/rforge/Stat2Data/man/Clothing.html)
+- Explore! What do we find?

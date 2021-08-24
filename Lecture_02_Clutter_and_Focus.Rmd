@@ -76,18 +76,6 @@ knitr::include_graphics('Lecture_02_Bible_Cross_Ref.png')
 knitr::include_graphics('Lecture_02_Coffee.jpg')
 ```
 
-## DuBois
-
-- W.E.B. DuBois was an early sociologist, one of very few black sociologists
-- and was interested in studying African-American life and history
-- The following graph tracks the wealth of black Americans over time
-
----
-
-```{r}
-knitr::include_graphics('Lecture_02_DuBois.png')
-```
-
 
 ## Health care
 
@@ -165,6 +153,13 @@ knitr::include_graphics('Lecture_02_Minard.gif')
 
 - Simply put, things that are made similar in some way (shape, color, shade, etc.) are part of the same whole
 
+Note on using color for this: Remember colorblindness!
+
+- Most common is red/green/(orange), blue/yellow also relatively common
+- When picking colors, avoid having your contrasts be red/green or blue/yellow. Red/blue is a popular choice here.
+- For complete accessibility, focus on highly contrasting *shades*
+- Colorblind-friendly palettes are available!
+
 ## Similarity
 
 ```{r}
@@ -184,7 +179,7 @@ ggplot(mtcars, aes(x = wt, y = mpg, color = Transmission))+
 
 ## Enclosure
 
-- If you put a physical enclosure aroudn some things, they will be perceived as being part of a group
+- If you put a physical enclosure around some things, they will be perceived as being part of a group
 - This can be especially handy if you're already using some other forms of similarity, or need to indicate areas that WOULD be part of that group if you had data there.
 
 ## Enclosure
@@ -228,9 +223,10 @@ ggplot(graphdat, aes(x = Day, y = YOY)) +
 
 ## Connection
 
-- If you put a literal connection betweent two points, people will interpret them as being connected!
+- If you put a literal connection between two points, people will interpret them as being connected!
 - No big surprise
 - See any line graph for this.
+- This is also a good reason *not* to use a line graph when your x-axis doesn't have an order to it!
 
 ## How?
 

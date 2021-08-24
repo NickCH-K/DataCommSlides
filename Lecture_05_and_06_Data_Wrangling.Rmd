@@ -1,0 +1,913 @@
+---
+title: "Data Wrangling in the Tidyverse"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+      
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(DT)
+library(purrr)
+library(readxl)
+```
+
+## Data Wrangling
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+- Data wrangling is the process of going from raw data to something usable
+- It is what you will spend most of your time as a data person doing, so you better be good at it!
+- Is it part of data communications? Yes, although not really any moreso than your other data classes
+- But do they cover it enough? Never! So we do here.
+- You will thank me later.
+
+## Data Wrangling
+
+This week:
+
+- The goal of data wrangling
+- How to think about data wrangling
+- Technical tips for data wrangling in R using the **tidyverse** package (which, importantly, contains the **dplyr** and **tidyr** packages inside, as well as **ggplot2** which we'll use for visualization)
+- This is adapted from my workshop on data wrangling in the **tidyverse**. [Video from that is here](https://twitter.com/nickchk/status/1350500257654718465), as well as versions with **data.table** (R package with different syntax, very good for big data sets and extra speed) and **pandas** in Python.
+
+
+## Tech note: the pipe
+
+`scales::percent(mean(mtcars$am, na.rm = TRUE), accuracy = .1)` can be rewritten
+
+```{r, eval = FALSE, echo = TRUE}
+mtcars %>%
+  pull(am) %>%
+  mean(na.rm = TRUE) %>%
+  scales::percent(accuracy = .1)
+```
+
+- Like a conveyer belt! Nice and easy. 
+- `pull()` is a **dplyr** function that says "give me back this one variable instead of a data set" but in a pipe-friendly way, so `mtcars %>% pull(am)` is the same as `mtcars$am` or `mtcars[['am']]`
+
+
+
+## Limitations
+
+- We only have so much time! I won't be going into *great* detail on the use of all the technical commands, but by the end of this you will know what's out there and generally how it's used
+- *As with any computer skill, a teacher's comparative advantage is in letting you know what's out there. The* **real learning** *comes from practice and Googling. So take what you see here today, find yourself a project, and do it! It will be awful but you will learn an astounding amount by the end*
+
+## The Core of Data Wrangling
+
+- Always **look directly at your data so you know what it looks like**
+- Always **think about what you want your data to look like when you're done**
+- Think about **how you can take information from where it is and put it where you want it to be**
+- After every step, **look directly at your data again to make sure it's doing what you think it's doing**
+
+I help a lot of people with their problems with data wrangling. Their issues are almost always *not doing one of these four things*, much more so than having trouble coding or anything like that
+
+## The Core of Data Wrangling
+
+- How can you "look at your data"?
+- Literally is one way - click on the data set, or do `View()` to look at it
+- Summary statistics tables: `sumtable()` or `vtable(lush = TRUE)` in **vtable** for example
+- Checking what values it takes: `table()` or `summary()` on individual variables
+- Look for: What values are there, what the observations look like, presence of missing or unusable data, how the data is structured
+
+## The Stages of Data Wrangling
+
+- From records to data
+- From data to tidy data
+- From tidy data to data for your analysis
+
+# From Records to Data
+
+## From Records to Data
+
+Not something we'll be focusing on today! But any time the data isn't in a workable format, like a spreadsheet or database, someone's got to get it there!
+
+- "Google Trends has information on the popularity of our marketing terms, go get it!"
+- "Here's a 600-page unformatted PDF of our sales records for the past three years. Turn it into a database."
+- "Here are scans of the 15,000 handwritten doctor's notes at the hospital over the past year"
+- "Here's access to the website. The records are in there somewhere."
+- "Go do a survey"
+
+## From Records to Data: Tips!
+
+- Do as little by hand as possible. It's a lot of work and you *will* make mistakes
+- *Look at the data* a lot!
+- Check for changes in formatting - it's common for things like "this enormous PDF of our tables" or "eight hundred text files with the different responses/orders" to change formatting halfway through
+- When working with something like a PDF or a bunch of text files, think "how can I tell a computer to spot where the actual data is?"
+- If push comes to shove, or if the data set is small enough, you can do by-hand data entry. Be very careful!
+
+## Reading Files
+
+One common thing you run across is data split into multiple files. How can we read these in and compile them?
+
+- `list.files()` produces a vector of filenames (tip: `full.names = TRUE` gives full filepaths)
+- Use `map()` from **purrr** to iterate over that vector and read in the data. This gives a list of `tibble`s (`data.frame`s) read in
+- Create your own function to process each, use `map` with that too (if you want some processing before you combine)
+- Combine the results with `bind_rows()`!
+
+## Reading Files
+
+For example, imagine you have 200 monthly sales reports in Excel files. You just want to pull cell C2 (total sales) and cell B43 (employee of the month) and combine them together.
+
+```{r, echo = TRUE, eval = FALSE}
+# For reading Excel
+library(readxl)
+# For map
+library(purrr)
+
+# Get the list of 200 reports
+filelist <- list.files(path = '../Monthly_reports/', pattern = 'sales', full.names = TRUE)
+```
+
+## Reading Files
+
+We can simplify by making a little function that processes each of the reports as it's read. Then, use `map()` with `read_excel()` and then our function, then bind it together!
+
+How do I get `df[1,3]`, etc.? Because I look straight at the files and check where the data I want is, so I can pull it and put it where I want it!
+
+```{r, echo = TRUE, eval = FALSE}
+process_file <- function(df) {
+  sales <- df[1,3]
+  employee <- df[42,2]
+  return(tibble(sales = sales, employee = employee))
+}
+
+compiled_data <- filelist %>%
+  map(read_excel) %>%
+  map(process_file) %>%
+  bind_rows()
+```
+
+# From Data to Tidy Data 
+
+## From Data to Tidy Data
+
+- **Data** is any time you have your records stored in some structured format
+- But there are many such structures! They could be across a bunch of different tables, or perhaps a spreadsheet with different variables stored randomly in different areas, or one table per observation
+- These structures can be great for *looking up values*. That's why they are often used in business or other settings where you say "I wonder what the value of X is for person/day/etc. N"
+- They're rarely good for *doing analysis* (calculating statistics, fitting models, making visualizations)
+- For that, we will aim to get ourselves *tidy data*
+
+## Tidy Data
+
+In tidy data:
+
+1. Each variable forms a column
+1. Each observation forms a row
+1. Each type of observational unit forms a table
+
+```{r}
+df <- data.frame(Country = c('Argentina','Belize','China'), TradeImbalance = c(-10, 35.33, 5613.32), PopulationM = c(45.3, .4, 1441.5))
+datatable(df)
+```
+
+## Tidy Data
+
+The variables in tidy data come in two types:
+
+1. *Identifying Variables*/*Keys* are the columns you'd look at to locate a particular observation. 
+1. *Measures*/*Values* are the actual data.
+
+Which are they in this data?
+
+```{r}
+df <- data.frame(Person = c('Chidi','Chidi','Eleanor','Eleanor'), Year = c(2017, 2018, 2017, 2018), Points = c(14321,83325, 6351, 63245), ShrimpConsumption = c(0,13, 238, 172))
+datatable(df)
+```
+## Tidy Data
+
+- *Person* and *Year* are our identifying variables. The combination of person and year *uniquely identifies* a row in the data. Our "observation level" is person and year. There's only one row with Person == "Chidi" and Year == 2018
+- *Points* and *ShrimpConsumption* are our measures. They are the things we have measured for each of our observations
+- Notice how there's one row per observation (combination of Person and Year), and one column per variable
+- Also this table contains only variables that are at the Person-Year observation level. Variables at a different level (perhaps things that vary between Person but don't change over Year) would go in a different table, although this last one is less important
+
+## Tidying Non-Tidy Data
+
+- So what might data look like when it's *not* like this, and how can we get it this way? 
+- Here's one common example, a *count table* (not tidy!) where each column is a *value*, not a *variable*
+
+```{r}
+data("relig_income")
+datatable(relig_income)
+```
+
+## Tidying Non-tidy Data
+
+- Here's another, where the "chart position" variable is split across 52 columns, one for each week
+
+```{r}
+data("billboard")
+datatable(billboard)
+```
+
+
+
+## Tidying Non-Tidy Data
+
+- The first big tool in our tidying toolbox is the *pivot*
+- A pivot takes a single row with K columns and turns it into K rows with 1 column, using the identifying variables/keys to keep things lined up. 
+- This can also be referred to as going from "wide" data to "long" data
+- Long to wide is also an option
+- In every statistics package, pivot functions are notoriously fiddly. Always read the help file, and do trial-and-error! Make sure it worked as intended.
+
+## Tidying Non-Tidy Data
+
+Check our steps!
+
+- We looked at the data
+- Think about how we want the data to look - one row per (keys) artist, track, and week, and a column for the chart position of that artist/track in that week, and the date entered for that artist/track (value)
+- How can we carry information from where it is to where we want it to be? With a pivot!
+- And afterwards we'll look at the result (and, likely, go back and fix our pivot code - the person who gets a pivot right the first try is a mysterious genius)
+
+## Pivot
+
+- In the **tidyverse** we have the functions `pivot_longer()` and `pivot_wider()`. Here we want wide-to-long so we use `pivot_longer()`
+- This asks for:
+- `data` (the data set you're working with, also the first argument so we can pipe to it)
+- `cols` (the columns to pivot) - it will assume anything not named here are the keys
+- `names_to` (the name of the variable to store which column a given row came from, here "week")
+- `values_to` (the name of the vairable to store the value in)
+- Many other options (see `help(pivot_longer)`)
+
+## Pivot
+
+```{r, echo = TRUE, eval = FALSE}
+billboard %>%
+  pivot_longer(cols = starts_with('wk'), # tidyselect functions help us pick columns based on name patterns
+             names_to = 'week',
+             names_prefix = 'wk', # Remove the "wk" at the start of the column names
+             values_to = 'chart_position',
+             values_drop_na = TRUE) # Drop any key combination with a missing value
+
+```
+
+```{r}
+pivot_longer(billboard,
+             cols = starts_with('wk'), # tidyselect functions help us pick columns based on name patterns
+             names_to = 'week',
+             names_prefix = 'wk', # Remove the "wk" at the start of the column names
+             values_to = 'chart_position',
+             values_drop_na = TRUE) %>%
+datatable()
+
+```
+
+## Variables Stored as Rows
+
+- Here we have tax form data where each variable is a row, but we have multiple tables For this one we can use `pivot_wider()`, and then combine multiple individuals with `bind_rows()`
+
+```{r}
+taxdata <- data.frame(TaxFormRow = c('Person','Income','Deductible','AGI'), Value = c('James Acaster',112341, 24000, 88341))
+taxdata2 <- data.frame(TaxFormRow = c('Person','Income','Deductible','AGI'), Value = c('Eddie Izzard',325122, 16000,325122 - 16000))
+datatable(taxdata)
+```
+
+## Variables Stored as Rows
+
+- `pivot_wider()` needs:
+- `data` (first argument, the data we're working with)
+- `id_cols` (the columns that give us the key - what should it be here?)
+- `names_from` (the column containing what will be the new variable names)
+- `values_from` (the column containing the new values)
+- Many others! See `help(pivot_wider)`
+
+## Variables Stored as Rows
+
+```{r, echo = TRUE}
+taxdata %>%
+  pivot_wider(names_from = 'TaxFormRow',
+              values_from = 'Value')
+```
+
+(note that the variables are all stored as character variables not numbers - that's because the "person" row is a character, which forced the rest to be too. we'll go through how to fix that later)
+
+## Variables Stored as Rows
+
+We can use `bind_rows()` to stack data sets with the same variables together, handy for compiling data from different sources
+
+```{r}
+taxdata %>%
+  pivot_wider(names_from = 'TaxFormRow',
+              values_from = 'Value') %>%
+  bind_rows(taxdata2 %>%
+              pivot_wider(names_from = 'TaxFormRow',
+              values_from = 'Value'))
+```
+
+## Merging Data
+
+- Commonly, you will need to link two datasets together based on some shared keys
+- For example, if one dataset has the variables "Person", "Year", and "Income" and the other has "Person" and "Birthplace"
+
+```{r}
+person_year_data <- data.frame(Person = c('Ramesh','Ramesh','Whitney', 'Whitney','David','David'), Year = c(2014, 2015, 2014, 2015,2014,2015), Income = c(81314,82155,131292,141262,102452,105133))
+person_data <- data.frame(Person = c('Ramesh','Whitney'), Birthplace = c('Crawley','Washington D.C.'))
+datatable(person_year_data)
+```
+
+## Merging Data
+
+That was `person_year_data`. And now for `person_data`:
+
+```{r}
+datatable(person_data)
+```
+
+## Merging Data
+
+- The **dplyr** `join` family of functions will do this (see `help(join)`). The different varieties just determine what to do with rows you *don't* find a match for. `left_join()` keeps non-matching rows from the first dataset but not the second, `right_join()` from the second not the first, `full_join()` from both, `inner_join()` from neither, and `anti_join()` JUST keeps non-matches
+
+## Merging Data
+
+```{r, echo = TRUE}
+person_year_data %>%
+  left_join(person_data, by = 'Person')
+```
+
+```{r, echo = TRUE}
+person_year_data %>%
+  right_join(person_data, by = 'Person')
+```
+
+## Merging Data
+
+- Things work great if the list of variables in `by` is the exact observation level in *at least one* of the two data sets
+- But if there are multiple observations per combination of `by` variables in *both*, that's a problem! It will create all the potential matches, which may not be what you want:
+
+```{r, echo = TRUE}
+a <- tibble(Name = c('A','A','B','C'), Year = c(2014, 2015, 2014, 2014), Value = 1:4)
+b <- tibble(Name = c('A','A','B','C','C'), Characteristic = c('Up','Down','Up','Left','Right'))
+a %>% left_join(b, by = 'Name')
+
+```
+
+## Merging Data
+
+- This is why it's *super important* to always know the observation level of your data. You can check it by seeing if there are any duplicate rows among what you *think* are your key variables: if we think that `Person` is a key for data set `a`, then `a %>% select(Person) %>% duplicated() %>% max()` will return `TRUE`, showing us we're wrong
+- At that point you can figure out how you want to proceed - drop observations so it's the observation level in one? Accept the multi-match? Pick only one of the multi-matches?
+
+## Merging Data: Other Packages
+
+- Or you can use `safe_join()` in the **pmdplyr** package, which will check for you that you're doing the kind of merge you think you're doing.
+- **pmdplyr** also contains the `inexact_join()` family of functions which can help join data sets that don't line up exactly, like if you want to match on time, but on the *most recent* match, not an exact match. The **fuzzyjoin** package has similar functions for matching inexactly for text variables
+
+# From Tidy Data to Your Analysis
+
+## From Tidy Data to Your Analysis
+
+- Okay! We now have, hopefully, a nice tidy data set with one column per variable, one row per observation, we know what the observation level is!
+- That doesn't mean our data is ready to go! We likely have plenty of cleaning and manipulation to go before we are ready for analysis
+- We will be doing this mostly with **dplyr**
+
+## dplyr
+
+- **dplyr** uses a *small set of "verbs"* to very flexibly do all kinds of data cleaning and manipulation
+- The primary verbs are: `filter(), select()`, `arrange()`, `mutate()`, `group_by()`, and `summarize()`.
+- Other important functions in **dplyr**: `pull()` (which we covered), `case_when()`, `slice()`
+- See the [dplyr cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+
+## filter()
+
+- `filter()` limits the data to the observations that fulfill a certain *logical condition*. It *picks rows*.
+- For example, `Income > 100000` is `TRUE` for everyone with income above 100000, and `FALSE` otherwise. `filter(data, Income > 100000)` would return just the rows of `data` that have `Income > 100000`
+
+```{r, echo = TRUE}
+person_year_data %>%
+  left_join(person_data, by = 'Person') %>%
+  filter(Income > 100000)
+```
+
+## Logical Conditions
+
+- A lot of programming in general is based on writing logical conditions that check whether something is true
+- In R, if the condition is true, it returns `TRUE`, which turns into 1 if you do a calculation with it. If false, it returns `FALSE`, which turns into 0. (tip: `ifelse()` is rarely what you want, and `ifelse(condition, TRUE, FALSE)` is redundant)
+
+## Logical Conditions Tips
+
+Handy tools for constructing logical conditions:
+
+`a > b`, `a >= b`, `a < b`, `a <= b`, `a == b`, or `a != b` to compare two numbers and check if `a` is above, above-or-equal, below, below-or-equal, equal (note `==` to check equality, not `=`), or not equal
+
+`a %in% c(b, c, d, e, f)` checks whether `a` is any of the values `b, c, d, e,` or `f`. Works for text too!
+
+## Logical Conditions Tips
+
+Whatever your condition is (`condition`), just put a `!` ("not") in front to reverse `TRUE`/`FALSE`. `2 + 2 == 4` is `TRUE`, but `!(2 + 2 == 4)` is `FALSE`
+
+Chain multiple conditions together! `&` is "and", `|` is "or". Be careful with parentheses if combining them! In `filter` specifically, you can use `,` instead of `&`.
+
+
+## select()
+
+- `select()` gives you back just a subset of the columns. It *picks columns*
+- It can do this by name or by column number
+- Use `-` to *not* pick certain columns
+
+If our data has the columns "Person", "Year", and "Income", then all of these do the same thing:
+
+```{r, echo = TRUE}
+no_income <- person_year_data %>% select(Person, Year)
+no_income <- person_year_data %>% select(1:2)
+no_income <- person_year_data %>% select(-Income)
+print(no_income)
+```
+
+## arrange()
+
+- `arrange()` sorts the data. That's it! Give it the column names and it will sort the data by those columns.
+- It's often a good idea to sort your data before saving it (or looking at it) as it makes it easier to navigate
+- There are also some data manipulation tricks that rely on the position of the data
+
+```{r}
+person_year_data %>%
+  arrange(Person, Year)
+```
+
+## slice()
+
+- Like `filter()`, `slice()` picks rows. The difference is that `filter()` picks them by logical condition, while `slice()` does it by row index number
+- `slice(1:5)` picks the first five rows, `slice(-103)` drops the 103rd row, etc.
+- Can be handy with `arrange()`. `arrange(-Income) %>% slice(1:5)` gives you the five rows with the highest income, for example
+
+## mutate()
+
+- `mutate()` *assigns columns/variables*, i.e. you can create variables with it (note also its sibling `transmute()` which does the same thing and then drops any variables you don't explicitly specify in the function)
+- You can assign multiple variables in the same `mutate()` call, separated by commas (`,`)
+
+```{r, echo = TRUE}
+person_year_data %>%
+  mutate(NextYear = Year + 1,
+         Above100k = Income > 100000)
+```
+
+## case_when()
+
+- A function that comes in handy a lot when using mutate to *create* a categorical variable is `case_when()`, which is sort of like `ifelse()` except it can cleanly handle way more than one condition
+- Provide `case_when()` with a series of `if ~ then` conditions, separated by commas, and it will go through the `if`s one by one for each observation until it finds a fitting one. 
+- As soon as it finds one, it stops looking, so you can assume anyone that satisfied an earlier condition doesn't count any more. Also, you can have the last `if` be `TRUE` to give a value for anyone who hasn't been caught yet
+
+## case_when()
+
+```{r, echo = TRUE}
+person_year_data %>%
+  mutate(IncomeBracket = case_when(
+    Income <= 50000 ~ 'Under 50k',
+    Income > 50000 & Income <= 100000 ~ '50-100k',
+    Income > 100000 & Income < 120000 ~ '100-120k',
+    TRUE ~ 'Above 120k'
+  ))
+```
+
+## case_when()
+
+- Note that the `then` doesn't have to be a value, it can be a calculation, for example 
+
+```{r, eval = FALSE, echo = TRUE}
+Inflation_Adjusted_Income = case_when(Year == 2014 ~ Income*1.001, Year == 2015 ~ Income)
+```
+
+- And you can use `case_when()` to change the values of just *some* of the observations. 
+
+```{r, eval = FALSE, echo = TRUE}
+mutate(Income = case_when(Person == 'David' ~ Income*1.34, TRUE ~ Income))
+```
+
+- Note: if assigning some observations to be `NA`, you must use the type-appropriate `NA`. `NA_character_`, `NA_real_`, etc.
+
+
+## group_by()
+
+- `group_by()` turns the dataset into a *grouped* data set, splitting each combination of the grouping variables
+- Calculations like `mutate()` or (up next) `summarize()` or (if you want to get fancy) `group_map()` then process the data separately by each group
+
+```{r, echo = TRUE}
+person_year_data %>% group_by(Person) %>%
+  mutate(Income_Relative_to_Mean = Income - mean(Income))
+```
+
+## group_by()
+
+- It will maintain this grouping structure until you re-`group_by()` it, or `ungroup()` it, or `summarize()` it (which removes one of the grouping variables)
+- How is this useful in preparing data? 
+- Remember, we want to *look at where information is* and *think about how we can get it where we need it to be*
+- `group_by()` helps us move information *from one row to another in a key variable* - otherwise a difficult move!
+- It can also let us *change the observation level* with `summarize()`
+- Tip: `n()` gives the number of rows in the group - handy! and `row_number()` gives the row number within its group of that observation
+
+## summarize()
+
+- `summarize()` *changes the observation level* to a broader level
+- It returns only *one row per group* (or one row total if the data is ungrouped)
+- So now your keys are whatever you gave to `group_by()`
+
+```{r, echo = TRUE}
+person_year_data %>%
+  group_by(Person) %>%
+  summarize(Mean_Income = mean(Income),
+            Years_Tracked = n())
+```
+
+## Exercises (1)
+
+- In an RMarkdown:
+- Get `SPrail.zip` from Canvas. Unzip it, and use **purrr**'s `map()` with `read_csv()` and `bind_rows()` to read it all in
+- Look at the data. Is the data tidy? How do you know?
+- `filter()` to "Promo" fares
+- Load **lubridate** and `mutate()` a column with the `month()` of the `start_date` called `month`
+- Make a dataset `tibble(month = 1:12, monthname = month.name)` and `left_join` it with the data (this isn't the easiest way to do this but lets us try a join)
+
+## Exercises (2)
+
+- `group_by()` and `summarize()` to get `mean()` price by destination and month name AND number of tickets sold (hint: use `n()`. Don't forget `na.rm = TRUE`!
+- `arrange()` and `slice()` to get the top 5 most expensive destination/months. Put that in a `kable()` with `kable_styling()` (and `scales::dollar` for mean price) in your RMarkdown. **Be sure to `ungroup()` first! Why?**
+- In the RMarkdown text (outside the chunk) use `slice()`, `pull()` and in-line chunks to write a line that automatically fills in "The most expensive tickets are for DESTINATION in MONTH, at a price of PRICE. On average the five most expensive routes sold NUMBER tickets apiece."
+
+# Part 2
+
+## The Rest
+
+- There's plenty more to cover, with way more than we can actually do
+- And if I load you up with stuff and then don't make you use it a lot, you'll just forget
+- The next section, on variable types, will always be relevant
+- The rest we'll skip through a bit, mostly to let you know what's out there
+- So if you need it in the future you can come back to these slides.
+
+# Variable Types
+
+## Manipulating Variables
+
+- Those are the base **dplyr** verbs we need to think about
+- They can be combined to do all sorts of things!
+- But important in using them is thinking about what kinds of variable manipulations we're doing
+- That will feed into our `mutate()`s and our `summarizes()`
+- A lot of data cleaning is making an already-tidy variable usable!
+
+## Variable Types
+
+Common variable types:
+
+- Numeric
+- Character/string
+- Factor
+- Date
+
+## Variable Types
+
+- You can check the types of your variables by printing a `tibble()`, or `is.` and then the type, or doing str(data)
+- You can generally convert between types using `as.` and then the type 
+
+```{r, echo = TRUE}
+taxdata %>%
+  pivot_wider(names_from = 'TaxFormRow',
+              values_from = 'Value') %>%
+  mutate(Person = as.factor(Person),
+         Income = as.numeric(Income),
+         Deductible = as.numeric(Deductible),
+         AGI = as.numeric(AGI))
+```
+
+## Numeric Notes
+
+- Numeric data actually comes in multiple formats based on the level of acceptable precision: `integer`, `double`, and so on
+- Often you won't have to worry about this - R will just make the data whatever numeric type makes sense at the time
+- But a common problem is that reading in very big integers (like ID numbers) will sometimes create `double`s that are stored in scientific notation - lumping multiple groups together! Avoid this with options like `col_types` in your data-reading function
+
+## Character/string
+
+- Specified with `''` or `""`
+- Use `paste0()` to stick stuff together! `paste0('h','ello', sep = '_')` is ''h_ello'`
+- Messy data often defaults to character. For example, a "1,000,000" in your Excel sheet might not be parsed as `1000000` but instead as a literal "1,000,000" with commas
+- Lots of details on working with these - back to them in a moment
+
+## Factors
+
+- Factors are for categorical data - you're in one category or another
+- The `factor()` function lets you specify these `labels`, and also specify the `levels` they go in - factors can be ordered! 
+
+```{r, echo = TRUE}
+tibble(Income = c('50k-100k','Less than 50k', '50k-100k', '100k+', '100k+')) %>%
+  mutate(Income = factor(Income, levels = c('Less than 50k','50k-100k','100k+'))) %>%
+  arrange(Income)
+```
+## Dates
+
+- Dates are the scourge of data cleaners everywhere. They're just plain hard to work with!
+- There are Date variables, Datetime variables, both of multiple different formats... eugh!
+- I won't go into detail here, but I strongly recommend using the **lubridate** package whenever working with dates. See the [cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/lubridate.pdf)
+- We already did a bit of this last time with `month()`
+
+## Characters/strings
+
+- Back to strings!
+- Even if your data isn't textual, working with strings is a very common aspect of preparing data for analysis
+- Some are straightforward, for example using `mutate()` and `case_when()` to fix typos/misspellings in the data
+- But other common tasks in data cleaning include: getting substrings, splitting strings, cleaning strings, and detecting patterns in strings
+- For this we will be using the **stringr** package in **tidyverse**, see the [cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf)
+
+## Making Strings
+
+- `paste()` and `paste0()` are your friends for sticking strings together, a common task in visualization
+- `paste('a','b','c',sep = '-') is `'a-b-c'`. Default `sep` is `' '` for `paste()`, or `''` for `paste0` (the only difference!)
+- `paste(c('a','b','c'), collapse = '-')` is also `'a-b-c'`
+
+## Getting Substrings
+
+- When working with things like nested IDs (for example, NAICS codes are six digits, but the first two and first four digits have their own meaning), you will commonly want to pick just a certain range of characters
+- `str_sub(string, start, end)` will do this. `str_sub('hello', 2, 4)` is `'ell'`
+- Note negative values read from end of string. `str_sub('hello', -1)` is `'o'`
+
+## Getting Substrings
+
+- For example, geographic Census Block Group indicators are 13 digits, the first two of which are the state FIPS code
+
+```{r, echo = TRUE}
+tibble(cbg = c(0152371824231, 1031562977281)) %>%
+  mutate(cbg = as.character(cbg)) %>% # Make it a string to work with
+  mutate(state_fips = case_when(
+    nchar(cbg) == 12 ~ str_sub(cbg, 1, 1), # Leading zeroes!
+    nchar(cbg) == 13 ~ str_sub(cbg, 1, 2)
+  ))
+```
+
+## Strings
+
+- **Lots** of data will try to stick multiple pieces of information in a single cell, so you need to split it out! 
+- Generically, `str_split()` will do this. `str_split('a,b', ',')[[1]]` is `c('a','b')`
+- Often in already-tidy data, you want `separate()` from **tidyr**. Make sure you list enough new `into` columns to get everything!
+
+```{r, echo = TRUE}
+tibble(category = c('Sales,Marketing','H&R,Marketing')) %>%
+  separate(category, into = c('Category1', 'Category2'), ',')
+```
+
+## Cleaning Strings
+
+- Strings sometimes come with unwelcome extras! Garbage or extra whitespace at the beginning or end, or badly-used characters
+- `str_trim()` removes beginning/end whitespace, `str_squish()` removes additional whitespace from the middle too. `str_trim(' hi  hello ')` is `'hi  hello'`.
+- `str_replace_all()` is often handy for eliminating (or fixing) unwanted characters
+
+```{r, echo = TRUE}
+tibble(number = c('1,000', '2,003,124')) %>%
+  mutate(number = number %>% str_replace_all(',', '') %>% as.numeric())
+```
+
+## Detecting Patterns in Strings
+
+- Often we want to do something a bit more complex. Unfortunately, this requires we dip our toes into the bottomless well that is *regular expressions*
+- Regular expressions are ways of describing patterns in strings so that the computer can recognize them. Technically this is what we did with `str_replace_all(',','')` - `','` is a regular expression saying "look for a comma"
+- There are a *lot* of options here. See the [guide](https://stringr.tidyverse.org/articles/regular-expressions.html)
+- Common: `[0-9]` to look for a digit, `[a-zA-Z]` for letters, `*` to repeat until you see the next thing... hard to condense here. Read the guide.
+
+## Detecting Patterns in Strings
+
+- For example, some companies are publicly listed and we want to indicate that but not keep the ticker. `separate()` won't do it here, not easily!
+- On the next page we'll use the regular expression `'\\([A-Z].*\\)'`
+- `'\\([A-Z].*\\)'` says "look for a (" (note the `\\` to treat the usually-special ( character as an actual character), then "Look for a capital letter `[A-Z]`", then "keep looking for capital letters `.*`", then "look for a )"
+
+## Detecting Patterns in Strings
+
+```{r, echo = TRUE}
+tibble(name = c('Amazon (AMZN) Holdings','Cargill Corp. (cool place!)')) %>%
+  mutate(publicly_listed = str_detect(name, '\\([A-Z].*\\)'),
+         name = str_replace_all(name, '\\([A-Z].*\\)', ''))
+```
+
+## For Example
+
+- Let's remove the "county" from a list of county names 
+
+```{r}
+data("fips_to_names", package = 'SafeGraphR')
+
+# Always check if the data is what you think! Do they all end in "County"?
+# word(n) pulls the nth "word", -1 starts from the end
+fips_to_names %>% pull(countyname) %>% word(-1) %>% table()
+```
+
+- The ones we'd want to remove are probably "County" and "Parish"
+
+```{r}
+fips_to_names <- fips_to_names %>%
+  mutate(countyname = str_replace_all(countyname, ' County| Parish',''))
+```
+
+# Using Data Structure
+
+## Using Data Structure
+
+- One of the core steps of data wrangling we discussed is thinking about how to get information from where it is now to where you want it
+- A tough thing about tidy data is that it can be a little tricky to move data *into different rows than it currently is*
+- This is often necessary when `summarize()`ing, or when doing things like "calculate growth from an initial value"
+- But we can solve this with the use of *arrange()* along with other-row-referencing functions like `first()`, `last()`, and `lag()`
+
+## Using Data Structure
+
+- `first()` and `last()` refer to the first and last row, naturally
+
+```{r, echo = TRUE}
+stockdata <- tibble(ticker = c('AMZN','AMZN', 'AMZN', 'WMT', 'WMT','WMT'),
+       date = as.Date(rep(c('2020-03-04','2020-03-05','2020-03-06'), 2)),
+       stock_price = c(103,103.4,107,85.2, 86.3, 85.6))
+stockdata %>%
+  arrange(ticker, date) %>%
+  group_by(ticker) %>%
+  mutate(price_growth_since_march_4 = stock_price/first(stock_price) - 1)
+```
+
+## Using Data Structure
+
+- `lag()` looks to the row a certain number above/below this one, based on the `n` argument
+- Careful! Despite the name, `dplyr::lag()` doesn't care about *time* structure, it only cares about *data* structure. If you want daily growth but the row above is last year, too bad!
+
+## Using Data Structure
+
+```{r, echo = TRUE}
+stockdata %>%
+  arrange(ticker, date) %>%
+  group_by(ticker) %>%
+  mutate(daily_price_growth = stock_price/lag(stock_price, 1) - 1)
+```
+
+
+## Trickier Stuff
+
+- Sometimes the kind of data you want to move from one row to another is more complex!
+- You can use `first()/last()` to get stuff that might not normally be first or last with things like `arrange(ticker, -(date == as.Date('2020-03-05')))`
+- For even more complex stuff, I often find it useful to use `case_when()` to create a new variable that only picks data from the rows you want, then a `group_by()` and `mutate()` to spread the data from those rows across the other rows in the group
+
+## Trickier Stuff
+
+```{r, echo = TRUE}
+tibble(person = c('Adam','James','Diego','Beth','Francis','Qian','Ryan','Selma'),
+       school_grade = c(6,7,7,8,6,7,8,8),
+       subject = c('Math','Math','English','Science','English','Science','Math','PE'),
+       test_score = c(80,84,67,87,55,75,85,70)) %>%
+  mutate(Math_Scores = case_when(subject == 'Math' ~ test_score,
+                                 TRUE ~ NA_real_)) %>%
+  group_by(school_grade) %>%
+  mutate(Math_Average_In_This_Grade = mean(Math_Scores, na.rm = TRUE)) %>%
+  select(-Math_Scores)
+
+```
+
+# Automation
+
+## Automation
+
+- Data cleaning is often very repetitive
+- You shouldn't let it be!
+- Not just to save yourself work and tedium, but also because standardizing your process so you only have to write the code *once* both reduces errors and means that if you have to change something you only have to change it once
+- So let's automate! Three ways we'll do it here: `across()`, writing functions, and **purrr**
+
+## across()
+
+- If you have a lot of variables, cleaning them all can be a pain. Who wants to write out the same thing a million times, say to convert all those read-in-as-text variables to numeric?
+- Old versions of **dplyr** used "scoped" variants like `mutate_at()` or `mutate_if()`. As of **dplyr 1.0.0**, these have been deprecated in favor of `across()`
+- `across()` lets you use all the variable-selection tricks available in `select()`, like `starts_with()` or `a:z` or `1:5`, but then lets you apply functions to each of them in `mutate()` or `summarize()`
+- similarly `rowwise()` and `c_across()` lets you do stuff like "add up a bunch of columns"
+
+## across()
+
+- `starts_with('price_growth')` is the same here as `4:5` or `c(price_growth_since_march_4, price_growth_daily)`
+
+```{r, echo = TRUE}
+stockgrowth <- stockdata %>%
+  arrange(ticker, date) %>%
+  group_by(ticker) %>%
+  mutate(price_growth_since_march_4 = stock_price/first(stock_price) - 1,
+         price_growth_daily = stock_price/lag(stock_price, 1) - 1) 
+stockgrowth %>%
+  mutate(across(starts_with('price_growth'), function(x) x*10000)) # Convert to basis points
+```
+
+## across()
+
+- That version replaced the original values, but you can have it create new ones with `.names`
+- Also, you can use a `list()` of functions instead of just one to do multiple calculations at the same time
+
+## across()
+
+```{r, echo = TRUE}
+stockgrowth %>%
+  mutate(across(starts_with('price_growth'), 
+                list(bps = function(x) x*10000,
+                     pct = function(x) x*100),
+                .names = "{.col}_{.fn}")) %>% 
+  select(ticker, starts_with('price_growth_daily')) %>% datatable()
+```
+
+## across()
+
+- Another common issue is wanting to apply the same transformation to all variables of the same type
+- For example, converting all characters to factors, or converting a bunch of dollar values to pounds
+- Use `where(is.type)` for this
+
+## across()
+
+```{r, echo = TRUE}
+stockdata %>%
+  mutate(across(where(is.numeric), list(stock_price_pounds = function(x) x/1.36)))
+```
+
+## rowwise() and c_across()
+
+- A lot of business data especially might record values in a bunch of categories, each category in its own column, but not report the total
+- This is annoying! Fix with `rowwise()` and `c_across()`
+
+## rowwise() and c_across()
+
+```{r, echo = TRUE}
+tibble(year = c(1994, 1995, 1996), sales = c(104, 106, 109), marketing = c(100, 200, 174), rnd = c(423,123,111)) %>%
+  rowwise() %>%
+  mutate(total_spending = sum(c_across(sales:rnd))) %>%
+  mutate(across(sales:rnd, function(x) x/total_spending, .names = '{.col}_pct'))
+```
+
+## Writing Functions
+
+- We've already done a bit of function-writing here, in the file read-in and with `across()`
+- Generally, **if you're going to do the same thing more than once, you're probably better off writing a function**
+- Reduces errors, saves time, makes code reusable later!
+
+```{r, echo = TRUE, eval = FALSE}
+function_name <- function(argument1 = default1, argument2 = default2, etc.) {
+  some code
+  result <- more code
+  return(result)
+  # (or just do result by itself - the last object printed will be automatically returned if there's no return())
+}
+```
+
+## Function-writing tips
+
+- Make sure to think about what kind of values your function accepts and make sure that what it returns is consistent so you know what you're getting
+- This is a really deep topic to cover in two slides, and mostly I just want to poke you and encourage you to do it. At least, if you find yourself doing something a bunch of times in a row, just take the code, stick it inside a `function()` wrapper, and instead use a bunch of calls to that function in a row
+- More information [here](https://www.r-bloggers.com/2019/07/writing-functions-in-r-example-one/).
+
+## Unnamed Functions
+
+- There are other ways to do functions in R: *unnamed functions*
+- Notice how in the `across()` examples I didn't have to do `bps <- function(x) x*10000`, I just did `function(x) x*10000`? That's an "unnamed function"
+- If your function is very small like this and you're only going to use it once, it's great for that!
+- In R 4.1, you can just do `\(x)` instead of `function(x)`
+
+## purrr
+
+- One good way to apply functions iteratively (yours or not) is with the `map()` functions in **purrr**
+- We already did this to read in files, but it applies much more broadly! `map()` usually generates a `list()`, `map_dbl()` a numeric vector, `map_chr()` a character vector, `map_df()` a `tibble()`...
+- It iterates through a `list`, `data.frame/tibble` (which are technically `list`s, or `vector`, and then applies a function to each of the elements
+
+```{r, echo = TRUE}
+person_year_data %>%
+  map_chr(class)
+```
+## purrr
+
+- Obviously handy for processing many files, as in our reading-in-files example
+- Or looping more generally for diagnostic or wrangling purposes. Perhaps you have a `summary_profile()` function you've made, and want to check each state's data to see if its data looks right. You could do 
+
+```{r, echo = TRUE, eval = FALSE}
+data %>% pull(state) %>% unique() %>% map(summary_profile)
+```
+
+- You can use it generally in place of a `for()` loop
+- See the [purrr cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf)
+
+# Finishing Up, and an Example!
+
+## Some Final Notes
+
+- We can't possibly cover everything. So one last note, about saving your data! 
+- What to do when you're done and want to save your processed data?
+- Saving data in R format: `save()` saves many objects, which are all put back in the environment with `load()`. Often preferable is `saveRDS()` which saves a single `data.frame()` or `tibble()` in compressed format, loadable with `df <- readRDS()`
+- Saving data for sharing: `write_csv()` makes a CSV. Yay!
+
+## Some Final Notes
+
+- Also, please, please, *please* **DOCUMENT YOUR DATA**
+- At the very least, keep a spreadsheet/\code{tibble} with a set of descriptions for each of your variables
+- Also look into the **sjlabelled** or **haven** packages to add variable labels directly to the data set itself
+- Once you have your variables labelled, `vtable()` in **vtable** can generate a documentation file for sharing
+
+## A Walkthrough
+
+- Let's clean some data!

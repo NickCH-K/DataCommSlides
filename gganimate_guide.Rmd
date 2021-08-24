@@ -1,0 +1,180 @@
+---
+title: "Animations in ggplot - gganimate"
+author: "Gareth Green"
+output: slidy_presentation
+---
+
+```{r echo = FALSE}
+# Course: 5210 Communicating Data
+# Purpose: Demonstrate gganimate
+# Date: August 5, 2019
+# Author: Gareth Green
+
+```
+
+```{r echo = FALSE}
+# Clear environment of variables and functions
+rm(list = ls(all = TRUE)) 
+
+# Clear environmet of packages
+if(is.null(sessionInfo()$otherPkgs) == FALSE)lapply(paste("package:", names(sessionInfo()$otherPkgs), sep=""), detach, character.only = TRUE, unload = TRUE)
+
+```
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+# Load libraries
+library(tidyverse)
+library(gganimate)
+
+```
+
+```{r echo = FALSE}
+# Load data
+qp1 <- read.csv("qp1_data.csv")
+
+```
+
+
+Animated visuals
+=======================================
+
+<div style="float: left; width: 95%;">
+
++ How many of you have seen this famous [gapminder video of Hans Rosling](https://www.bing.com/videos/search?q=hans+rosling&view=detail&mid=4CC1172C798C8C3BD2A94CC1172C798C8C3BD2A9&FORM=VIRE)
+
++ Animated visuals can help tell a story
+
+    - especially in a presenation
+    - you can tell the story while the visual progresses
+
++ Animations are especially good for time series
+
+    - can work well for other forms of motion as well
+        - for example, how median price changes with number of bedrooms
+    - key is that members of a group differ over the varialbe that you are animating over
+
++ Only use if the animation ads substance
+
+    - do not just use animations to show sizzle
+
++ You can save these in your TA and call them later
+
+    - `anim_save()` is much like `ggsave()`
+
+</div>
+
+
+Animated visual basics
+=======================================
+
+<div style="float: left; width: 95%;">
+
++ I want to show you a similar animation to the one Hans used
+
++ We will be using gganimate
+
+    - I will show several examples of how to use gganminate
+    - there are several differnt functions and they continue to develop new ones
+
++ Here we use the function `transition_time()`
+
+    - this has the visual transition along a variable that is not in the plot
+    - see that `year` is not in `ggplot()` but it is in `transition_time(year)`
+    
+```{r ann1, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 5}
+# Load package with gapminder data
+library(gapminder)
+
+# Build a faceted animation graph
+ggplot(data = gapminder, 
+       mapping = aes(x = gdpPercap/1000, y = lifeExp, 
+                     size = pop, color = country)) +
+  geom_point(alpha = 0.7, show.legend = FALSE) +
+  scale_colour_manual(values = country_colors) +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  facet_wrap(~continent) +
+  theme_bw() +
+
+  # Here comes the gganimate specific bits
+  labs(title = "Real GDP and life expectancy grow together: Year {frame_time}",
+       x = "GDP per capita ($000)", y = "Life expectancy") +
+  transition_time(year) +
+  ease_aes("linear")
+
+```
+
+</div>
+
+
+Time-series animation visuals
+=======================================
+
+<div style="float: left; width: 95%;">
+
++ Here is a typical time series visual
+
+    - here I use `transition_reveal()` by the x-variable in `ggplot()`
+    - also set `frame = yr_built` for the visual to transition along
+
++ I use `annimate()` to set the speed of the reveal
+
+```{r ann2, message = FALSE, warning = FALSE}
+# Graph median price by year built
+p <- qp1 %>% 
+  select(yr_built, waterfront, price) %>% 
+  group_by(yr_built, waterfront) %>% 
+  summarize(med_price = median(price/1000)) %>% 
+  ggplot(aes(x = yr_built, y = med_price, frame = yr_built)) + 
+    geom_line(aes(color = as.factor(waterfront))) + 
+    scale_color_manual(name = "Waterfront", labels = c("No", "Yes"), values = c("navy", "blue"),
+                       guide = guide_legend(reverse=TRUE)) +
+    theme_classic() +
+    theme(axis.title.x = element_blank(),
+          legend.position="bottom") +
+  labs(title = "Waterfront median price is much more variable than non-waterfront",
+       x = "", y = "Median price ($000)") +  
+  transition_reveal(yr_built) 
+
+# Run as a GIF annimation and control speed
+animate(p, nframes = 300)
+
+```
+
+</div>
+
+Animating distinct stages of a visual
+=======================================
+
+<div style="float: left; width: 95%;">
+
++ Can also animate visuals that have discrete states
+
+    - good for bar graphs or similar
+
++ the variable in `transition_state()` does not have to be called in `ggplot()`
+
+    - i.e. could have done by `view`
+
+```{r ann3, message = FALSE, warning = FALSE, fig.height = 4, fig.width = 5}
+# Animate a bar graph
+qp1 %>% 
+  select(price, bedrooms, waterfront) %>% 
+  group_by(bedrooms, waterfront) %>%
+  filter(bedrooms < 7 & bedrooms > 0) %>% 
+  summarise(med_price = median(price/1000)) %>% 
+  ggplot(aes(x = bedrooms, y = med_price, fill = as.factor(waterfront))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  theme_classic() +
+  scale_fill_manual(name = "Waterfront", labels = c("No", "Yes"), values = c("lightblue", "blue"),
+                    guide = guide_legend(reverse=TRUE)) +
+  labs(title = "Median price grows more per bedroom for waterfront homes",
+       x = "Number of bedrooms", y = "Median price ($000)") +
+  transition_states(bedrooms, wrap = FALSE) +
+  shadow_mark()
+
+```
+
+</div>
+
+
