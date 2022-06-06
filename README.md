@@ -19,6 +19,8 @@ Also, check out the accompanying [video series](https://nickchk.com/videos.html#
 
 [Lecture 4: R and RMarkdown](https://nickch-k.github.io/DataCommSlides/Lecture_04_R_and_RMarkdown.html#/)
 
+[Common R Problems](https://nickch-k.github.io/DataCommSlides/Lecture_04_Common_R_Problems.html#/)
+
 [Lecture 5 and Lecture 6: Data Wrangling](https://nickch-k.github.io/DataCommSlides/Lecture_05_and_06_Data_Wrangling.html#/)
 
 ## Exploratory Data Analysis
