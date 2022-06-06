@@ -1,0 +1,274 @@
+---
+title: "Common R Mistakes in Data Viz"
+author: "Nick HK"
+date: "`r Sys.Date()`"
+output: 
+  rmdformats::readthedown:
+    toc: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Common R Problems
+
+This document catalogues some of the requests for help I get, and mistakes I see in looking at student work, particularly in my Data Communications class. I also, of course, cover how to fix these things.
+
+I've divided this into two sections: (1) things breaking, and (2) mistakes in coding.
+
+# Things Breaking
+
+These are common errors you might get, and common things that might cause errors.
+
+## General troubleshooting tips
+
+1. Run your code one line at a time. Between each line, check the output and make sure it looks like you expect it to look. Often, errors occur because an earlier line of code didn't do what we intended it to do. If you don't spot any problems there, keep going until you hit the error message.
+1. Read the error message and see if you can make sense of what it says
+1. Often, even if you don't understand the message, it will give you a hint as to what is causing the problem, and so you'll know where to look to double-check your code
+1. Google
+
+If you still need help, I am your professor and I am here to help you! Here's some tips for asking me for coding help:
+
+1. Let me know what the problem is ("it's not working" isn't too helpful)
+1. What is the error message or warning, if there is one, and what lines of code are generating it?
+1. What are you trying to accomplish with the code? What *should* it do?
+1. Send along your code as well. The original file is a good idea, although then I won't be able to help on my phone and you'll have to wait until I get to a computer. Copy/pasting code and error message into an email works well. A screenshot (Google "how to take a screenshot" and either Mac or Windows, as appropriate) also works well. Taking a picture of your computer screen is the least-good way to share your problem.
+
+## There is no package called
+
+If you get an error like `there is no package called 'packagename'`, that means that you've tried to load or use a package - perhaps using `library()` or something like that - but you don't have that package installed.
+
+The Fix:
+
+1. Did you spell the package name correctly? Maybe you do have the package, but you made a typo
+1. If you spelled it correctly, you may not have installed it. Install it (usually) with `install.packages('packagename')` where `'packagename'` is replaced with the name of the package you actually want.
+
+## Could not find function
+
+If you get an error like `count not find function "functionname"`, that means it's trying to look for that function, but cannot find it. 
+
+The Fix:
+
+1. Did you spell the function name correctly? Maybe you made a typo.
+1. If the function is in a package, did you load the package? Remember, the package must be re-loaded every time you restart R. If you're working in RMarkdown, you must load the package inside of your RMarkdown script, since RMarkdown starts from a blank slate.
+
+## Object not found
+
+If you get an error like `object 'objectname' not found`, that means that you've made a reference to an object called `objectname`, but there is no such object to refer to.
+
+The Fix:
+
+1. Did you spell the object's name correctly? Maybe you made a typo.
+1. Did you remember to create the object before referring to it? For example, the code `mean(x); x <- 1:10` would not work, because you try to take the mean of `x` before it's been created. If you're working in RMarkdown, remember that it will start from a blank slate, so you must create all objects inside of your Rmarkdown script.
+
+## Column doesn't exist
+
+If you get an error like `column 'columnname' doesn't exist`, that means it's trying to refer to a column name that is not actually in your data.
+
+The Fix:
+
+1. Did you spell the column's name correctly? Maybe you made a typo.
+1. Does your column name have spaces or other strange characters in it like dashes? If so, in many applications (anywhere you're not treating the column name as a string) you have to surround the column name in backticks (`r "\u0060"`) so it knows where the column name starts and ends.
+1. Did you perhaps drop the column before trying to refer to it? For example, in the below code, the `group_by() %>% summarize()` will only keep columns named in the `group_by()` or in the `summarize()`. So even though the `mpg` column was there at the start, it no longer is by the time we refer to it.
+
+```{r, eval = FALSE}
+mtcars %>%
+  group_by(am) %>%
+  summarize(mean_hp = mean(hp)) %>%
+  mutate(hp_by_mpg = mean_hp/mpg)
+```
+
+## Warning: Package was compiled with the version
+
+If you load a package and get a warning that looks like `Warning: packagename was compiled with R version...`, that just means that the package was compiled using a slightly newer version of R than yours. It's generally not a problem as long as you have a somewhat-recent version of R.
+
+The Fix:
+
+1. Ignore it
+1. If you want it to go away, update your R installation.
+
+## Rtools is required to build packages from source
+
+If you are installing packages, you may be asked whether you'd like to build packages from source. If you say "Yes", but you do not have Rtools installed, you will get an error, and the package won't install properly.
+
+The Fix:
+
+1. When asked whether you want to install packages from source, say "No."
+1. Install Rtools before installing packages. The easiest way to do this is to install the **installr** package, and then run `installr::install.rtools()`.
+
+## File does not exist, or No such file or directory
+
+If you get an error like `'filename.csv' does not exist`, that means that you're trying to load a file, but the file is not in the location you're telling R to look.
+
+The Fix:
+
+1. Did you spell the filename correctly? Maybe you made a typo. Or, perhaps, you're trying to open an Excel fie (`.xlsx`) but telling R to look for a CSV (`.csv`)
+1. Is the file perhaps open in Excel? Sometimes, Microsoft Office will hold files hostage and not let them be opened in other programs while they're open in Office. Close the Excel window that has the file open.
+1. **Most often**, this is a working directory issue. If you tell R to look for `'filename.csv'`, it will look for that file in the *working directory*. Or, if you tell it to look for `'data/filename.csv'`, it will look for a folder called "data" in the working directory, and for filename.csv inside of that. In recent versions of RStudio, the current working directory is listed right on top of the Console. Did you check whether the file is actually in that folder? If you're running RMarkdown, it will set the working directory to the folder where the .RMD file is located. Did you put the file in the right spot relative to where the RMD is stored? See my [video on filepaths](https://www.youtube.com/watch?v=NG7Y0kkGR8g) for more help.
+
+
+## My code works fine in Rstudio, but my RMarkdown won't knit
+
+If your code runs fine when you run it by hand, but your RMarkdown throws errors, these are the most common issues:
+
+1. You may have loaded a library while working on your code, but not loaded that same library in your RMarkdown. Include all necessary `library()` functions inside your RMarkdown document.
+1. You may have created an object while working on your code, but not created that same object in your RMarkdown. Make sure all objects are created within the RMarkdown itself.
+1. To troubleshoot both (1) and (2) above, restart your R session (Session -> Restart R) and clear your environment (hit the broom icon in the Environment tab), and THEN run your code line by line to see where the error is.
+1. If you're loading in a file, you may have a different working directory than the RMarkdown is using. Remember, RMarkdown sets the working directory to the folder where the file is saved. See the previous "File does not exist" issue above.
+1. RMarkdown hates when you try to install packages inside the RMarkdown (and it's a bad idea anyway). Make sure there are no `install.packages()` or `remotes::install_github()` lines in your RMarkdown doc
+
+If none of those fix it, then look in the "Render" tab to see what exactly the error message is. Keep in mind that, in Rmarkdown, the line number associated with the error message is the line number for the **start of the chunk where the error is**, not the **actual line where the error occurs.**
+
+## Object of type 'closure' is not subsettable
+
+This is the most aggravating and least-informative R error. "Subsettable" is a hint though - you're trying to take a subset of something (such as picking an element from a vector, or picking a column from a data set), but the thing you're doing it to is a "closure" that you can't do that to.
+
+Most commonly, this is a case of accidentally giving the name of a function where you mean to give the name of a vector or data frame. For example:
+
+```{r, eval = FALSE}
+# My data set is about how mean you are, so I'll call it mean_data
+mean_data <- tibble(person = c('Me','You'), meanness = c(1,10000000))
+# Now let's look at that meanness variable, but oops, I'm referring to the function mean() instead of my data mean_data
+mean$meanness
+# Error in mean$meanness : object of type 'closure' is not subsettable
+```
+
+The Fix:
+
+1. See where it says the error is "in" - that's the place where you've referred to the wrong thing. fix it!
+
+## You probably made a typo or didn't balance your parentheses
+
+Just in general, a very large percentage of errors students come to me with occur simply because they made a typo, or didn't balance their parentheses (pairing each ( with a )).
+
+The Fix:
+
+1. If you get an error message of every kind, read it carefully to make sure you didn't make a typo
+1. Avoid coding where you have lots and lots of nested parentheses. Then, for whatever parentheses you do have, click on each one in RStudio - it will highlight its "partner" or show where there is a missing partner.
+
+
+# Mistakes in Coding
+
+These are common mistakes I see students making, which may not always lead to error, but sometimes will. And these mistakes will often lead to incorrect results even if it runs okay.
+
+## Not checking
+
+This is not specific to R, or really to coding. But I am begging you to do this;
+
+After every line of code, check whether the code did what you expected it to do.
+
+Ask yourself: what was that line of code trying to do? What should the data look like after that line runs?
+
+Look at the data after you run the code. Does it look as expected?
+
+If you created a variable you'd expect to take certain values, perhaps use a function like `summary()` or `unique()` to see if it takes those values.
+
+If you tried to collapse the data so there should be one row per, say, country, look at your data to see whether that happened.
+
+I have been using R for years (and coding generally for decades). I can look at your code and, often, know immediately whether it's going to do something unexpected. You (probably) don't have that luxury. But you can replicate 90% of it by just *checking your work*. I cannot emphasize enough how much of a good idea this actually is and I'm not just saying this. **I** do this *despite those decades of experience*. Or perhaps *because* of it.
+
+## Using numbers as strings
+
+When you put something in quotes, like '1', it will treat it as a *string variable* - a set of characters to be read as text.
+
+If you want a variable to be treated as a number, **do not put it in quotes.** This way lies madness.
+
+R is pretty loose, and will allow you to do things like ask whether `'2' > 1`, and will answer yes. This *feels* like it's okay to put the 2 in quotes. But it's not. What R is doing is saying "oof... I can't compare a number to a letter, but you're asking me to. I'll just convert this number to a string as well, so I'm really doing `'2' > '1'`, and since '2' is alphabetically after '1', that's true, which is the desired result. Great! Except it also means that `'02' > 1` is false, since '02' is alphabetically before '1'. Oops.
+
+The Fix:
+
+1. If it's a number, don't put quotes around it.
+
+## Using strings for variable names
+
+If your main coding experience has been with Python so far, you're probably used to always having to put variable names in quotes. If I want to get the variable `mpg` from the Pandas DataFrame `mtcars`, I do `mtcars['mpg']` or `mtcars.loc[:, 'mpg']`.
+
+R is different. R makes a lot of use of what's called "non-standard evaluation" which basically means you can often write variable names like regular code instead of putting it in strings. So we *could* do `mtcars[['mpg']]`, but usually we'd do something like `mtcars$mpg` or `mtcars %>% pull(mpg)`.
+
+Confusingly, sometimes R *does* require quotes (`mtcars[['mpg']]` works but `mtcars[[mpg]]` doesn't), and sometimes it will accept things either way (`mtcars %>% select(mpg)` and `mtcars %>% select('mpg')` both work). 
+
+But often, especially when working with the **tidyverse** as we do, using strings for variable names can get you in trouble. For example, you'll be scratching your head for a while to figure out why `ggplot(data, aes(x = 'x', y = 'y')) + geom_point()` doesn't work, before realizing that **ggplot2** *doesn't* accept variable names as strings, and it's literally trying to graph the letter "x" against the letter "y". Oops.
+
+The Fix:
+
+1. It's generally a good idea to default to not using quotes around variable names.
+
+## Letting NAs propogate
+
+In this class we do a whole lot of summary statistics! And you may find yourself with a lot of `NA` (missing) values in the results. Why is that?
+
+R's standard summarizing functions, like `mean()` or `sum()`, will return `NA` if any of the values you're giving it are `NA`. `mean(c(1,2,3,4,5, NA))` returns `NA`, not `3`.
+
+So, if you're doing something like a `group_by() %>% summarize()` with a function like `mean()` in it, then if there's a missing value *anywhere in your data*, you'll get back an `NA`.
+
+The Fix:
+
+1. Whenever you use a function like `mean()`, there's usually a `na.rm = TRUE` option you can add to drop any `NA` values before computing the function. This is usually what you want.
+1. Note the `na.rm = TRUE` option goes inside the `mean()` or whatever function, not the `mutate()` or `summarize()
+
+## Indiscriminate na.omit()
+
+One way to deal with missing values is to purge them from your data entirely. I don't teach this in class, but I find a lot of students will look online and find the `na.omit()` function for doing this.
+
+However, be aware that `na.omit()` removes rows for which there's a missing value in *any* column. If you're analyzing three columns of data, but your data set has 200, then you lose a row if that missing value is *anywhere*. That's probably not what you want.
+
+The Fix:
+
+1. Limit your data only to the columns you're going to use (perhaps with `select()`) before running `na.omit()`
+1. Instead use the superior `drop_na()` in **dplyr/tidyverse**, which also lets you specify the set of variables to look for NAs in. `data %>% drop_na(a, b)` will only drop rows if they have missing values in the `a` or `b` columns, not any others.
+
+## Mixing up <-, =, and ==
+
+`<-` is for assigning objects. You can say `a <- 1`, and that will create an object `a` with the value `1` inside.
+
+`=` *can also* be for assigning objects, just like `<-`, but is also for assigning arguments and options in functions. In the function `mean()`, which takes the argument `x`, I can say `mean(x = 1:10)` but not `mean(x <- 1:10)`.
+
+`==` is for *checking* whether two things are equal. `a == 1` will check whether the object `a` is equal to `1`, and will return `TRUE` if it is, or `FALSE` otherwise.
+
+Commonly, this will cause problems in cases like this:
+
+```{r, eval = FALSE}
+data %>%
+  filter(state = "WA")
+```
+
+which we might expect to filter our data to rows that are in the state of Washington, but instead will try to assign a new object `state` to be equal to `"WA"`.
+
+## summarize() without summaries
+
+`summarize()` is a **dplyr/tidyverse** function that summarizes the data down to have one row, or one row per group if you've previously specified a `group_by()`.
+
+However, for it to do this, you need to tell it *how* to summarize that data. So, each argument needs to be a function that returns *one value*. Or else it won't work.
+
+Most commonly, students will just list a bunch of variables in their `summarize()` and expect it to take the mean of each of them. But it doesn't do that, and will instead return a non-summarized data set.
+
+```{r, eval = FALSE}
+# wrong:
+mtcars %>%
+  group_by(am) %>%
+  summarize(mpg, hp)
+
+# right:
+mtcars %>%
+  group_by(am) %>%
+  summarize(mpg = mean(mpg), hp = mean(hp))
+
+# or if you want to be fancy
+mtcars %>%
+  group_by(am) %>%
+  summarize(across(c(mpg, hp), mean))
+```
+
+## Working way too hard
+
+Data communications is a class in which we need to learn some coding to do what we need to do, but it's not a coding class. If there's a difficult task, I've usually gone over a simple solution somewhere in class.
+
+If you're trawling arcane StackExchange answers and pasting together a bunch of code you don't understand,  or if you're spending tedious hours writing out a thousand lines of code, there's a good chance that you're doing something the hard way, when I've provided an easy way in class.
+
+Some tips for avoiding this:
+
+1. If you're writing tiny variations on the same code a zillion times, try doing it in a loop instead
+1. If you're having difficulty working with a date variable, there's probably a function that does things for you in the **lubridate** package
+1. If you're having difficulty working with a string variable, there's probably a function that does things for you in the **stringr** package
+1. If you're spending hours and hours on what feels like a problem that should have a simple answer, it probably does. Email me.
