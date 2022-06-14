@@ -1,5 +1,5 @@
 ---
-title: "Lecture 3: Audience"
+title: "Lecture 3: Focus and Audience"
 author: "Nick Huntington-Klein"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:   
@@ -40,6 +40,7 @@ cat("
 - It's impossible to do good communication without thinking about who you're communicating *to*
 - Something you make for a highly technical audience should be different from something you make for a non-technical boss, or an outsider, or the general population
 - And, crucially, all of it should be different from what you'd make *for yourself*
+- **Communication is not about what you say, it's about what people hear**. Different people hear differently.
 
 ## Who is it For?
 
@@ -64,6 +65,14 @@ Always ask:
 - Don't be afraid to hold their hand
 - Even if they *are* very familiar with what you're doing, they'll appreciate clarity. It will let them know that *you* know what you're doing
 - **Don't assume people will read your work super super closely. Make your work such that the right conclusion to draw is also the most obvious one**
+
+## Tips
+
+- Have someone else look at your work and tell you what they think it means (maybe trade with them in this class?)
+- After finishing something, give yourself a little break from it and come back. Ask: "if I had no idea about what this was, would I figure it out? What conclusion would I draw? Would it be the right one?"
+- And "What could I change to make the proper conclusion even more obvious?" How can you **focus** attention? 
+- It can rarely be too obvious! Rarely are there points for subtlety here.
+- As with *anything* (not just thinking about audience) always **look at your work and ask if it looks right**
 
 
 ## Example
@@ -96,6 +105,8 @@ ggplot(d, aes(x = reorder(naics_title, visits_by_day), y = visits_by_day)) +
 
 ## The Three Rules of Presentation
 
+A good way to focus attention on the story you want them to understand is to prepare them to receive information
+
 - Tell them what you're going to tell them
 - Tell them
 - Tell them what you told them
@@ -114,13 +125,12 @@ ggplot(d, aes(x = reorder(naics_title, visits_by_day), y = visits_by_day)) +
 - How does he give them a bucket for the information he's about to provide?
 - How does he get them engaged with what he's talking about?
 
-## Tips
+## Guiding Our Audience
 
-- Have someone else look at your work and tell you what they think it means (maybe trade with them in this class?)
-- After finishing something, give yourself a little break from it and come back. Ask: "if I had no idea about what this was, would I figure it out? What conclusion would I draw? Would it be the right one?"
-- And "What could I change to make the proper conclusion even more obvious?" How can you **focus** attention? 
-- It can rarely be too obvious! Rarely are there points for subtlety here.
-- As with *anything* (not just thinking about audience) always **look at your work and ask if it looks right**
+Beyond considering our audience's capabilities, we also want to think about how to guide their attention
+
+- How can we nudge them as to where to look, what to compare, what continuities to see?
+- How can we prepare them to receive the story we want them to understand?
 
 ## Focusing Attention
 
@@ -409,13 +419,6 @@ ggplot(SPrail_dow, aes(x = fare,
   annotate('text',x = 1.34, y = 36, label = 'Weekend',color = '#33ccFF', alpha = 1)
 ```
 
-## Annotation
-
-- Annotation can be a great way of pointing out features of the data
-- If you can tell the reader what you mean rather than making them infer it, that's probably good
-- (although if they'd always infer it without you having to tell it, that's even better)
-- Remember - *walk your audience through the data*, and don't be afraid to interpret for them!
-
 
 ## Could we Go Further?
 
@@ -429,6 +432,19 @@ ggplot(SPrail_dow, aes(x = fare,
 - Highlight what's important
 - Remove distractions
 - Unimportant stuff CAN be backgrounded
+
+## Annotation
+
+- Annotation can be a great way of pointing out features of the data
+- If you can tell the reader what you mean rather than making them infer it, that's probably good
+- (although if they'd always infer it without you having to tell it, that's even better)
+- Remember - *walk your audience through the data*, and don't be afraid to interpret for them!
+
+## Annotation
+
+- Tell them what you're going to tell them: Title the graph with the story or insight
+- Tell them: Have a graph that demonstrates that story or insight
+- Tell them what you told them: put a label or arrow or other attention-drawing element that makes clear how the graph supports that title
 
 ## Explanation with Audience and Focus
 

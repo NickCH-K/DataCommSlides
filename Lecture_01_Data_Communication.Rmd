@@ -53,6 +53,50 @@ This will largely focus on *data visualization* but will also cover:
 - Workflow
 - Data cleaning and manipulation
 
+## What We're Doing
+
+- This is sort of a mutt of a class, covering coding, communications concepts, data management and cleaning, and even some analytical stuff
+- That's because this is *really* a course about preparing you to go out into the real world and work with data
+- The thing I really want you to come away with after this class is this:
+- When you are working with data, **think carefully about what you're doing, and make sure you're doing it right.** 
+- It really is just **thinking carefully** and **attending to detail**, not technical skill. This is more important than coding. We'll have to code, but code can only be as good as what you're trying to make it do
+
+## What We're Doing
+
+- You're going to leave the world of a classroom where the project is set up so your prof knows there *is* a right answer, what that right answer is, and they can check your work
+- In the real world, *you* will be expected to produce good work on your own, which means *you'll* be checking your work, and there won't be a "wrong answer" buzzer that sounds if you make a mistake
+- I want you to build enough confidence in working with data that you can look at something the computer has spit out and think "the computer only does what it's told. I know what this *should* be. This is not yet right."
+
+## What We're Doing
+
+So when you do **anything** with data - load a file, create a variable, make a graph, do an analysis, ask:
+
+1. What am I **trying to do**?
+1. Did it **work properly**? How can I **CHECK** if it worked properly?
+1. If it's a form of communication, have you made it **as clear as possible**? Try to find places where people might get confused.
+
+Never think "I pushed the button/wrote the line that made the thing go. I'm done." It's on you to fulfill the requirement in a way that's **good**. Take pride in your work, or it will be bad.
+
+## What We're Doing
+
+It takes no technical/coding skill, or extensive explanation from me, to see why this graph is bad. If you produce this graph, you should take it upon yourself to fix it. Ask: how can I improve this?
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 3, fig.width = 6}
+data(gapminder, package = 'gapminder')
+countries <- gapminder %>%
+  pull(country) %>% 
+  unique() %>%
+  sort()
+gapminder %>%
+  filter(year == 2007) %>%
+  mutate(lexp = lifeExp/max(lifeExp) + .1) %>%
+  mutate(countryy_2 = as.numeric(factor(country))) %>%
+  ggplot(aes(x = countryy_2, y = lexp)) + geom_line() + 
+  scale_x_continuous(breaks = 1:length(countries), labels = \(x) countries[x]) +
+  labs(title = 'Life expectancy compared to most')
+  
+```
+
 ## Admin
 
 Let's do some housekeeping:
@@ -63,11 +107,11 @@ Let's do some housekeeping:
 
 ## Resources
 
-In addition to the course website and Knaflic's *Storytelling with Data*:
+In addition to the course website and Healy's [Data Visualization](https://kieranhealy.org/publications/dataviz/):
 
-- Kieran Healy's [Data Visualization](https://kieranhealy.org/publications/dataviz/)
 - The [R Graphics Cookbook](https://r-graphics.org/)
 - [Data Visualization blogs](https://www.tableau.com/learn/articles/best-data-visualization-blogs)
+- [LOST-STATS](https://lost-stats.github.io)
 - The internet writ large
 - Code for all these slides (RMarkdown and ggplot2 examples) are on the course GitHub page
 
@@ -77,6 +121,13 @@ In addition to the course website and Knaflic's *Storytelling with Data*:
 - And a lot of information at your fingertips
 - *Too much*
 - And so we simplify to tell the *story* underlying the data
+
+## What is Data Communicatoin?
+
+- I have a **result** from my data
+- I want you to **understand and believe** my result
+- How can I demonstrate this result to you so you'll understand it?
+- How can I present the data so that you understand where the result came from and why they should agree that the result is accurate?
 
 ## The Map and the Territory
 
@@ -94,11 +145,12 @@ In addition to the course website and Knaflic's *Storytelling with Data*:
 ## Storytelling With Data
 
 1. Understand the context
-2. Choose an appropriate visual display
-3. Eliminate clutter
-4. Focus attention where you want it
-5. Think like a designer
-6. Tell a story
+1. Figure out *the story* (what you want the reader to understand, and why)
+1. Choose an appropriate visual display
+1. Eliminate clutter
+1. Focus attention where you want it
+1. Think like a designer
+1. Tell the story
 
 ## Examples Outside of Data
 
@@ -115,7 +167,15 @@ knitr::include_graphics("Lecture_1_Faucet.jpg")
 
 The person who designed this faucet understands, hopefully, how water pipes work and how opening a valve can allow water to flow
 
-They know *what is important for the audience to know* - how they can turn the water on
+
+## Figure out the story
+
+*What is important for the audience to know*?
+
+I don't care if the user understands how pipes work, or their history of water usage.
+
+I need the user to know how to properly turn the water on
+
 
 ## Choose an appropriate visual display
 
@@ -147,7 +207,7 @@ And nothing else
 
 There aren't a lot of ways to use this wrong, other than messing up pressure vs. temperature
 
-## Tell a story
+## Tell the story
 
 Water flow can be controlled by twisting this handle
 
@@ -170,14 +230,23 @@ gapminder
 
 ## Understand the Context
 
+How do things work here?
+
+- We know that life expectancy and GDP per capita go together closely
+
+## Figure out the story
+
 What do we want people to learn?
 
 - GDP per capita and life expectancy go together strongly
-- Both GDP per capita and life expectancy have increased a lot over time
+- Both GDP per capita and life expectancy have increased a lot over time (i.e. things on this front are getting better!)
+
+This is useful information and I can see why someone would want to understand this for its own sake, to understand the world better (and perhaps have some actionable takeaway as a result!)
 
 ## Choose an appropriate visual display
 
 - We want something that will show a relationship between two variables with many observations
+- NOW WE HAVE SOME OUTPUT. Put on those "how can we make it better?" goggles: the first output we get is NOT DONE
 
 ```{r, fig.width=6, fig.height=4}
 ggplot(gapminder,
@@ -237,10 +306,10 @@ ggplot(gapminder %>%
   annotate('text',x = 2300, y = 66, label = 'India', color = 'green') + 
   annotate('text',x = 10000, y = 68, label = 'Brazil', color = 'red') + 
   annotate('text',x = 25000, y = 75, label = 'Spain', color = 'blue') + 
-  guides(color = FALSE)
+  guides(color = 'none')
 ```
 
-## Tell a story
+## Tell the story
 
 - Realize that we've lost the "things get better over time" angle
 - And also lost the part where we want to talk about the whole world!

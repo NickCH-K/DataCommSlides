@@ -36,6 +36,7 @@ cat("
 ```
 
 - We want to tell a story with our data
+- That is, we want to *demonstrate some interesting finding* from our data
 - Some stories are clear
 - Others are complex
 - They all need to be clear
@@ -62,7 +63,7 @@ cat("
 ---
 
 ```{r}
-knitr::include_graphics('Lecture_02_Bible_Cross_Ref.png')
+knitr::include_graphics('Lecture_02_Bible_Cross_Ref.gif')
 ```
 
 ## Coffee
@@ -93,19 +94,20 @@ knitr::include_graphics('Lecture_02_Healthcare.png')
 - You see a lot of *network graphs* floating around these days
 - They look super cool
 - But they can be hard to actually learn anything from
+- Unless the story is just "things sure are connected, aren't they?" which isn't all that interesting
 
 ---
 
 ```{r}
-knitr::include_graphics('Lecture_02_Network_Graph.gif')
+knitr::include_graphics('Lecture_02_Network_Graph.jpg')
 ```
 
 ## Napoleon's March
 
 - This is considered one of the most beautiful and impressive pieces of data viz ever, about Napoleon's army during its march and retreat from Russia
 - Distance from Paris, size of army, elevation, places where the army met itself...
-- It absolutely tells an intricate and detailed story - but does it *tell* the story or *illustrate* it?
-- Can be hard to say!
+- It absolutely tells an intricate and detailed story - but what can you take away from it if you don't already know what it's trying to say?
+- What parts of the story does it guide you towards focusing on? Which get lost?
 
 ---
 
@@ -138,6 +140,8 @@ knitr::include_graphics('Lecture_02_Minard.gif')
 
 - If you put things close to each other, they tend to get thought of as being associated
 - And visually, they are at least visually comparable
+- Putting two similar things close together says "these things are very similar!"
+- Putting two distinct things close together says "compare these please!"
 
 ## Proximity
 
@@ -181,6 +185,7 @@ ggplot(mtcars, aes(x = wt, y = mpg, color = Transmission))+
 
 - If you put a physical enclosure around some things, they will be perceived as being part of a group
 - This can be especially handy if you're already using some other forms of similarity, or need to indicate areas that WOULD be part of that group if you had data there.
+- Enclosures say "these things are in a group!" - perhaps you want to compare that group to other things, or focus attention *within* the group?
 
 ## Enclosure
 
@@ -224,6 +229,7 @@ ggplot(graphdat, aes(x = Day, y = YOY)) +
 ## Connection
 
 - If you put a literal connection between two points, people will interpret them as being connected!
+- Connecting two things says "one of these things is adjacent or linked to to the other"
 - No big surprise
 - See any line graph for this.
 - This is also a good reason *not* to use a line graph when your x-axis doesn't have an order to it!
@@ -232,7 +238,7 @@ ggplot(graphdat, aes(x = Day, y = YOY)) +
 
 - With these concepts in mind, how can we use them to emphasize information?
 - And improve clarity
-- Let's begin with a first-pass graph and improve it as we can
+- Let's begin with a bad first-pass graph and improve it as we can
 - Let's tell a story about how Washington's 4th graders fare in math vs. other coastal states
 
 ## State NAEP Test Scores
@@ -255,6 +261,7 @@ ggplot(naep,
 - Ask: what should be comparable?
 - We should be able to tell "more" or "less" test score
 - We use *proximity* to make more-similar scores go together
+- **Think**: what bar ordering makes the takeaway as easy to see as possible?
 
 ## Proximity: Example
 
@@ -300,8 +307,10 @@ ggplot(naep %>%
 
 - What data is important to our story, and what data is not?
 - We are interested in comparing Washington to other coastal states, why do we need all these other states
+- Having stuff on the graph says "this is worth your attention somehow." If it's not important to the story, it will confuse or distract from the story
 - Chuck 'em!
 - This will also give us room to rotate those axis labels
+
 
 ## Clarity
 
@@ -349,6 +358,7 @@ ggplot(naep %>%
 
 - Enclosure allows us to get rid of a lot of the borders
 - And we an remove the backing ink too
+- **Don't underestimate the benefits of removing background ink.** It can really be distracting! Cleaner graphs look cleaner and are often nicer.
 
 ## Simplify
 
@@ -368,6 +378,7 @@ ggplot(naep %>%
 
 ## Easily Following Information
 
+- **Think**: have we made the presentation as easy to see as possible? How could we make it more clear?
 - Especially with long text labels, horizontal bar charts are much easier to read and compare
 
 ## Easily Following Information
@@ -390,6 +401,7 @@ ggplot(naep %>%
 
 ## Label Data Directly
 
+- **Think**: have we provided *affordances*? Have we put the right answer in the place where you'd think to look for it?
 - Why make the reader work? Put the label right where it's needed
 - Also, remove the cognitive steps of translating the markers
 

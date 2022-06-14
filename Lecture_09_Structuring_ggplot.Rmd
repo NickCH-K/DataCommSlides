@@ -17,6 +17,7 @@ output:
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(ggrepel)
+library(scales)
 ```
 
 
@@ -45,9 +46,22 @@ cat("
 - The goal is to reduce unknown unknowns so you know where to look/Google
 - Also, just start typing in RStudio and see what autocompletes!
 
+## The Key Pieces
+
+A common structure for a `ggplot()` command with a fair amount of customization might be:
+
+```{r, echo = TRUE, eval = FALSE}
+ggplot(data, aes(x = xvar, y = yvar, color = colorvar)) + 
+  geom_mygeometry(otheraesthetic = value) + 
+  scale_aesthetic_type(labels = something) + 
+  labs(x = 'My X Var', y = 'My Y Var', title = 'My Title') + 
+  guides(color = 'none')
+```
+
 ## Scales
 
 - Every axis (aesthetic element) has a *scale*
+- This determines how *a value in the data* (1, 2, 3) turns into *a value on the graph* (100 pixels to the right, 200 pixels, 300 pixels; or "red", "blue", "green")
 - These scales are fully manipulable and label-able!
 - `scale_axisname_type`
 
@@ -82,36 +96,40 @@ ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position 
 ## Setting Scales
 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+library(scales)
 ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge') + 
-  scale_y_continuous(labels = scales::percent, limits = c(0,.1)) +
+  scale_y_continuous(labels = label_percent(), limits = c(0,.1)) +
   scale_x_discrete(position = 'top') + 
   scale_fill_manual(values = c('Apple'='red','Banana'='yellow','Carrot'='orange'))
 ```
 
 ## Setting Scales
 
-- Note that `scale_whatever_manual` can also be used to limit or reorder factor variables
-- `scale_fill_manual(values = c('Apple'='red','Carrot'='orange', 'Banana'='yellow'))` will go in Apple, Carrot, Banana order
 - `limits` in the `scale` function can be used to specify the vector of values to be included, or as a range for continuous variables
-- `labels` is also handy. `labels = c('Red Apple','Yellow Banana','Orange Carrot')` would relabel the legend (or axis labels)
--  In a continuous function, say for dollars, `scale_x_continuous(labels = scales::dollar)` would put it in dollar terms
-- Or dates: `scale_x_date(labels = function(x) paste(month.abb[month(x)],year(x)))`
+- `labels` is also handy. `labels = c('Red Apple',` `'Yellow Banana','Orange Carrot')` would relabel the legend (or axis labels)
+-  In a continuous function, say for dollars, `scale_x_continuous(labels = scales::label_dollar())` would put it in dollar terms. More on this in a moment
+- Or dates: `scale_x_date(labels = function(x)` `paste(month.abb[month(x)],year(x)))`
 
 ## Setting Color or Fill Scales
 
 - Selecting a color scale is important - we've discussed discrete and continuous palettes
-- The **paletteer** package ([see documentation](https://emilhvitfeldt.github.io/paletteer/)) compiles a whole buncha palettes and is easy to use - use `palettes_d_names` or `palettes_c_names` to list discrete and continuous palettes in the package
-- Or `palettes_dynamic_names` to see continuous binned palettes where the colors used depend on how many shades you need
-- **RColorBrewer** is also a classic
+- There are a bunch of `scale_color_`/`scale_fill_` functions that solely exist to help with this!
+- (not to mention entire packages like **paletteer**)
+
+## Setting Color or Fill Scales
+
+Especially useful are:
+
+- `scale_color_gradient()` for gradient scales (or `_gradient2()` for diverging scales with a "middle" in them), `scale_color_viridis()` also has some great gradient scales (either discrete or continuous!)
+- `scale_color_brewer()`/`scale_fill_brewer()` functions for discrete values, or `_distiller()` for continuous values, or `_fermenter()` for binned
 
 ## Setting Color or Fill Scales
 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-library(paletteer)
 ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge') + 
-  scale_y_continuous(labels = scales::percent, limits = c(0,.1)) +
+  scale_y_continuous(labels = label_percent(), limits = c(0,.1)) +
   scale_x_discrete(position = 'top') + 
-  scale_fill_paletteer_d('yarrr::google')
+  scale_fill_brewer(palette = 'Dark2')
 ```
 
 
@@ -119,16 +137,24 @@ ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position 
 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
 ggplot(data, aes(x = person, y = quality, group = category, fill = quality)) + geom_col(position = 'dodge') + 
-  scale_y_continuous(labels = scales::percent, limits = c(0,.1)) +
+  scale_y_continuous(labels = label_percent(), limits = c(0,.1)) +
   scale_x_discrete(position = 'top') + 
-  scale_fill_paletteer_c('pals::coolwarm')
+  scale_fill_viridis_c()
+```
+
+## Setting Color or Fill Scales
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(data, aes(x = person, y = quality, group = category, fill = quality)) + geom_col(position = 'dodge') + 
+  scale_y_continuous(labels = label_percent(), limits = c(0,.1)) +
+  scale_x_discrete(position = 'top') + 
+  scale_fill_gradient2(midpoint = .03)
 ```
 
 ## Transformations
 
 - We can transform values as we plot them
 - Many `scale_something_continuous` entries have a `trans` option, set to `date`, `log`, `probability`, `reciprocal`, `sqrt`, `reverse`, etc. etc. to perform that transformation before plotting 
-- Typically that's something from the `scales` package. Other options like `scales::percent`
 - You can also do things like `scale_x_log10` or `scale_y_reverse` for some common transforms
 - `scale_something_binned()` takes a continuous value and puts it in bins, handy sometimes for simplification
 
@@ -155,6 +181,40 @@ When to use log scales?
 
 - When data is highly skewed, so a few huge observations are drawing all focus
 - When the relationship is multiplicative so you want to show, say, percentage growth
+
+## Labeling Scales for Continuous Variables
+
+Scale functions have a `labels=` option. 
+
+- USE IT!!
+- This is the quickest and easiest way to make your graph look a zillion times better and more professional
+- We already covered this for categorical variables. `labels = c('A','B')` gives the categories the names A and B, in that order (tip: check the order first)
+- For continuous variables, the **scales** package helps us immensely here
+
+## scales
+
+Two main types of functions in **scales**:
+
+- Transformation functions like `dollar()`: `dollar(10)` creates $10 (NOTE: handy sometimes in RMarkdown text! Also note this creates text, not numbers, so don't use them in `aes()` unless you want the variable to be a string)
+- Labeling functions like `label_dollar()` designed to slot directly into the `labels=` argument. `scale_y_continuous(labels = label_dollar())` turns all your y-axis labels into the dollar equivalent
+
+
+## scales
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge') + 
+  scale_y_continuous(labels = label_percent(), limits = c(0,.1))
+```
+
+## Scales
+
+The `label_` functions have lots of options! You can set the `accuracy` (precision), decide how to break up big numbers (`big.mark`) or scale things down to, say, thousands! (`scale=1/1000, suffix = 'k'`)
+
+```{r, echo = TRUE, fig.height = 2, fig.width = 6}
+data(gapminder, package = 'gapminder')
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) + geom_point() + 
+  scale_x_log10(labels = label_dollar(accuracy = 1, scale = 1/1000, suffix = 'k'))
+```
 
 ## Documentation
 
@@ -240,75 +300,6 @@ ggplot(mtcars, aes(x = mpg, y = hp)) + geom_point() +
   labs(x = 'Miles per Gallon', y = 'Horsepower', title = 'Horsepower vs. MPG by Cylinders')
 ```
 
-## Downloadable Geometries
-
-- There are so, so many **ggplot2** geometries available
-- Way too many to cover - see the [ggplot2 extension gallery](https://exts.ggplot2.tidyverse.org/gallery/) in addition to the base-**ggplot2** cheat sheet from last time
-- I will go over some popular ones. Google package names for more detailed explanations
-- We won't go deeply into how to use these, this is more to show you they exist and an example so you can look further yourself if you're interested
-
-## geom_text to geom_repel
-
-- We covered geom_text last time
-- But the text gets in the way! How did I handle this in that `mtcars` graph I just did?
-
-```{r, echo = FALSE, fig.height = 4, fig.width = 6}
-data(mtcars)
-mtcars <- mtcars %>%
-  mutate(Transmission = factor(am, labels = c('Automatic','Manual')),
-         CarName = row.names(mtcars))
-ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
-  geom_text()
-```
-
-## geom_text_repel
-
-```{r, echo = TRUE, fig.height = 3.75, fig.width = 6}
-library(ggrepel); data(mtcars)
-mtcars <- mtcars %>%
-  mutate(Transmission = factor(am, labels = c('Automatic','Manual')),
-         CarName = row.names(mtcars))
-ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
-  geom_text_repel() + labs(x = 'MPG',y='HP')
-```
-
-## geom_label_repel adds boxes
-
-- That was still pretty busy. Text graphs really only work with a smaller number of labels (or short ones)
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-ggplot(mtcars[1:10,], aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
-  geom_label_repel() + labs(x = 'MPG',y='HP', caption = 'First ten cars only')
-```
-
-
-## ggridges
-
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-#A common need is to graph distributions across groups
-library(ggridges)
-ggplot(mtcars, aes(x = mpg, y = factor(cyl), fill = factor(cyl))) + 
-  geom_density_ridges(alpha = .6) + 
-  labs(x = 'Miles per Gallon', y = 'Cylinders') + 
-  guides(fill = FALSE)
-```
-
-
-## ggmap
-
-- **ggplot2** has *extensive* mapping capabilities
-- Including straightforward-ish map *animations* with the **tmap** package
-- Also see libraries **choloropleth**, **tigris**, **tmap**, **sf**, **fiftystater**
-
-
-
-## ggforce
-
-- **ggforce** is a package with LOTS of extras, especially for facets
-- An especially handy one is `facet_zoom` for showing all data but focusing in on some
-- Focus focus focus your audience!
-- Can also be used to focus on a range with `xlim` or `ylim`
 
 ## ggforce's facet_zoom
 
@@ -319,83 +310,10 @@ ggplot(iris, aes(Petal.Length, Petal.Width, colour = Species)) +
   facet_zoom(x = Species == 'versicolor')
 ```
 
-## ggalt
+## Multiple-Graph Notes
 
-- **ggalt** is another package with lots of additional geoms
-- Including some functions to automatically encircle your data (setting things apart!)
-- Two nice ones are `geom_lollipop` for lollipop charts (a nice-looking alternative to a bar chart)
-- and `geom_dumbbell` for dumbbell charts (nice for "to-and-from" changes within groups)
-
-## `geom_lollipop`
-
-```{r, echo = TRUE, eval = FALSE}
-library(ggalt); data(gss_cat, package='forcats')
-gss_cat <- gss_cat %>%
-  group_by(marital) %>%
-  summarize(PropAbove = mean(rincome == '$25000 or more')) 
-ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
-  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
-```
-
-## `geom_lollipop`
-
-```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
-library(ggalt); data(gss_cat, package='forcats')
-gss_cat <- gss_cat %>%
-  group_by(marital) %>%
-  summarize(PropAbove = mean(rincome == '$25000 or more')) 
-ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
-  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
-```
-
-## geom_dumbbell
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-top_bottom <- mtcars %>% group_by(cyl) %>%
-  summarize(worst = max(mpg), best = min(mpg))
-ggplot(top_bottom, aes(y = cyl, x = best, xend = worst)) + 
-  geom_dumbbell(size = 3, color = 'gray',colour_x = 'blue', colour_xend = 'red')
-
-```
-
-## gganimate
-
-- The **gganimate** package makes it fairly straightforward to animate your graphs
-- Take a graph and use a `transition_` command to have it assign one axis to *time*
-- Make sure this actually adds something! This limits where the graph can be shown
-
-## gganimate
-
-```{r, echo = TRUE, eval = FALSE}
-library(gganimate)
-data(gapminder)
-options(gganimate.dev_args = list(width = 650, height = 400))
-p <- ggplot(gapminder,
-       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
-  geom_point() + 
-  scale_x_log10() + 
-  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
-       title = "GDP and Life Expectancy by Country, 1952-2007",
-       color = 'Continent') + 
-  transition_time(year))
-animate(p,nframes = 200,end_pause = 30)
-```
-
-## gganimate
-
-```{r}
-library(gganimate); data(gapminder, package='gapminder')
-options(gganimate.dev_args = list(width = 650, height = 400))
-p <- ggplot(gapminder,
-       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
-  geom_point() + 
-  scale_x_log10() + 
-  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
-       title = "GDP and Life Expectancy by Country, 1952-2007",
-       color = 'Continent') + 
-  transition_time(year)
-animate(p,nframes = 200,end_pause = 30)
-```
+- For overlaying the *same type* of graph, say two line graphs for two variables, don't `+` different geometries, you're almost always better off doing a `pivot_longer()` first and just using `aes()`.
+- For sticking together multiple completely disparate graphs, don't use facets, instead load **patchwork** and combine them as desired - we'll discuss this later
 
 ## Imitation and Flattery
 

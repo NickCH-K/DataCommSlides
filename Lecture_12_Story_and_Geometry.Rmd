@@ -473,3 +473,156 @@ How about density plots?
 - Sketch a graph to tell that story as clearly as possible
 - If you have time, make it
 - You can load it with `read_csv()` and, if necessary, use `ymd` in **lubridate** to make the date a date
+
+
+
+HEY HEY HEY
+
+## Downloadable Geometries
+
+- There are so, so many **ggplot2** geometries available
+- Way too many to cover - see the [ggplot2 extension gallery](https://exts.ggplot2.tidyverse.org/gallery/) in addition to the base-**ggplot2** cheat sheet from last time
+- I will go over some popular ones. Google package names for more detailed explanations
+- We won't go deeply into how to use these, this is more to show you they exist and an example so you can look further yourself if you're interested
+
+## geom_text to geom_repel
+
+- We covered geom_text last time
+- But the text gets in the way! How did I handle this in that `mtcars` graph I just did?
+
+```{r, echo = FALSE, fig.height = 4, fig.width = 6}
+data(mtcars)
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')),
+         CarName = row.names(mtcars))
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
+  geom_text()
+```
+
+## geom_text_repel
+
+```{r, echo = TRUE, fig.height = 3.75, fig.width = 6}
+library(ggrepel); data(mtcars)
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')),
+         CarName = row.names(mtcars))
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
+  geom_text_repel() + labs(x = 'MPG',y='HP')
+```
+
+## geom_label_repel adds boxes
+
+- That was still pretty busy. Text graphs really only work with a smaller number of labels (or short ones)
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars[1:10,], aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
+  geom_label_repel() + labs(x = 'MPG',y='HP', caption = 'First ten cars only')
+```
+
+
+## ggridges
+
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+#A common need is to graph distributions across groups
+library(ggridges)
+ggplot(mtcars, aes(x = mpg, y = factor(cyl), fill = factor(cyl))) + 
+  geom_density_ridges(alpha = .6) + 
+  labs(x = 'Miles per Gallon', y = 'Cylinders') + 
+  guides(fill = FALSE)
+```
+
+
+## ggmap
+
+- **ggplot2** has *extensive* mapping capabilities
+- Including straightforward-ish map *animations* with the **tmap** package
+- Also see libraries **choloropleth**, **tigris**, **tmap**, **sf**, **fiftystater**
+
+
+
+## ggforce
+
+- **ggforce** is a package with LOTS of extras, especially for facets
+- An especially handy one is `facet_zoom` for showing all data but focusing in on some
+- Focus focus focus your audience!
+- Can also be used to focus on a range with `xlim` or `ylim`
+
+
+## ggalt
+
+- **ggalt** is another package with lots of additional geoms
+- Including some functions to automatically encircle your data (setting things apart!)
+- Two nice ones are `geom_lollipop` for lollipop charts (a nice-looking alternative to a bar chart)
+- and `geom_dumbbell` for dumbbell charts (nice for "to-and-from" changes within groups)
+
+## geom_lollipop
+
+```{r, echo = TRUE, eval = FALSE}
+library(ggalt); data(gss_cat, package='forcats')
+gss_cat <- gss_cat %>%
+  group_by(marital) %>%
+  summarize(PropAbove = mean(rincome == '$25000 or more')) 
+ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
+  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
+```
+
+## geom_lollipop
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+library(ggalt); data(gss_cat, package='forcats')
+gss_cat <- gss_cat %>%
+  group_by(marital) %>%
+  summarize(PropAbove = mean(rincome == '$25000 or more')) 
+ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
+  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
+```
+
+## geom_dumbbell
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+top_bottom <- mtcars %>% group_by(cyl) %>%
+  summarize(worst = max(mpg), best = min(mpg))
+ggplot(top_bottom, aes(y = cyl, x = best, xend = worst)) + 
+  geom_dumbbell(size = 3, color = 'gray',colour_x = 'blue', colour_xend = 'red')
+
+```
+
+## gganimate
+
+- The **gganimate** package makes it fairly straightforward to animate your graphs
+- Take a graph and use a `transition_` command to have it assign one axis to *time*
+- Make sure this actually adds something! This limits where the graph can be shown
+
+## gganimate
+
+```{r, echo = TRUE, eval = FALSE}
+library(gganimate)
+data(gapminder)
+options(gganimate.dev_args = list(width = 650, height = 400))
+p <- ggplot(gapminder,
+       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       title = "GDP and Life Expectancy by Country, 1952-2007",
+       color = 'Continent') + 
+  transition_time(year))
+animate(p,nframes = 200,end_pause = 30)
+```
+
+## gganimate
+
+```{r}
+library(gganimate); data(gapminder, package='gapminder')
+options(gganimate.dev_args = list(width = 650, height = 400))
+p <- ggplot(gapminder,
+       aes(x = gdpPercap, y = lifeExp, color = continent)) + 
+  geom_point() + 
+  scale_x_log10() + 
+  labs(x = "GDP per Capita (log scale)", y = "Life Expectancy",
+       title = "GDP and Life Expectancy by Country, 1952-2007",
+       color = 'Continent') + 
+  transition_time(year)
+animate(p,nframes = 200,end_pause = 30)
+```

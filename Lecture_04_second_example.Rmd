@@ -1,0 +1,28 @@
+---
+title: "My Storms Stuff"
+author: "Nick HK"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# install.packages('tidyverse')
+library(tidyverse)
+library(scales)
+
+data(storms)
+```
+
+# My Storms Analysis
+
+## Storms 1
+
+Storms are bad [look at the weather](https://weather.com).
+
+## Storms 2
+
+```{r}
+summary(storms)
+```
+THe mean wind speed is `r number(mean(storms$wind))`

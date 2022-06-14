@@ -7,7 +7,7 @@
 
         <meta name="author" content="Nick HK" />
     
-        <meta name="date" content="2022-06-06" />
+        <meta name="date" content="2022-06-07" />
     
     <title>Common R Mistakes in Data Viz</title>
 
@@ -1291,14 +1291,14 @@ src: url(data:application/font-sfnt;base64,AAEAAAARAQAABAAQR0RFRgs+Cz8AAjwQAAAAQ
       function</a></li>
       <li><a href="#object-not-found">Object not found</a></li>
       <li><a href="#column-doesnt-exist">Column doesn’t exist</a></li>
-      <li><a href="#warning-package-was-compiled-with-the-version">Warning:
-      Package was compiled with the version</a></li>
+      <li><a href="#warning-package-was-compiled-with-r-version">Warning:
+      Package was compiled with R version</a></li>
       <li><a href="#rtools-is-required-to-build-packages-from-source">Rtools is
       required to build packages from source</a></li>
       <li><a href="#file-does-not-exist-or-no-such-file-or-directory">File does
       not exist, or No such file or directory</a></li>
       <li><a href="#my-code-works-fine-in-rstudio-but-my-rmarkdown-wont-knit">My
-      code works fine in Rstudio, but my RMarkdown won’t knit</a></li>
+      code works fine in RStudio, but my RMarkdown won’t knit</a></li>
       <li><a href="#object-of-type-closure-is-not-subsettable">Object of
       type ‘closure’ is not subsettable</a></li>
       <li><a href="#you-probably-made-a-typo-or-didnt-balance-your-parentheses">You
@@ -1325,7 +1325,7 @@ src: url(data:application/font-sfnt;base64,AAEAAAARAQAABAAQR0RFRgs+Cz8AAjwQAAAAQ
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
                   <p class="author"><span class="glyphicon glyphicon-user"></span> Nick
 HK</p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2022-06-06</p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2022-06-07</p>
           </div>
    </div>
      
@@ -1376,9 +1376,9 @@ lines of code are generating it?</li>
 although then I won’t be able to help on my phone and you’ll have to
 wait until I get to a computer. Copy/pasting code and error message into
 an email works well. A screenshot (Google “how to take a screenshot” and
-either Mac or Windows, as appropriate) also works well. Taking a picture
-of your computer screen is the least-good way to share your
-problem.</li>
+either Mac or Windows, as appropriate) also works well. Using your phone
+to take a picture of your computer screen is the least-good way to share
+your problem.</li>
 </ol>
 </div>
 <div id="there-is-no-package-called" class="section level2">
@@ -1401,7 +1401,7 @@ actually want.</li>
 <div id="could-not-find-function" class="section level2">
 <h2>Could not find function</h2>
 <p>If you get an error like
-<code>count not find function &quot;functionname&quot;</code>, that means it’s
+<code>could not find function &quot;functionname&quot;</code>, that means it’s
 trying to look for that function, but cannot find it.</p>
 <p>The Fix:</p>
 <ol style="list-style-type: decimal">
@@ -1439,6 +1439,9 @@ to refer to a column name that is not actually in your data.</p>
 <ol style="list-style-type: decimal">
 <li>Did you spell the column’s name correctly? Maybe you made a
 typo.</li>
+<li>Are you referring to the proper dataset? Maybe you created the
+variable in <code>my_data2</code> but you’re trying to access it in
+<code>my_data</code>.</li>
 <li>Does your column name have spaces or other strange characters in it
 like dashes? If so, in many applications (anywhere you’re not treating
 the column name as a string) you have to surround the column name in
@@ -1455,8 +1458,8 @@ longer is by the time we refer to it.</li>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_hp =</span> <span class="fu">mean</span>(hp)) <span class="sc">%&gt;%</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hp_by_mpg =</span> mean_hp<span class="sc">/</span>mpg)</span></code></pre></div>
 </div>
-<div id="warning-package-was-compiled-with-the-version" class="section level2">
-<h2>Warning: Package was compiled with the version</h2>
+<div id="warning-package-was-compiled-with-r-version" class="section level2">
+<h2>Warning: Package was compiled with R version</h2>
 <p>If you load a package and get a warning that looks like
 <code>Warning: packagename was compiled with R version...</code>, that
 just means that the package was compiled using a slightly newer version
@@ -1492,7 +1495,8 @@ location you’re telling R to look.</p>
 <ol style="list-style-type: decimal">
 <li>Did you spell the filename correctly? Maybe you made a typo. Or,
 perhaps, you’re trying to open an Excel fie (<code>.xlsx</code>) but
-telling R to look for a CSV (<code>.csv</code>)</li>
+telling R to look for a CSV (<code>.csv</code>). Or you wrote “file.csv”
+but the file is “file (1).csv”.</li>
 <li>Is the file perhaps open in Excel? Sometimes, Microsoft Office will
 hold files hostage and not let them be opened in other programs while
 they’re open in Office. Close the Excel window that has the file
@@ -1511,7 +1515,7 @@ filepaths</a> for more help.</li>
 </ol>
 </div>
 <div id="my-code-works-fine-in-rstudio-but-my-rmarkdown-wont-knit" class="section level2">
-<h2>My code works fine in Rstudio, but my RMarkdown won’t knit</h2>
+<h2>My code works fine in RStudio, but my RMarkdown won’t knit</h2>
 <p>If your code runs fine when you run it by hand, but your RMarkdown
 throws errors, these are the most common issues:</p>
 <ol style="list-style-type: decimal">
@@ -1551,7 +1555,7 @@ you can’t do that to.</p>
 function where you mean to give the name of a vector or data frame. For
 example:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># My data set is about how mean you are, so I&#39;ll call it mean_data</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mean_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">person =</span> <span class="fu">c</span>(<span class="st">&#39;Me&#39;</span>,<span class="st">&#39;You&#39;</span>), <span class="at">meanness =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">10000000</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mean_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">person =</span> <span class="fu">c</span>(<span class="st">&#39;Me&#39;</span>,<span class="st">&#39;You&#39;</span>), <span class="at">meanness =</span> <span class="fu">c</span>(<span class="dv">1000</span>,<span class="dv">999</span>))</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Now let&#39;s look at that meanness variable, but oops, I&#39;m referring to the function mean() instead of my data mean_data</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>mean<span class="sc">$</span>meanness</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Error in mean$meanness : object of type &#39;closure&#39; is not subsettable</span></span></code></pre></div>
@@ -1568,12 +1572,13 @@ me with occur simply because they made a typo, or didn’t balance their
 parentheses (pairing each ( with a )).</p>
 <p>The Fix:</p>
 <ol style="list-style-type: decimal">
-<li>If you get an error message of every kind, read it carefully to make
-sure you didn’t make a typo</li>
-<li>Avoid coding where you have lots and lots of nested parentheses.
-Then, for whatever parentheses you do have, click on each one in RStudio
-- it will highlight its “partner” or show where there is a missing
-partner.</li>
+<li>If you get an error message of any kind, read the relevant part of
+the code carefully to make sure you didn’t make a typo</li>
+<li>Avoid coding where you have lots and lots of nested parentheses
+(this is something that <strong>tidyverse</strong> piping we learn is
+intended to avoid). Then, for whatever parentheses you do have, click on
+each one in RStudio - it will highlight its “partner” or show where
+there is a missing partner.</li>
 </ol>
 </div>
 </div>
@@ -1585,7 +1590,7 @@ incorrect results even if it runs okay.</p>
 <div id="not-checking" class="section level2">
 <h2>Not checking</h2>
 <p>This is not specific to R, or really to coding. But I am begging you
-to do this;</p>
+to do this:</p>
 <p>After every line of code, check whether the code did what you
 expected it to do.</p>
 <p>Ask yourself: what was that line of code trying to do? What should
@@ -1596,7 +1601,8 @@ expected?</p>
 perhaps use a function like <code>summary()</code> or
 <code>unique()</code> to see if it takes those values.</p>
 <p>If you tried to collapse the data so there should be one row per,
-say, country, look at your data to see whether that happened.</p>
+say, country, look at your data (click it in the Environment pane) to
+see whether that happened.</p>
 <p>I have been using R for years (and coding generally for decades). I
 can look at your code and, often, know immediately whether it’s going to
 do something unexpected. You (probably) don’t have that luxury. But you
@@ -1619,10 +1625,12 @@ to. I’ll just convert this number to a string as well, so I’m really
 doing <code>&#39;2&#39; &gt; &#39;1&#39;</code>, and since ‘2’ is alphabetically after
 ‘1’, that’s true, which is the desired result. Great! Except it also
 means that <code>&#39;02&#39; &gt; 1</code> is false, since ‘02’ is
-alphabetically before ‘1’. Oops.</p>
+alphabetically before ‘1’. Same with <code>&#39;120&#39;&gt;&#39;20&#39;</code> being
+false. Oops.</p>
 <p>The Fix:</p>
 <ol style="list-style-type: decimal">
-<li>If it’s a number, don’t put quotes around it.</li>
+<li>If it’s a number, and you want it treated like a numeric value,
+don’t put quotes around it.</li>
 </ol>
 </div>
 <div id="using-strings-for-variable-names" class="section level2">
@@ -1662,8 +1670,8 @@ variable names.</li>
 find yourself with a lot of <code>NA</code> (missing) values in the
 results. Why is that?</p>
 <p>R’s standard summarizing functions, like <code>mean()</code> or
-<code>sum()</code>, will return <code>NA</code> if any of the values
-you’re giving it are <code>NA</code>.
+<code>sum()</code>, will return <code>NA</code> if <em>any</em> of the
+values you’re giving it are <code>NA</code>.
 <code>mean(c(1,2,3,4,5, NA))</code> returns <code>NA</code>, not
 <code>3</code>.</p>
 <p>So, if you’re doing something like a
@@ -1689,9 +1697,9 @@ look online and find the <code>na.omit()</code> function for doing
 this.</p>
 <p>However, be aware that <code>na.omit()</code> removes rows for which
 there’s a missing value in <em>any</em> column. If you’re analyzing
-three columns of data, but your data set has 200, then you lose a row if
-that missing value is <em>anywhere</em>. That’s probably not what you
-want.</p>
+three columns of data, but your data set has 200 columns, then you lose
+a row if that missing value is <em>anywhere</em>. That’s probably not
+what you want.</p>
 <p>The Fix:</p>
 <ol style="list-style-type: decimal">
 <li>Limit your data only to the columns you’re going to use (perhaps

@@ -33,7 +33,7 @@ If you still need help, I am your professor and I am here to help you! Here's so
 1. Let me know what the problem is ("it's not working" isn't too helpful)
 1. What is the error message or warning, if there is one, and what lines of code are generating it?
 1. What are you trying to accomplish with the code? What *should* it do?
-1. Send along your code as well. The original file is a good idea, although then I won't be able to help on my phone and you'll have to wait until I get to a computer. Copy/pasting code and error message into an email works well. A screenshot (Google "how to take a screenshot" and either Mac or Windows, as appropriate) also works well. Taking a picture of your computer screen is the least-good way to share your problem.
+1. Send along your code as well. The original file is a good idea, although then I won't be able to help on my phone and you'll have to wait until I get to a computer. Copy/pasting code and error message into an email works well. A screenshot (Google "how to take a screenshot" and either Mac or Windows, as appropriate) also works well. Using your phone to take a picture of your computer screen is the least-good way to share your problem.
 
 ## There is no package called
 
@@ -46,7 +46,7 @@ The Fix:
 
 ## Could not find function
 
-If you get an error like `count not find function "functionname"`, that means it's trying to look for that function, but cannot find it. 
+If you get an error like `could not find function "functionname"`, that means it's trying to look for that function, but cannot find it. 
 
 The Fix:
 
@@ -69,6 +69,7 @@ If you get an error like `column 'columnname' doesn't exist`, that means it's tr
 The Fix:
 
 1. Did you spell the column's name correctly? Maybe you made a typo.
+1. Are you referring to the proper dataset? Maybe you created the variable in `my_data2` but you're trying to access it in `my_data`. 
 1. Does your column name have spaces or other strange characters in it like dashes? If so, in many applications (anywhere you're not treating the column name as a string) you have to surround the column name in backticks (`r "\u0060"`) so it knows where the column name starts and ends.
 1. Did you perhaps drop the column before trying to refer to it? For example, in the below code, the `group_by() %>% summarize()` will only keep columns named in the `group_by()` or in the `summarize()`. So even though the `mpg` column was there at the start, it no longer is by the time we refer to it.
 
@@ -79,7 +80,7 @@ mtcars %>%
   mutate(hp_by_mpg = mean_hp/mpg)
 ```
 
-## Warning: Package was compiled with the version
+## Warning: Package was compiled with R version
 
 If you load a package and get a warning that looks like `Warning: packagename was compiled with R version...`, that just means that the package was compiled using a slightly newer version of R than yours. It's generally not a problem as long as you have a somewhat-recent version of R.
 
@@ -103,12 +104,12 @@ If you get an error like `'filename.csv' does not exist`, that means that you're
 
 The Fix:
 
-1. Did you spell the filename correctly? Maybe you made a typo. Or, perhaps, you're trying to open an Excel fie (`.xlsx`) but telling R to look for a CSV (`.csv`)
+1. Did you spell the filename correctly? Maybe you made a typo. Or, perhaps, you're trying to open an Excel fie (`.xlsx`) but telling R to look for a CSV (`.csv`). Or you wrote "file.csv" but the file is "file (1).csv". 
 1. Is the file perhaps open in Excel? Sometimes, Microsoft Office will hold files hostage and not let them be opened in other programs while they're open in Office. Close the Excel window that has the file open.
 1. **Most often**, this is a working directory issue. If you tell R to look for `'filename.csv'`, it will look for that file in the *working directory*. Or, if you tell it to look for `'data/filename.csv'`, it will look for a folder called "data" in the working directory, and for filename.csv inside of that. In recent versions of RStudio, the current working directory is listed right on top of the Console. Did you check whether the file is actually in that folder? If you're running RMarkdown, it will set the working directory to the folder where the .RMD file is located. Did you put the file in the right spot relative to where the RMD is stored? See my [video on filepaths](https://www.youtube.com/watch?v=NG7Y0kkGR8g) for more help.
 
 
-## My code works fine in Rstudio, but my RMarkdown won't knit
+## My code works fine in RStudio, but my RMarkdown won't knit
 
 If your code runs fine when you run it by hand, but your RMarkdown throws errors, these are the most common issues:
 
@@ -128,7 +129,7 @@ Most commonly, this is a case of accidentally giving the name of a function wher
 
 ```{r, eval = FALSE}
 # My data set is about how mean you are, so I'll call it mean_data
-mean_data <- tibble(person = c('Me','You'), meanness = c(1,10000000))
+mean_data <- tibble(person = c('Me','You'), meanness = c(1000,999))
 # Now let's look at that meanness variable, but oops, I'm referring to the function mean() instead of my data mean_data
 mean$meanness
 # Error in mean$meanness : object of type 'closure' is not subsettable
@@ -144,8 +145,8 @@ Just in general, a very large percentage of errors students come to me with occu
 
 The Fix:
 
-1. If you get an error message of every kind, read it carefully to make sure you didn't make a typo
-1. Avoid coding where you have lots and lots of nested parentheses. Then, for whatever parentheses you do have, click on each one in RStudio - it will highlight its "partner" or show where there is a missing partner.
+1. If you get an error message of any kind, read the relevant part of the code carefully to make sure you didn't make a typo
+1. Avoid coding where you have lots and lots of nested parentheses (this is something that **tidyverse** piping we learn is intended to avoid). Then, for whatever parentheses you do have, click on each one in RStudio - it will highlight its "partner" or show where there is a missing partner.
 
 
 # Mistakes in Coding
@@ -154,7 +155,7 @@ These are common mistakes I see students making, which may not always lead to er
 
 ## Not checking
 
-This is not specific to R, or really to coding. But I am begging you to do this;
+This is not specific to R, or really to coding. But I am begging you to do this:
 
 After every line of code, check whether the code did what you expected it to do.
 
@@ -164,7 +165,7 @@ Look at the data after you run the code. Does it look as expected?
 
 If you created a variable you'd expect to take certain values, perhaps use a function like `summary()` or `unique()` to see if it takes those values.
 
-If you tried to collapse the data so there should be one row per, say, country, look at your data to see whether that happened.
+If you tried to collapse the data so there should be one row per, say, country, look at your data (click it in the Environment pane)  to see whether that happened.
 
 I have been using R for years (and coding generally for decades). I can look at your code and, often, know immediately whether it's going to do something unexpected. You (probably) don't have that luxury. But you can replicate 90% of it by just *checking your work*. I cannot emphasize enough how much of a good idea this actually is and I'm not just saying this. **I** do this *despite those decades of experience*. Or perhaps *because* of it.
 
@@ -174,11 +175,11 @@ When you put something in quotes, like '1', it will treat it as a *string variab
 
 If you want a variable to be treated as a number, **do not put it in quotes.** This way lies madness.
 
-R is pretty loose, and will allow you to do things like ask whether `'2' > 1`, and will answer yes. This *feels* like it's okay to put the 2 in quotes. But it's not. What R is doing is saying "oof... I can't compare a number to a letter, but you're asking me to. I'll just convert this number to a string as well, so I'm really doing `'2' > '1'`, and since '2' is alphabetically after '1', that's true, which is the desired result. Great! Except it also means that `'02' > 1` is false, since '02' is alphabetically before '1'. Oops.
+R is pretty loose, and will allow you to do things like ask whether `'2' > 1`, and will answer yes. This *feels* like it's okay to put the 2 in quotes. But it's not. What R is doing is saying "oof... I can't compare a number to a letter, but you're asking me to. I'll just convert this number to a string as well, so I'm really doing `'2' > '1'`, and since '2' is alphabetically after '1', that's true, which is the desired result. Great! Except it also means that `'02' > 1` is false, since '02' is alphabetically before '1'. Same with `'120'>'20'` being false. Oops.
 
 The Fix:
 
-1. If it's a number, don't put quotes around it.
+1. If it's a number, and you want it treated like a numeric value, don't put quotes around it.
 
 ## Using strings for variable names
 
@@ -198,7 +199,7 @@ The Fix:
 
 In this class we do a whole lot of summary statistics! And you may find yourself with a lot of `NA` (missing) values in the results. Why is that?
 
-R's standard summarizing functions, like `mean()` or `sum()`, will return `NA` if any of the values you're giving it are `NA`. `mean(c(1,2,3,4,5, NA))` returns `NA`, not `3`.
+R's standard summarizing functions, like `mean()` or `sum()`, will return `NA` if *any* of the values you're giving it are `NA`. `mean(c(1,2,3,4,5, NA))` returns `NA`, not `3`.
 
 So, if you're doing something like a `group_by() %>% summarize()` with a function like `mean()` in it, then if there's a missing value *anywhere in your data*, you'll get back an `NA`.
 
@@ -211,7 +212,7 @@ The Fix:
 
 One way to deal with missing values is to purge them from your data entirely. I don't teach this in class, but I find a lot of students will look online and find the `na.omit()` function for doing this.
 
-However, be aware that `na.omit()` removes rows for which there's a missing value in *any* column. If you're analyzing three columns of data, but your data set has 200, then you lose a row if that missing value is *anywhere*. That's probably not what you want.
+However, be aware that `na.omit()` removes rows for which there's a missing value in *any* column. If you're analyzing three columns of data, but your data set has 200 columns, then you lose a row if that missing value is *anywhere*. That's probably not what you want.
 
 The Fix:
 

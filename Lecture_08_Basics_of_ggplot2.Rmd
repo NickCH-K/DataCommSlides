@@ -36,14 +36,14 @@ cat("
 - It is based on the *grammar of graphics*
 - Lots of major publications use it (538, The Economist, BBC, ...)
 - Zillions of extensions for doing anything you like
-- (also runs in Python using **plotnine**, although a little limited)
+- (also runs in Python using **plotnine**, so everything you learn here will also teach you plotting in Python)
 
 ## Resources
 
 - [An overview of the Grammar of Graphics concept](https://towardsdatascience.com/a-comprehensive-guide-to-the-grammar-of-graphics-for-effective-visualization-of-multi-dimensional-1f92b4ed4149)
 - [ggplot2 cheat sheet from RStudio](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
 - [ggplot2 book by Hadley Wickham](https://ggplot2-book.org/)
-- [Data Visualization by Kieran Healey](http://socviz.co/)
+- [LOST-Stats Figures](https://lost-stats.github.io/Presentation/Figures/Figures.html)
 - [R Graphics Cookbook](https://r-graphics.org/)
 - The **esquisse** or **swirlr** packages for learning **ggplot2**
 
@@ -53,6 +53,7 @@ cat("
 - Manipulating data easy in R
 - Easy to edit
 - Handles multidimensional data effortlessly
+- Once you know how to generate graphs in a flexible coding system, **it will be easier to do what you want in code than in a more canned and restricted piece of software**
 
 ## Tidy Tuesday
 
@@ -121,12 +122,24 @@ ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) +
   geom_point()
 ```
 
+## Common Aesthetics
+
+See `help()` for a given geometry to see what it accepts. But common are:
+
+- `x`, `y`: position on the x and y axis
+- `color`, `fill`: color is for coloring things generally. For shapes, `color` is the outline and `fill` is the inside
+- `label`: text labels
+- `size`: guess what this does
+- `alpha`: Transparency
+- `linetype`: for lines or outlines, the type of line (solid, dashed...)
+- `xmin`/`xmax`/`xend` (and same for `y`): For line segments or shaded ranges, where do they start/end?
+
 
 ## Geometry
 
 - The *geometry* is what actually gets drawn. In the last slide, `geom_point()` drew points.
 - There are many different geometries. Let's look at the [ggplot2 cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
-- Common: `geom_point`, `geom_line`, `geom_bar`, `geom_text`
+- Common: `geom_point`, `geom_line`, `geom_col`, `geom_text`
 
 ## Geometry: geom_line
 
@@ -162,6 +175,20 @@ data <- tibble(category = c('Apple','Banana','Carrot','Apple','Banana','Carrot')
 ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge')
 ```
 
+## Hm?
+
+What was that `position = 'dodge'`?
+
+- Used when you have stacked elements with the same `x` aesthetic that you want to be side-by-side
+- With `geom_col()` or `geom_bar()` you can set `position = 'dodge'` to make the different-fill bars go side by side
+- Can apply `position = position_dodge(.9)` with other geometries to make them line up. For example...
+
+## Dodging
+
+```{r}
+ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position = 'dodge') + 
+  geom_text(aes(label = quality), position = position_dodge(.9), vjust = -.4)
+```
 
 
 ## Calculations
@@ -174,6 +201,13 @@ ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
 ggplot(mtcars, aes(x = mpg)) + geom_density()
 ```
+
+## Demonstrating Distributions
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(y = mpg, x = factor(am))) + geom_violin()
+```
+
 
 ## Demonstrating Distributions
 

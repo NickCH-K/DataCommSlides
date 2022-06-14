@@ -1,5 +1,5 @@
 ---
-title: "Lecture 6: Exploratory Data Analysis"
+title: "Lecture 7: Exploratory Data Analysis"
 author: "Nick Huntington-Klein"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:   

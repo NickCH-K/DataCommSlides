@@ -73,3 +73,4 @@ swirl()
 # Troubleshooting
 mean(c('a','b'))
 sumtable(mean)
+feols(Y~X)

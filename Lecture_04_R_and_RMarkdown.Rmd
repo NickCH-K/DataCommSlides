@@ -131,6 +131,10 @@ output: html_document
 - `warning` and `message`: Show warnings and messages from the code?
 - `include`: Include *any output at all* or not?
 
+## Common Mistakes
+
+- Let's take a look at the [Common Errors and Mistakes Cheatsheet](https://nickch-k.github.io/DataCommSlides/Lecture_04_Common_R_Problems.html)
+
 ## Let's do it
 
 - Make a new RMarkdown HTML document
