@@ -163,6 +163,18 @@ ggplot(sal, aes(x = Year, y = Salary, color = Person)) +
 - We must ask: what does this geometry let us *compare* and *contrast*, and what do we *want* to compare and contrast?
 - We can only evaluate a few but this will help us learn to evaluate them overall (and pick up some specific tips)
 
+## In General
+
+- If a geometry shows *lots of separate distinct objects* (like a bar graph), it wants you to compare those objects
+- If a geometry draws *a continuous path* (like a line graph, or a cluster of points with a shape to it), it wants you to follow that path and see how it changes smoothly along some axis
+- If a geometry shows *an area divided into many parts* (like a pie chart, treemap, or a stacked bar graph) it wants you to see how a whole object is divided up
+
+## In General 
+
+- If a geometry represents *something real* (like a map) then it expects us to interpret it as that real thing
+- If a geometry shows *differing colors, sizes, or shades* (like a lot of stuff), it's expecting us to notice that something is *more* and compare it to something that is *less*
+- If a geometry shows *crowded areas* and *sparse areas* (like a density plot, or clusters of points), it's expecting us to see which areas are well-populated and which aren't
+
 ## Bar Graphs
 
 ```{r}
@@ -265,6 +277,12 @@ storms %>%
 - Requires you to track a whole lot of information
 - ONLY good for if you are ONLY interested in bottom category AND the total, but NOT any other categories
 - Also, please please only apply this to outcome variables where it makes sense to stack (sum them) together. "Average price by category" doesn't work.
+
+## Stacked Bar Charts
+
+- More broadly, a common mistake with stacked bar charts that I also see with pie charts, tree maps, and other geometries that divide an *area* up into *sections*:
+- Dividing an area up into sections implies you are *dividing a whole into pieces* and also that you can *add the pieces back together to get the whole*
+- This doesn't work with stuff like averages! If you stack "average male income" on top of "average female income" you don't get "average overall income". 
 
 ## Some Bar Graph Alternatives
 

@@ -64,8 +64,8 @@ Things to Get Right:
 ## Properly Using and Understanding the Data
 
 - Measurement is important! If we don't think the measurement is good and means what we think it means, there's little point in doing data analysis anyway
-- Measurement can be bad because it's *noisy* (the data isn't very precise or there are errors in it), because it's *misleading* (the questions is fine but you're trying to use the data in a wrong way), because it's *weak* (small sample, big data categories) or because it's *insufficient* (you're trying to answer a much grander question than the data can really handle)
-- Also, be aware of missing data! If  a variable is missing for a lot of people it may not be usable without some truly fancy advanced stuff that you don't want to do without really understanding it
+- Measurement can be bad because it's *noisy* (the data isn't very precise or there are errors in it, or often missing), because it's *misleading* (the questions is fine but you're trying to use the data in a wrong way), because it's *weak* (small sample, big data categories) or because it's *insufficient* (you're trying to answer a much grander question than the data can really handle)
+- Garbage in, garbage out
 
 ## Be Careful!
 
@@ -81,12 +81,6 @@ Things to Get Right:
 - But while Dolan read spouse present/absent as "spouse is in the room during questioning", it actually meant "spouse together/separated." He was comparing couples that were together vs. couples that were separating!
 - Didn't read the data documentation. Oops.
 
-## Be Careful!
-
-- A bunch of prominent psychologists wrote a landmark study about how asking people to sign a "I agree to be truthful" statement at the *beginning* of a form made them more honest than signing at the *end* of the form
-- Nine years later, another researcher actually [looks at their data](https://science.thewire.in/the-sciences/evidence-of-fraud-in-an-influential-field-experiment-about-dishonesty/) and finds extremely clear evidence that the data was entirely faked (likely by the insurance company the researchers partnered with, not the researchers themselves)
-- If they'd just checked to see whether the data was plausible, they'd never have published the paper
-- Instead, years later one of their biggest studies turns out fake and throws other work into suspicion by a general audience!
 
 
 ## What does the Data Tell Us?
@@ -95,9 +89,23 @@ Things to Get Right:
 - We have to carefully consider what the data does tell us and what it doesn't tell us.
 - *Identification* is the econometrics concept that asks "does the *statistical calculation we just ran* answer the *theoretical question we have*?"
 
+## Answering the Question
+
+- One angle to think about identification in is: did you summarize the data in the right way to answer the question?
+- If you want to show something increased over time, make sure to show that it *increased*, not that it *is high*
+- If you want to show that something *is high/low*, be sure we can see *high/low relative to what*
+
+## Answering the Question
+
+- If you have a question about *individuals*, but report *totals*, your answer combines both an answer about individuals with an answer about how many individuals there are
+- If you're deciding which type of franchise to open, you'd probably be more interested in *average* sales per store than *total* sales, right? So show that!
+- If you want to know which college is more expensive, you'd want *average* tuition per student instead of *total* tuition for the college
+- (reporting sums instead of averages, when an average is called for, is a common tendency among business students I find)
+- Many other versions of this average/sum problem with different statistics!
+
 ## Theory and Hypothesis
 
-- If you want to learn anything from your data analysis, you have to come in with a theory
+- More broadly, if you want to learn anything from your data analysis, you have to come in with a theory
 - "Theory" just means there's a "why" or "because" in there - "sales went up *because* there was a promotion in place"
 - Very rarely can we actually see a "why" or "because" in data. Instead we get a calculation like "average sales were higher in periods where a promotion in place than in periods where there wasn't"
 - The *calculation* is rarely interesting (we really want to know if those sales are effective, not whether sales *happened* to be higher!). Identification asks "can we learn anything about the theory from the calculation?"
@@ -159,8 +167,22 @@ So what now?
 
 - You can be more accurate by saying what you actually found - "sales were higher when there were more ads" - instead of "ads improved sales" (causal language which implies a direction for the relationship). Then you can discuss what that actually means in terms of decision-making (*should* we increase ads? What *can* the data tell us about that question? What else would we want to know first?)
 
+## Or Just a Gut Check
+
+- Another way to avoid identification error is to think about what you're really implying with your results and seeing if it makes sense
+- A common error I see from business students on this is the "predictors of success" problem
+- If you are trying to say something about what makes a successful business/strategy, and you find that $X$ is correlated with success, does that *really* mean that $X$ causes, or even is a useful *predictor* of, success?
+
+## Or Just a Gut Check
+
+- For example, if you're trying to develop a successful TV show, you might notice that viewership (success) is positively correlated with the number of seasons a show gets
+- But saying "try to get a lot of seasons, that will lead to success" is nonsense - viewership causes seasons, not the other way around
+- It's not even useful as a predictor - if you're *developing* the show, you don't *know* how many seasons it will get
+- You're not answering the actual question of interest (how do we spot/make a hot TV show?)
+
 ## Creating Plausible Results
 
+- More broadly, whether we're talking about identification or not
 - A great indication that something is wrong about your data or analysis, or that you're not identified, is simply in whether your results *make any darn sense*
 - Data is wrong sometimes, and errors can become clear only in retrospect! So a good gut-checking instinct is really key, especially in areas like business where you know you'll get things a *little* wrong and have imperfect data, but need to know if it's *too wrong to be useful*
 
@@ -182,7 +204,11 @@ Always be asking yourself:
 - Explore the data! See what looks way wrong - implausible averages, outliers that are so far gone they're probably errors, "missing data" coded as values like -99, etc.
 - After each data cleaning step, *look at the data to make sure it actually did what you thought*. I can't stress this enough. Please do this!
 - In each analysis, *ask yourself what the result is saying and if it's at all plausible*
+
+## Creating Plausible Results
+
 - For example, if you find that your sales are only nonzero in two weeks of the year, that's probably wrong. Or that the ad sales are 5x the non-ad sales, that's probably wrong too!
+- Or if you've chosen to make a recommendation on the basis of your method, but your method recommends something impossible (I recommend that you hire for your new CEO... Thomas Edison!) or clearly wrong (I recommend that you hire for your new CEO... a cat!) that doesn't mean you've come to a great surprising conclusion, it means your method is bad and you should start over with a different method
 
 ## Doing the Right Calculations
 
@@ -199,7 +225,7 @@ Always be asking yourself:
 
 ## Tips for Wading into Statistical Waters
 
-- *Don't use tests or models you don't understand*. Recognize that the cost of using a fancier model, or just something you're unfamiliar with (on top of haivng to figure out how to explain your results) is going to be the the work of reading all about both the method and the software that goes with it
+- *Don't use tests or models you don't understand*. Recognize that the cost of using a fancier model, or just something you're unfamiliar with (on top of having to figure out how to explain your results) is going to be the the work of reading all about both the method and the software that goes with it
 - If you can't or won't do that, don't use the method. A simpler, imperfect method you do understand is better than a more complex one you don't (as long as you understand the ways it's imperfect)
 
 ## Tips for Wading into Statistical Waters
@@ -223,21 +249,8 @@ Notice what's not in there:
 - Whether the estimate we *do* get is right / what the actual effect is
 - Whether the estimate we do get is more right than some *other* estimate that also doesn't match the theoretical distribution
 - Whether there's an X% chance of the effect being real or we are "X% confident" of an effect
-- Being insignificant doesn't mean there's *no* effect, it just means there's not enough evidence to *reject* a null effect
+- Being insignificant doesn't mean there's *no* effect, it just means there's not enough evidence to *reject* a null effect (and don't **try** to get significance)
 
-
-## Statistical Significance
-
-- Usually the theoretical statement is of the form "the relationship / mean is zero" (which, isn't that often obviously untrue?) 
-- *All* statistical significance says is that the null hypothesis is unlikely
-- *Assuming you've even set up the test properly* - hypothesis tests are based on assumptions too and will be wrong if that's not satisfied, and in any case are you identified?
-- And do you have the *statistical power* (big enough sample) to make a failure-to-reject meaningful? Or do you perhaps have a sample so huge that basically everything is significant but it doesn't mean much?
-
-## Statistical Significance
-
-- People like to hear about statistical significance, and it's not a useless concept, but you have to be careful in what you can make from it
-- Insignificant *doesn't mean wrong*, it just means insignificant. And it's definitely not a *goal*. **Never** change your analysis to chase significance
-- Like with other statistical calculations, be aware of what you're *doing*, what the *assumptions are*, and what *the actual data says* rather than what you're hoping it says. And **don't use it if you don't understand it**
 
 ## Communicating Uncertainty
 
@@ -264,7 +277,7 @@ Notice what's not in there:
 
 - So perhaps you find that, on average, sales with an ad in place are $120 higher than sales without an ad in place
 - Using the distribution might say "on average, sales are $120 higher with an ad in place, but it varies, with about 10% of sales only being $15 higher than normal"
-- The confidence band might be "we'd expect that 95% of sales wit ads in place will be between $5 and $225 higher than normal sales"
+- The confidence band might be "we'd expect that 95% of sales with ads in place will be between $5 and $225 higher than normal sales"
 
 ## Forecast Bands - easy to interpret right?
 

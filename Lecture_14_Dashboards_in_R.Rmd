@@ -100,7 +100,6 @@ knitr::include_graphics('Lecture_14_KPI.png')
 
 - Let's explore each of these examples and see what works and what might not
 - [Year-to-Date Income Statement](https://public.tableau.com/views/IncomeStatement_4/IncomeStatement?:embed=y&:display_count=yes&publish=yes&:showVizHome=no)
-- [SafeGraph Reopening the Economy](https://www.safegraph.com/dashboard/reopening-the-economy-foot-traffic)
 - [NBA Scoring Dashboard](https://beta.rstudioconnect.com/jjallaire/htmlwidgets-d3heatmap/htmlwidgets-d3heatmap.html)
 - [Economic Indicators for the USA](https://research.stlouisfed.org/dashboard/1151)
 
@@ -168,5 +167,5 @@ knitr::include_graphics('Lecture_14_Flexdashboard_row.png')
 - Open a Flex Dashboard template
 - Load any data set (in the Dashboard code)
 - Make a Flex Dashboard and set its `theme`
-- Include three graphs: one regular **ggplot2**, that same graph again but with a different theme, and one graph from [http://gallery.htmlwidgets.org/](http://gallery.htmlwidgets.org/) - an easy pick is [dygraphs](https://rstudio.github.io/dygraphs/) line graphs
+- Include three graphs: one regular **ggplot2**, that same graph again but with a different theme, and one graph from [http://gallery.htmlwidgets.org/](http://gallery.htmlwidgets.org/) - an easy pick is [dygraphs](https://rstudio.github.io/dygraphs/) line graphs (although you do have to format your data as `xts`... try the **tbl2xts** package and its `tbl_xts()` function)
 - If you can make it look nice that's great! But focus more on getting it to work.

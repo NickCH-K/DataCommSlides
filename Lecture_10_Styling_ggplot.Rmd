@@ -48,7 +48,7 @@ cat("
 
 - As you'd expect, we'll be setting the values of certain aesthetic properties
 - Which ones apply depend on the geometry. See [this page](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html). Some common ones:
-- color, linetype, fill, size, shape
+- color, linetype, fill, size, shape (and soon: linewidth)
 - Text aesthetics: family (font), fontface, hjust, vjust (see **extrafont** package to use all your system fonts)
 
 ## Decorating Axes vs. Decorating Geometries
@@ -93,8 +93,6 @@ ggplot(mtcars, aes(x = Transmission, fill = factor(cyl))) +
 
 - Everything *behind* the geometries can be manipulated as well
 - For example, we can change the coordinate system (usually to `coord_flip` it for bar graphs)
-- Or, we can change the legends, axis labels, etc., with `theme()`.
-- The options are endless! See `help(theme)`
 
 ## Coordinates
 
@@ -148,6 +146,12 @@ ggplot(mtcars2, aes(x = Transmission,y=count)) +
   geom_lollipop(color = 'red', size = 2) + coord_flip() +
   scale_x_discrete(limits = c("Manual", "Automatic"))
 ```
+
+## Theming
+
+- Pretty much all elements of presentation that aren't in a geometry can be controlled with `theme()`
+- The options are endless! See `help(theme)`
+- We set different aspects of the theme using `element_` functions like `element_text()`, `element_line()`, `element_rect()` which take aesthetic settings like `size`, `color`, etc.
 
 ## Axes
 
@@ -265,6 +269,14 @@ ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
   theme_pubr()
 ```
 
+## General Theming Notes
+
+- How can we think about theming generally?
+- We want, as always, to drive focus towards our story
+- This means not making the theme distracting it, but using it to drive attention to what we want
+- Need focus on the x-axis labels? Make em bold!
+- Often we don't need distracting background color (as there is in the default theme). Usually get rid of it!
+
 ## Other Styling
 
 - Let's move on to some other ways we can build focus and clarity
@@ -301,10 +313,46 @@ ggplot(gapminder, aes(x = year, y = lifeExp, color=country)) + geom_line(size = 
   theme_minimal(base_family='serif') 
 ```
 
+## Highlighting
+
+- Or do it manually with `scale_X_manual()`
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+gapminder %>% mutate(color_name = ifelse(country %in% c('United States','Canada','Mexico'), as.character(country), 'Other')) %>%
+ggplot(aes(x = year, y = lifeExp, group = country, color=color_name, size = color_name, alpha = color_name)) + geom_line() + 
+  geom_text(aes(label = ifelse(year == 2007 & color_name != 'Other', color_name,'')), 
+                           hjust = 0, size = 13/.pt) +
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2025),
+                     breaks = c(1950,1970,1990,2010))+
+  scale_color_manual(values = c('red','forestgreen','gray','blue')) + 
+  scale_size_manual(values = c(1.5,1.5,.1,1.5)) +
+  scale_alpha_manual(values = c(1,1,.2,1)) +
+  theme_minimal(base_family='serif') + 
+  guides(color = 'none', size = 'none', alpha = 'none')
+```
+
+## Highlighting
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+gapminder %>% mutate(color_name = ifelse(country %in% c('United States','Canada','Mexico'), as.character(country), 'Other')) %>%
+ggplot(aes(x = year, y = lifeExp, group = country, color=color_name, size = color_name, alpha = color_name)) + geom_line() + 
+  geom_text(aes(label = ifelse(year == 2007 & color_name != 'Other', color_name,'')), 
+                           hjust = 0, size = 13/.pt) +
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2025),
+                     breaks = c(1950,1970,1990,2010))+
+  scale_color_manual(values = c('red','forestgreen','gray','blue')) + 
+  scale_size_manual(values = c(1.5,1.5,.1,1.5)) +
+  scale_alpha_manual(values = c(1,1,.2,1)) +
+  theme_minimal(base_family='serif') + 
+  guides(color = 'none', size = 'none', alpha = 'none')
+```
+
 ## Annotation
 
 - There are also many options for *annotating* our data
-- For direct data point annotation, especially of line graphs, you can do this with some data manipulation and `geom_text`
+- For direct data point annotation, especially of line graphs, you can do this with some data manipulation and `geom_text` (see previous slide)
 - For putting a block of text I recommend **ggannotate**
 - I also recommend looking into [**ggtext**](https://wilkelab.org/ggtext/) which allows rich-text formatting of all text on the graph, but we won't be covering it here.
 

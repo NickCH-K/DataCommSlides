@@ -1,5 +1,5 @@
 ---
-title: "Bob Ross Style"
+title: "Painting With the Prof"
 author: "Nick Huntington-Klein"
 date: "`r Sys.Date()`"
 output: html_document
@@ -58,12 +58,12 @@ ggplot(gdata, aes(x = Date, y = value, linetype = name, color = name)) +
 
 # Life by Education
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 spend <- read_csv('https://vincentarelbundock.github.io/Rdatasets/csv/stevedata/gss_spending.csv')
 #https://vincentarelbundock.github.io/Rdatasets/doc/stevedata/gss_spending.html
 
 spend <- spend %>%
-  filter(!is.na(degree)) %>%
+  dplyr::filter(!is.na(degree)) %>%
   transmute(BA = degree >= 3,
          income_above_median = rincom16 >= median(rincom16, na.rm = TRUE),
          conservative = polviews >= 5,
@@ -86,23 +86,18 @@ knitr::kable(spend) %>% kableExtra::kable_styling(bootstrap_options = 'striped')
 ```{r, echo = TRUE}
 spend <- spend %>%
   pivot_longer(cols = c('income_above_median','conservative','news_reader','full_time'))
-no_ba <- spend %>% 
-  slice(1:4) %>%
-  rename(no_ba_value = value)
-ba <- spend %>%
-  slice(5:8) %>%
-  rename(ba_value = value)
-df <- no_ba %>% 
-  left_join(ba, by = 'name')
+ spend <- spend %>%
+  pivot_wider(id_cols = name, names_from = BA) %>%
+   rename(ba_value = `TRUE`, no_ba_value = `FALSE`)
 ```
 
 ```{r}
-ggplot(df, aes(x = no_ba_value, xend = ba_value, y = name)) + 
+ggplot(spend, aes(x = no_ba_value, xend = ba_value, y = name)) + 
   geom_dumbbell(size_x = 3, size_xend = 3, colour = 'black', colour_x = 'red', colour_xend = 'blue') + 
   labs(x = 'Proportion', y = NULL,
        title = 'A Different Financial World for BA-Holders') + 
-  annotate(geom = 'text', x = df$no_ba_value[3], y = 'news_reader', label = 'No BA', vjust = -1) +
-  annotate(geom = 'text', x = df$ba_value[3], y = 'news_reader', label = 'BA', vjust = -1) +
+  annotate(geom = 'text', x = spend$no_ba_value[3], y = 'news_reader', label = 'No BA', vjust = -1) +
+  annotate(geom = 'text', x = spend$ba_value[3], y = 'news_reader', label = 'BA', vjust = -1) +
   theme_minimal() + 
   theme(panel.grid.major.y = element_blank(),
         panel.grid.minor.y = element_blank(),
