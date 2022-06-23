@@ -72,6 +72,20 @@ cat("
 - Everything is **interactive by default**
 - **Easier than R** and also less work but **deep customization a bit more difficult**
 
+## The Canned-Coded Scale
+
+- It is extremely common in software to have to choose between a deeper, more customizable option (such as coding something in **ggplot2**) or a more canned, one-click-does-it option (like Tableau or Excel)
+- Until you're very familiar with the coding option, the canned option will be faster and easier...
+- *IF* the thing you want to do is something the canned-software authors anticipated and decided to make easy
+- If it's not, it will usually be *much* harder than just coding the thing up
+
+## The Canned-Coded Scale
+
+- Tableau is a very cool tool and I encourage you to use it (as are other more canned systems like PowerBI, Azure ,etc.)
+- But don't be surprised when you start thinking "hmm but what if my visualization was different in THIS nonstandard way" and start Googling, only to find it's a fourteen-step process that doesn't actually work
+- Using Tableau for the simple stuff, and immediately shifting to code for anything that's not stock-standard, is a decent strategy!
+- That said, let's explore Tableau
+
 ## Tableau
 
 - As opposed to (the way we've used) R, Tableau uses *database* logic - it sends the calculation **to the data** rather than bringing the data to the calculation
@@ -127,6 +141,12 @@ knitr::include_graphics('Lecture_16_Tableau_Main.png')
 - In general, like Excel, click what you want to edit, like axis titles
 - Note with a graph we can find the data that goes into it
 - Some variables like "Measure Names" can become their own "shelf" like column/row for more complex diagrams
+
+## Common Problems in Tableau
+
+- If something's not working, check whether your variable has the correct continuous/discrete measure/dimension settings
+- Note that sometimes "grouped" variables don't work the same as regular categorical variables - make life easier by just making them strings grouped as you like in R and import them
+- Did you try Googling to see how you can do (nonstandard thing X)?
 
 ## Basic Example
 

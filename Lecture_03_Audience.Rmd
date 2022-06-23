@@ -80,12 +80,7 @@ Always ask:
 - What are some communication errors here?
 
 ```{r, echo = FALSE, eval =  TRUE}
-d <- readRDS('../Data Translation Challenge/king_dailyvisits.Rdata') %>%
-  group_by(naics_title) %>%
-  summarise(visits_by_day = sum(visits_by_day)) %>%
-  arrange(-visits_by_day) %>%
-  slice(1:5)
-ggplot(d, aes(x = reorder(naics_title, visits_by_day), y = visits_by_day)) + 
+ggplot(readRDS('king_dailyvisits.Rdata'), aes(x = reorder(naics_title, visits_by_day), y = visits_by_day)) + 
   geom_col(color = 'lightblue') + 
   coord_flip() + 
   ggpubr::theme_pubr() + 
@@ -153,6 +148,20 @@ Beyond considering our audience's capabilities, we also want to think about how 
 - But the important parts, the ones that produce the right conclusion, should be *as visible as possible*
 - In writing, you may have learned about inverted-pyramid structure
 - In visualization there are other tricks we can use
+
+## My Mom's Car
+
+- What does the driver want to know? And what is highlighted?
+
+![The Dash of My Mom's Car](Lecture_03_Cardash.jpg)
+
+## My Mom's Car
+
+- The driver probably wants to know how fast they are going
+- And how full their tank is
+- Instead the focus is heavily on the RPM of the engine, and the other things are tucked back, faded out by glare, and not where you immediately look
+- (more confusing is that the RPM is a dial that looks like a typical speedometer, but isn't)
+
 
 ## Preattentive Attributes
 
