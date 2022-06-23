@@ -143,6 +143,20 @@ knitr::include_graphics('Lecture_17_MiddayFlights.png')
 - (Also, while we're at it, add data point labels to the line graph)
 - (And right-click an empty space to add an annotation)
 
+## Other Down-Arrow Adjustments
+
+- We can also use this down-arrow to sort
+- For example, sorting a bar by its height, or the value of another variable
+- You can do this using another variable directly, or a table calculation (like a COUNT) of a variable
+
+## Getting More Complex
+
+- If you want to do more detailed adjustments to variables, things like complex created variables, you can do so with Create Calculated Field
+- But this does require that you learn the Tableau coding system. You can Google for how to do stuff, but it's often easier just to do it in R and export to Tableau (same as with joins/etc.)
+- One exception is if you just want a basic condition checked
+- `IF [X] == Value THEN "A" ELSE "B" END`
+- Can also use `ELSEIF` for more-flexible grouped variables than with Groups
+
 ## Animation
 
 - You can do basic animations by adding a variable to "Pages"; this will make a slideshow going through each value
@@ -155,6 +169,13 @@ knitr::include_graphics('Lecture_17_MiddayFlights.png')
 - Or just a static image with Worksheet $\rightarrow$ Export
 - Or make a dashboard (we'll get to that next time)!
 
+
+## Sharing Work
+
+- If you're sharing with someone who has Tableau, and your data isn't enormous, use a **packaged workbook**.
+- This will bundle the data set in with your work so they can actually open it, making a `.twbx` file
+- If you don't do this and just send a `.twb` then they won't be able to see your work at all!!
+- If you turn in your Tidy Tuesday homework as a `.twb` I won't be able to read it and you'll have to resubmit.
 
 ## Practice
 

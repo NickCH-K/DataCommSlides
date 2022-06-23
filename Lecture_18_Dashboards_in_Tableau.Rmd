@@ -66,6 +66,12 @@ knitr::include_graphics('Lecture_18_AddWorksheets.png')
 - Also check the Layout tab for other options
 - Keep the audience in mind, and whether some visualizations might not translate to tiny sizes!
 
+## Layout
+
+- You can "float" elements of the dashboard but this isn't generally a good idea
+- What *is* a good idea is moving things like legends (if you have them) close to where the actual viz that uses them is
+- You don't want the legend for Viz B sitting next to Viz A - confusing!
+
 ## Formatting
 
 - Format $\rightarrow$ Dashboard brings up the formatting panel for things like overall coloring, fonts, etc.
@@ -77,6 +83,12 @@ knitr::include_graphics('Lecture_18_AddWorksheets.png')
 ```{r}
 knitr::include_graphics('Lecture_18_Dashboard_Format.png')
 ```
+
+## Filters
+
+- You can add interactive filters to look at different parts of the data, and apply those filters broadly
+- Select a viz that uses the variable you want to filter on and hit the "use as filter" button (looks like a funnel) and then the down arrow and Filter to select the variable to filter on
+- A filter will appear. On the down arrow for THAT, you can change the kind of filter you get (dropdown, etc.) and also which worksheets the filter applies to - can update the whole dashboard at once with one filter if you like!
 
 ## Considerations for Dashboards
 
@@ -112,5 +124,8 @@ knitr::include_graphics('Lecture_18_A_Mess.png')
     - Before 1999 and after 2004, it wasn't, and was actually recommended against
     - From 1999-2004, people who pay the most attention to their health will be more likely to follow the recommendation, i.e. take Vitamin E
     - So, during that time, the relationship between taking Vitamin E and health outcomes like mortality should be stronger
+    
+## Let's Do This
+
 - Try to tell this story in a dashboard!
 - Careful: how can you show that a *relationship* gets stronger or weaker over time? This is trivariate!
