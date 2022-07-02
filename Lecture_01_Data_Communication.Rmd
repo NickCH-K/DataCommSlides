@@ -160,7 +160,7 @@ In addition to the course website and Healy's [Data Visualization](https://kiera
 ## How Does This Faucet Work?
 
 ```{r, out.width="650px"}
-knitr::include_graphics("Lecture_1_Faucet.jpg")
+knitr::include_graphics("Lecture_01_Faucet.jpg")
 ```
 
 ## Understand the context
