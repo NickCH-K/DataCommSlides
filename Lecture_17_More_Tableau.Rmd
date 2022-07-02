@@ -184,7 +184,7 @@ knitr::include_graphics('Lecture_17_MiddayFlights.png')
 ---
 
 ```{r}
-knitr::include_graphics('Lecture17_CumulativeCancellations.png')
+knitr::include_graphics('Lecture_17_CumulativeCancellations.png')
 ```
 
 ## Practice
@@ -192,7 +192,7 @@ knitr::include_graphics('Lecture17_CumulativeCancellations.png')
 - Now you recreate this graph
 
 ```{r}
-knitr::include_graphics('Lecture17_DelaybyDAy.png')
+knitr::include_graphics('Lecture_17_DelaybyDay.png')
 ```
 
 
