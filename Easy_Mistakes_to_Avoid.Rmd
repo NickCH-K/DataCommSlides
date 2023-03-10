@@ -1,0 +1,417 @@
+---
+title: "Easy Graph Mistakes to Avoid"
+subtitle: "So avoid them"
+author: "Nick HK"
+date: "`r Sys.Date()`"
+output: 
+  rmdformats::readthedown:
+    toc: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width = 6, fig.height = 4)
+
+library(tidyverse)
+library(scales)
+library(causaldata)
+library(patchwork)
+```
+
+# The List (for reference or copy/paste)
+
+**Ten Things You Must Not Do**
+
+1.  A Graph Without Context
+2.  Illegible Text
+3.  A Line Graph With An Unordered x-Axis
+4.  A Degenerate Line Graph
+5.  A Scatterplot With Lots of Identical Data
+6.  A Legend With a Zillion Categories
+7.  A Pie Chart with a Legend For Each Slice
+8.  A Combined-Area Chart with a Non-Addable Value
+9.  Scientific Notation
+10. Coding-Language Variable Names
+
+**Six Things You Almost Certainly Shouldn't Do**
+
+11. A Dual Y-Axis
+12. A Bar Graph That Could Be A Line Graph
+13. Randomly Adding A Color Scale
+14. A Pie Chart With Lots of Categories
+15. Angled Text
+16. An All-Defaults Basic Bar Graph
+
+# Easy Mistakes
+
+This is a college course. In general, in college courses there are difficult and abstract concepts to grasp. Often there is room for interpretation, or perhaps a question is asked of you in a confusing way, or the concept is just plain really tough and it's going to take a lot of work to understand.
+
+There are plenty of those concepts in this class, too. But also, there are a lot of things where there is a very well-defined and simple thing that you Must Not Do Because It Is Wrong. In many of these cases, *not* doing the thing is easy. You just need to remember not to do it.
+
+This document is about those things. Here, I have compiled ten things that you Must Not Do, and six things that you Almost Certainly Shouldn't Do. Before submitting your work, I strongly recommend breezing through this list (or at least the table of contents) to make sure you haven't done these things.
+
+This is by no means a comprehensive list of things that can be wrong with a data visualization. But these are some things that I *see often in student work*, are *pretty much never the thing you want to do*, and *are simple things that are easy to fix*.
+
+I will note that this list is being made in the context of *graphs that look good and you intend to share with a general audience*. A scientific audience, for example, might be okay with scientific notation (#9). Or an audience who is also an expert in what you're talking about and knows your data source might be fine with omitted context (#1) or keeping variable names what they are in your code (#10). Maybe even in a business context that wants you to move super fast, they might prefer you give them a big long legend rather than spend the time to label things more carefully (#6). But for this class, that is not your context (unless you're just doing EDA intended primarily for your own eyes). So don't do those things.
+
+I will also admit that for pretty much every entry on the Almost Certainly Shouldn't Do list, there *are some applications* where you might want these things. But they are slim, and everything on the list is something I find is applied pretty thoughtlessly in practice rather than because the correct opportunity has arisen. #16 in particular is not a *bad graph* but rather just a graph that could easily be made so much better, and an indication that you didn't try very hard.
+
+To keep this already too-long document from being longer, I will keep the explanations of *why* things are on this list very brief. But I will be explaining most of them in class at some point, so we'll get there. If you are curious for more, ask me.
+
+## I Mean It: Grades
+
+I really don't want to see these things. On one level, I don't want to see them because they make your graphs worse. On another level, if there's a super simple and obvious way to make your graph better, and you're not doing it, it's a sign you don't care that much about the graph you're making, or didn't look at it and try to notice what was wrong. As someone teaching a data communications class, that bums me out. So there's a hint of the [No Brown M&Ms Clause](https://www.insider.com/van-halen-brown-m-ms-contract-2016-9) in writing this list.
+
+At the start of the term, if you do something on this list, I will refer you to the list and point out that you have made an error listed here. Your grade will reflect the fact that the error (probably) made your graph worse, but there's nothing *special* about this list for your grade yet.
+
+**However, after week 5, doing anything on the list that you Must Not Do will lead to a 10% reduction in the assignment grade per violation on most assignments, or 5% per violation on the Data Exploration or Data Translation projects.** You will not have an option to revise your work to remove the penalty.
+
+Doing anything on the "Almost Certainly Shouldn't Do" list will result in the same reduction *unless* you have a really good reason for doing it. I recommend checking with me, *telling me your reason* (you have to say your reason, you can't just be like "hey is this good") before you submit and asking if your graph justifies breaking the rule. Heck, maybe you can dazzle me and have a good enough reason for breaking a Must Not Do rule. I doubt it, though!
+
+If a 10% markdown for a basic error sounds harsh, it is! Especially that 5% markdown on those big term projects - I'll really do it! But these errors are easy to avoid, and this page even has fixes, with **ggplot2** code. So if you make them (or if your groupmate made them in your group project and you don't stop them), you really did choose to do so. I'm not gleefully cackling at the prospect of marking people down for simple errors. I'm hoping I never have to, and that this is enough of an incentive to make that happen.
+
+# Ten Things You Must Not Do
+
+## 1. A Graph Without Context
+
+There must be some indication **on your graph** (or, if your graph is in the middle of a memo or presentation, in that memo or presentation *very close to that graph*), some indication of what your graph is about. Also, if there are terms on your graph that your audience will not understand, use different terms, or explain them in some way.
+
+This is necessary to make your graph understandable to an audience. Remember, they don't know your data outside of this graph. The reader seeing the graph below would ask: "what does 'old' mean in this context? Are those bars for people? Places named after those saints? Are they streets?"
+
+```{r}
+data(yule)
+yule %>%
+  slice(8:9) %>%
+  mutate(location = c('St. John','St. Pancras')) %>%
+  ggplot(aes(x = location, y = old)) + 
+  geom_col() + 
+  theme_classic() + 
+  labs(x = NULL) + 
+  theme(text = element_text(size = 20))
+```
+
+One common way this arises is forgetting to say what your data is *about*. Say you are working on a data set of popular songs, with information about their length and how much it cost to record them and make a graph showing that, surprisingly, length and cost are negatively related. Neat! Did you, uh, remember to let the reader know that this graph is about music and not, say, movies, or bridges?
+
+**Fixing it in ggplot**: Use `labs()` to add graph and axis titles explaining what things mean. Use `+annotate()` or the **ggannotate** package to add annotation explaining what things mean. Use `mutate()` to replace labels that don't mean anything with labels that do.
+
+## 2. Illegible Text
+
+Make your font big enough to be legible, and make sure the text doesn't overlap too much with other text, making it hard to read. Also make sure your text isn't too big for its space, making it cut off by the edge of the image. I don't think I need to explain why on this one!
+
+This can be a little tricky when making a graph on the computer, since something that looks fine when you run it the first time might end up shrunken down in the final document. The fix for this is to *look at the result in the final document, and go back and fix it if it looks bad.*
+
+```{r}
+yule %>%
+  ggplot(aes(x = pop, y = paup, label = location)) + 
+  geom_text(size = 12/.pt) + 
+  theme_classic() + 
+  labs(x = 'Population Growth', y = 'Poverty Rate Growth',
+       title = 'An Investigation Into the Relationship Between Growth in Population and Growth in the Poverty Rate') +
+  theme(text = element_text(size = 8),
+        plot.title = element_text(size = 18))
+```
+
+**Fixing it in ggplot**: If your text is in an `annotate()` or `geom_`, use the `size` aesthetic to change its size. If you have overlapping text with a `geom_text()/geom_label()`, you can sometimes fix it by using `geom_text_repel()/geom_label_repel()` instead from the **ggrepel** package. If it's a plot title or axis title/label, use `theme()` to change the size.
+
+If your axis labels are overlapping (like if you have a lot of bars on a bar graph), try any mix of of: (a) making the bars horizontal instead of vertical with `coord_flip()`, (b) using `mutate()` to swap out labels for shorter ones, (c) consider if there's another way to label your bars (perhaps at the top of the bar so the labels are at different heights?), (d) consider if your graph would make more sense *removing some bars*, (e) simply make the image wider so there's more room, using the `fig.width` chunk option in Quarto, or if saving the image to file, change the width in the export window or use the `width` option in `ggsave()`, or (f) use `scale_x_discrete(guide = guide_axis(n.dodge = 2))` to make the label height alternate up and down to give more room for the text.
+
+## 3. A Line Graph With An Unordered x-Axis
+
+A line graph implies continuity from one point to the next. If your x-axis is categorical and does not follow a meaningful order where each category comes "after" the one before it, then that continuity isn't actually there, and is misleading. It will often be incorrectly read as "change over time". (And no, alphabetical order or ordering the categories by the y-axis value doesn't usually count as a meaningful order for this purpose).
+
+```{r}
+ggplot(yule %>% slice(1:6), aes(x = reorder(location, -old), y = old, group = 1)) + 
+  geom_line() + 
+  labs(x = 'Location', y = 'Growth in Aged Population', title = '19th-century Growth of English Aged Populations') + 
+  theme_minimal()
+```
+
+**Fixing it in ggplot**: Make a bar graph (`geom_bar()/geom_col()`) instead, or some other kind of graph.
+
+## 4. A Degenerate Line Graph
+
+Line graphs are designed to be used in cases where, for each line you intend to plot, there is one data point for each x-axis value. If you try to make a line graph with data where this is not the case, your results will almost certainly be nonsense with a bunch of uninterpretable vertical lines on it. It will sort of feel like the slopes connecting those vertical lines are meaningful, but they aren't; they're almost entirely arbitrary.
+
+(note there is an alternate kind of graph called a *path graph*, made in **ggplot** with `geom_path()` which has vertical lines to connect the points but *does* have one data point per x-axis value. That's fine and not a problem.)
+
+```{r}
+data("avocado")
+avocado %>%
+  mutate(Month = lubridate::floor_date(Date, 'month')) %>%
+  ggplot(aes(x = Month, y = AveragePrice)) + 
+  geom_line() +
+  labs(y = 'Average Price', title = 'Price of California Avocados') + 
+  theme_classic()
+  
+```
+
+**Fixing it in ggplot**: Make sure you only have one data point per line per x-axis value. If your problem is that there are multiple different groups in your data (perhaps that avocado data contains one value for Hass avocadoes each month and another value for other kinds), then either use `filter()` to pick only the group you want, or use `color` or `linetype` or some other aesthetic in your `aes()` function to plot the line for each group separately. If you do only want one line but currently have multiple rows of data for each x-axis value, you probably want to summarize the different rows together into a single row. Use `group_by(your_x_axis_variable) %>% summarize(y = mean(y))` or `sum(y)` or some other summarizing function.
+
+## 5. A Scatterplot With Lots of Identical Data
+
+A scatterplot is used in cases where it is useful to see each data point separately. However, if you have two data points that take the exact same values, then one point will be directly in front of the other, blocking its view. If this happens on very rare occasion, it's not a problem. But if it happens *a lot*, then your scatterplot is bad. Note that *if either your x or y axis, or both, is categorical or takes a small number of discrete values, then this is almost certainly going to be a problem*.
+
+```{r}
+data(gss_cat)
+set.seed(1000)
+gss_cat %>%
+  sample_frac(.1) %>%
+  mutate(Religion = factor(if_else(relig %in% c('Christian','Orthodox-christian','Catholic','Protestant'),'Christian','Other'),
+                           levels = c('Other','Christian'))) %>%
+ggplot(aes(x = race, y = tvhours, color = Religion)) + 
+  geom_point() + 
+  theme_minimal() + 
+  labs(y = 'Hours Watched',x = NULL, title = 'Hours of TV Watched per Day, by Race and Religion')
+```
+
+Note that the above graph contains thousands of people, but you can't see any of it. It also looks like "Other" must be a super tiny group, with no representation, but actually it has plenty of people too; it just happened to be the group drawn first, so all those Christian dots got drawn on top of them, blocking them out.
+
+**Fixing it in ggplot**: *If it makes sense for your context* (i.e. this won't really make sense if you have a categorical x or y axis), you can use `geom_jitter()`, which spaces out the points so they don't overlap so much, instead of `geom_point()`. You can also try a scatterplot-esque graph that's designed to show you *how many points are in an area*, like `geom_bin2d()` or a [balloon plot](https://rpkgs.datanovia.com/ggpubr/reference/ggballoonplot.html) (which, by the way, *does* make sense when you have categorical or heavily discrete variables on your x and y axes). In general, considering a different kind of graph is a good idea. In most cases where this problem arises, the real problem is that a scatterplot makes no sense for what you're doing.
+
+## 6. A Legend With a Zillion Categories
+
+Separating your data by, say, color, is a super valuable thing you can do in a graph. But you have to convey to the reader which color is which group. A legend is the default way to do that. However, doing this with a legend requires that your reader (a) go through the legend, (b) remember which group is which category, (c) go to the data while remembering that fact, and (d) go back and forth to the legend every time they forget.
+
+Legends *quickly get overwhelming and unhelpful* if you have too many categories. How many categories is too many? I'd say you can do up to 4 without worrying too much about it. 5 is a bit much to handle but probably fine. 6 is probably too many. 7 is definitely too many.
+
+```{r}
+ggplot(gss_cat, aes(x = age, y = tvhours, color = relig)) + 
+  geom_jitter(width = 1, height = 1) + 
+  labs(x= 'Age', y = 'Hours Watched', title = 'Age and TV Watching',
+       color = 'Religion') + 
+  theme_classic() + 
+  theme(panel.grid = element_line(linewidth = .25))
+```
+
+**Fixing it in ggplot**: You might try finding another way to label your data (and then turn the legend off with `+guides(color = 'none')` (or similarly for other non-color aesthetics). In some cases, like a bar graph, it's easy to label the top (with `geom_text()`) or bottom (by default) of the bar. Line graphs are fairly easy to label the end or beginning of lines using [this guide](https://lost-stats.github.io/Presentation/Figures/line_graph_with_labels_at_the_beginning_or_end.html) or perhaps the **gghighlight** package or the super-neat-looking [geomtextpath](https://allancameron.github.io/geomtextpath/). For any type of graph you could break the groups into different graphs entirely with `facet_grid()` or `facet_wrap()` instead of distinguishing them by color. Also, have you considered that if you have *that many groups* that distinguishing the groups probably isn't that important to your story? Maybe you don't need them to be distinguished by color. In the scatterplot above, the shape of the scatterplot is what's important. Religion clearly isn't!
+
+## 7. A Pie Chart with a Legend For Each Slice
+
+Pie charts are already not well-liked in most data visualization circles for a number of reasons, one being that we're just not that good at seeing which of two angles is bigger. The pie chart itself is simply not doing the heavy lifting. If the comparison you're making is super obvious (like showing that "White" is the biggest category in the chart below) then it's *fine* but rarely the best option.
+
+However, if in your pie chart you rely on a *legend* to tell us what each slice represents, then since the visual representation of the angles isn't all that informative, you're actually making it harder to see what's going on than just putting everything in a table of numbers. Just give me a table of numbers instead at that point.
+
+```{r}
+gss_cat %>%
+  group_by(race) %>%
+  summarize(n = n()) %>%
+ggplot(aes(x="", y=n, fill=race)) +
+  geom_bar(stat="identity", width=1) +
+  coord_polar("y", start=0) +
+  theme_void() + 
+  labs(fill = 'Race')
+```
+
+If you *are* going to do a pie chart (and there are better options out there, like [treemaps](https://r-charts.com/part-whole/treemapify/), [waffle charts](https://github.com/hrbrmstr/waffle), or in many cases bar charts or stacked bar charts), you need to label it properly! Every slice should have its category **and** the percentage that it represents clearly labeled either on the slice, or just outside of the circle.
+
+**How to fix it in ggplot**: As previously mentioned, you could just use a different geometry. But if you want to stick with a pie chart, you can label the slices by first using `mutate()` to create a new label column (let's call it `my_label`) where you `paste0()` together the name of the category and the percentage it represents. For example, `mutate(my_label = paste0(category, '\n', amount/sum(amount),'%'))` where `category` is the category that defines the different pie slices, and `amount` is the value representing the size of each slice. Then, `geom_text(aes(label = my_label, position = position_stack(vjust=0.5))`.
+
+If your labels won't fit on the slices, try moving them outside; see [this guide](https://stackoverflow.com/a/44438500/3088891).
+
+## 8. A Combined-Area Chart with a Non-Addable Value
+
+Graphs are all about visual metaphors, and the kind of graph you make implies certain metaphors whether you want it to or not. With very, very rare exception, any time you *take a thing and separate it into parts*, you are implying that each of those parts add up to that whole thing. We see this, for example, with pie charts. The whole pie represents the entire data, and each slice represents a subset of that data. All the slices together gets you the whole pie. We also see it with stacked bar charts. Each bar represents some total amount, which is then divvied up among different subcategories.
+
+That means that you *can't use that kind of graph if those parts do not add up to that whole thing*.
+
+Lots of numbers *don't make sense if you add them together*. If one car is going 60 miles per hour, and another is going 55 miles per hour, does that mean that together they're going 60 + 55 = 115 miles per hour? No! Or, if the average income in the USA is \$40k, and the average income in Canada is \$45k, then would you say that the average income in the USA and Canada is \$40k + \$45k = \$85k? No! That doesn't make any sense. So the below graph doesn't make sense either:
+
+```{r}
+gss_cat %>%
+  mutate(Religion = factor(if_else(relig %in% c('Christian','Orthodox-christian','Catholic','Protestant'),'Christian','Other'),
+                           levels = c('Other','Christian'))) %>%
+  group_by(Race = race, Religion) %>%
+  summarize(`Average Hours Watched` = mean(tvhours, na.rm = TRUE)) %>%
+  ggplot(aes(x = Race, y = `Average Hours Watched`, fill = Religion)) + 
+  geom_col() + 
+  theme_classic() + 
+  theme(panel.grid.major.y = element_line())
+```
+
+**Fixing it in ggplot**: Use a different kind of graph, where the non-addable numbers aren't being graphically added together. This could mean using a bar graph instead of a pie chart, or using a grouped bar chart instead of a stacked one (add `position = 'dodge'` to your `geom_bar()/geom_col()`), or using a non-stacked line chart (`geom_line()`) instead of a stacked area chart (`geom_area()`). Or maybe something else altogether!
+
+## 9. Scientific Notation
+
+Big numbers take a lot of digits to write out. Your graphing software knows that people don't want to see a `8000000000` and so it has ways of writing that number smaller. Two common approaches are scientific notation (making that number into `8.0e+09`) and the other (although not as common) is power notation (making that number into $8.0\times 10^9$).
+
+The problem with both of these is that a general audience doesn't know what they mean. Your goal is to help people understand things about your data, so something that they don't understand isn't very helpful. So don't use it.
+
+```{r}
+data("population")
+population %>%
+  filter(country == 'Canada') %>%
+  ggplot(aes(x = year, y = population)) +
+  geom_line(size = 1) + 
+  labs(x = 'Year' ,y = 'Population', title = 'The Population of Canada') + 
+  theme_classic()
+```
+
+**Fixing it in ggplot**: The problem you're trying to solve is that you have a big, long number and you don't want to write the whole thing out (and you shouldn't!). In a lot of cases you can fix the problems by using bigger units, like "8M" instead of "8000000". The `label_` functions in the **scales** package can help. `scale_y_continuous(labels = label_number(scale = 1/1000000, suffix = 'M'))` will divide all the y-axis labels by a million and then add a "M" suffix. Similarly, `number(x, scale = 1/1000000, suffix = 'M')` will turn the specific number `x` into millions. You can also make settings like `prefix = '$'` to format it as dollars or `big.mark = ','` to put commas to distinguish thousands markers, or change `accuracy` to make it display more or fewer digits after the decimal place.
+
+One place this can fail is if you're using a log scale and need to pass through many orders of magnitude. If `label_number()` doesn't look too bad, then great! That's still your best option. If not, try `label_log()` which will write numbers in $10^x$ format. Not ideal, but better than scientific notation.
+
+## 10. Coding-Language Variable Names
+
+When you are coding up your analysis, you have to refer to the variables in the data by their column names. Often, these column names are not in plain language. They may be abbreviations (`EDUC` instead of "Education"), or do weird things with spaces (`myvariable` or `myVariable` or `my_variable` instead of "My Variable"), or be regular words but not particularly descriptive or nicely-formatted (`marital` instead of "Marital Status") or be incomprehensible (`AEORTE001` instead of "Total Population"). Sometimes if you're doing a calculation on a variable, the calculation will show up as part of the variable name (`I(Income^2)` instead of "Income Squared")
+
+Your reader does not know what these things mean. Or, if they can figure it out (like `myVariable` they can probably figure out) it's just a nice courtesy to your reader to change them to plain English. Plus, *not* doing this is just a clear signal to your reader that you didn't put much effort in, and they'll start wondering if you were also low-effort on more consequential stuff.
+
+```{r}
+gss_cat %>%
+  group_by(marital) %>%
+  summarize(hrswatch = mean(tvhours, na.rm = TRUE)) %>%
+  ggplot(aes(x = reorder(marital, -hrswatch), y = hrswatch)) + 
+  geom_col() + 
+  theme_minimal() + 
+  labs(title = 'Average TV Hours Watched Per Day')
+```
+
+**Fixing it in ggplot**: For actual variable names or axis titles, just use `labs()` to fix the problem. However, note you should also do this for things like factor variables (imagine the above graph had "nvrmarried" instead of "Never married"). You can convert these using `mutate(new_variable = case_when(old_variable == "nvrmarried" ~ "Never Married", etc.))` or `scale_x_discrete(labels = c('nvrmarried'='Never Married'))`.
+
+# Six Things You Almost Certainly Shouldn't Do
+
+## 11. A Dual Y-Axis
+
+When you want to show the relationship between two continuous variables, one approach you see a lot is to graph both variables as line or bar graphs (or one of each) along the x-axis, and then handle the fact that the two variables are on different scales by having two y-axis scales, one of the left and one on the right.
+
+This is not a good way to show the relationship between two variables, for three main reasons: (a) it's actually pretty hard to tell in this format whether a relationship is strong or not in most cases, and (b) the results these graphs create are *highly arbitrary* and you can make a given relationship look strong or weak at a whim by simply messing with one of the y-axes, and (c) since you're almost always doing line or bar graphs with this, you're either doing two bar graphs or two line graphs (making it easy to miss the fact that there *is* another y-axis on the right and making the graph confusing), or you're doing one line and one bar, and in the process almost certainly breaking either rule #3 above or #12 below.
+
+```{r}
+#| fig.width: 8
+mydat = gss_cat %>%
+  group_by(year) %>%
+  summarize(tv = mean(tvhours, na.rm = TRUE),
+            age = mean(age, na.rm = TRUE)) 
+
+p1 = mydat %>%
+  ggplot(aes(x = year, y = age)) + 
+  geom_col(aes(y = tv*15), fill = 'blue', alpha = .5) +
+  geom_line(linewidth = 1, color = 'firebrick') + 
+  labs(x = 'Year', y = 'Average Age',
+       title='Strong Relationship?') + 
+  theme_classic() +
+  scale_y_continuous(sec.axis = sec_axis(trans = ~./15, name = "TV Hours")) + 
+  coord_cartesian(ylim = c(40, 50))
+p2 = mydat %>%
+  ggplot(aes(x = year, y = age)) + 
+  geom_col(aes(y = tv*2+40), fill = 'blue', alpha = .5) +
+  geom_line(linewidth = 1, color = 'firebrick') + 
+  labs(x = 'Year', y = 'Average Age', title ='Weak Relationship?') + 
+  theme_classic() +
+  scale_y_continuous(sec.axis = sec_axis(trans = ~((.-40)/2), name = "TV Hours")) + 
+  coord_cartesian(ylim = c(40, 50))
+(p1+p2)
+```
+
+As a note, there is one case in which a dual y-axis is perfectly fine with no issue: *when the left and right y-axes are really just the same thing.* In other words, literally copying the y-axis onto the right side as well as the left so you can see it more easily. That's fine. Or, simply transforming the number, for example if you were tracking something's height, and you had "Height in meters" on the left and "Height in feet" on the right. Same value just expressed differently. That's totally fine. What's generally getting you in trouble is using the dual y-axes for *two different scales*.
+
+**Fixing it in ggplot**: If you want to show the relationship between two different variables, use a different graph, perhaps a geometry designed to show the relationship between two continuous variables. A scatterplot with `geom_point()` is one fine option, and there are others (see our [Geometry](https://nickch-k.github.io/DataCommSlides/Lecture_12_Story_and_Geometry.html#/) slides!). Depending on what you're doing, you can sometimes convert both variables into the same scale. For example, if you're trying to show that both variables are growing at a similar rate, maybe convert the data into percentage-growth variables with `arrange(time_variable) %>% mutate(percent_growth = (x/shift(x)) - 1)`.
+
+## 12. A Bar Graph That Could Be A Line Graph
+
+Most of the students taking this class are business students, and if there's one thing I've learned over the years it's that **business students love bar graphs**. Which is fine - bar graphs are a perfectly respectable geometry. But everything has a potential for overuse, and I find that business students tend to also use bar graphs where another graph type would make more sense. So, if you are looking at an ordered x-axis (like time) and interested in showing a story about how some single value is changing across that x-axis, that's really a line graph's domain. So make a line graph.
+
+Doubly true with groups - grouped line graphs look way better and are much easier to read than grouped bar plots.
+
+```{r}
+gss_cat %>%
+  group_by(year) %>%
+  summarize(tv = mean(tvhours, na.rm = TRUE)) %>%
+  filter(!is.na(tv), !is.na(year))%>%
+  ggplot(aes(x = year, y = tv)) + 
+  geom_col() + 
+  labs(x = 'Year', y = 'Average TV Watched Daily') + 
+  theme_classic()
+```
+
+## 13. Randomly Adding A Color Scale
+
+Color can help make things pretty, but in the realm of data visualization it also provides information. And any time you add a color *scale* (where different parts of your data have different colors), the audience will expect that you are trying to provide information about the data to them with that scale. So, it probably should!
+
+Making *all* of your data a specific color that you think looks nice is fine, and can improve the aesthetic qualities of your graph. But you shouldn't make *different data into different colors* unless it provides *additional* information beyond what's already on the graph (or, at least, really helps emphasize information that was already there).
+
+The two ways I see this most often are (a) making every bar in a bar graph a different random color, or (b) coloring a line or bar graph differently based on its height.
+
+Of these, (a) isn't helpful because we already know that these are separate bars - the bar labels tell us that. The color adds nothing, and because it's a whole long list of different colors it usually doesn't look good either. There are times the color *does* convey information and this is okay, for example if we are *intentionally* picking *relevant* colors to help us remember which bar is which (like in a graph of food brands, making Starbucks their distinct [green]{style="color: #006241"} color and McDonald's their distinctive [red]{style="color: #FF2D08"}), or if this is simply one graph of many and you're keeping a consistent color scheme across all graphs to help us connect one graph to the next (of course, if you *do* do this, *definitely* get rid of the legend with `guides(fill = 'none')`). (b) is rarely helpful because we can already see how high the value is, by looking at its height. (b) also usually looks really bad and can make the data hard to see, especially on a line graph.
+
+```{r}
+#| fig.width: 8
+p1 = ggplot(gss_cat, aes(x = race, fill = race)) + 
+  geom_bar() + 
+  theme_classic() + 
+  labs(x = NULL, y = 'Count') + 
+  guides(fill = 'none')
+p2 = gss_cat %>%
+  group_by(age) %>%
+  summarize(tv = mean(tvhours, na.rm = TRUE)) %>%
+  filter(!is.na(tv), !is.na(age))%>%
+  ggplot(aes(x = age, y = tv, color = tv)) + 
+  geom_line() + 
+  labs(x = 'Age in Years', y = 'Average TV Watched Daily',
+       fill = 'Hours') + 
+  theme_classic()
+p1+p2
+```
+
+**Fixing it with ggplot**: Just don't do it! Easy. Even better, find some other, more useful way to take advantage of the space you have to play with color. Pick a nice, attractive color for all your bars to take (and almost certainly just keep your line graph one color). Or, better, use color to color important bars eye-grabbing colors and less important bars less-eye-grabbing colors with `scale_fill_manual(values = )`.
+
+## 14. A Pie Chart With Lots of Categories
+
+Pie charts are fine in some circumstances, but there is a reason data visualization people tend not to like them: the human eye is bad at distinguishing between similarly-sized angles. So they really only work if the story you're going for is that one category is *way bigger* or *way smaller* than the others and that's the point. Pie charts are *terrible* at letting you compare similarly-sized groups, and they're also not very efficient uses of space. So they're *really bad* in any circumstance with lots and lots of pie slices.
+
+How many slices is too many? Honestly, any more than four is probably too many *unless* one of the slices is the only important ones and the others are only there for comparison (in which case you should *definitely* color the important one a bright color and wash out the rest so you don't pay much attention to them).
+
+```{r}
+gss_cat %>%
+  group_by(relig) %>%
+  summarize(n = n()) %>%
+  mutate(share = n/sum(n)) %>%
+  mutate(label = paste0(relig, ' (', percent(share,.1), ')')) %>%
+  mutate(pos = (cumsum(c(0, n)) + c(n / 2, .01))[1:n()]) %>%
+ggplot(aes(1, n, fill = relig, label = label)) +
+    geom_col(color = 'black', 
+             position = position_stack(reverse = TRUE), 
+             show.legend = FALSE) +
+    ggrepel::geom_text_repel(aes(x = 1.4, y = pos), 
+                    nudge_x = .3, 
+                    segment.size = .7, 
+                    show.legend = FALSE) +
+    coord_polar('y') +
+    theme_void()
+```
+
+**Fixing it in ggplot2**: If you have a lot of categories in the categorical variable you're interested in, consider an alternate geometry like a [treemap](https://r-charts.com/part-whole/treemapify/), [waffle chart](https://github.com/hrbrmstr/waffle), or a bar chart.
+
+If you want to stick with a pie chart, ask whether all those tiny little categories are actually important. Could you gather a bunch of them together into an "Other" category? And, again, you could *maybe* get away with a lots-of-categories pie chart if only one is the important, bright-colored one and the rest are just detail in the background. But there are still probably better options.
+
+## 15. Angled Text
+
+If there's not enough room for your text to lie horizontally, you might be tempted to angle it to fit everything. This isn't the *worst* thing in the world, but angled text *is* pretty hard to read, especially if it's tilted a full 90 degrees. This isn't always possible to avoid, but at least *try* to think of a way to get your text in without tilting it.
+
+(in a perfect world we'd also be getting rid of all those vertical y-axis titles, which we can do with `theme(axis.title.y = element_text(angle = 0, hjust = 1))`, perhaps putting some line breaks in the title with `labs(y=)` so it's not so wide).
+
+```{r}
+ggplot(gss_cat, aes(x = relig)) + 
+  geom_bar() + 
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+  labs(x = NULL, title = 'Distribution of Religious Faiths', y = 'Count')
+```
+
+**Fixing it in ggplot**: For bar graphs with long x-axis labels, try any mix of (a) making the bars horizontal instead of vertical with `coord_flip()`, (b) using `mutate()` to swap out labels for shorter ones, (c) consider if there's another way to label your bars (perhaps at the top of the bar so the labels are at different heights?), (d) consider if your graph would make more sense *removing some bars*, (e) simply make the image wider so there's more room, using the `fig.width` chunk option in Quarto, or if saving the image to file, change the width in the export window or use the `width` option in `ggsave()`, or (f) use `scale_x_discrete(guide = guide_axis(n.dodge = 2))` to make the label height alternate up and down to give more room for the text.
+
+## 16. An All-Defaults Basic Bar Graph
+
+There's nothing wrong with a bar graph, and the default **ggplot2** and **Tableau** bar graphs look *fine*. There's nothing wrong with them (ok, the Tableau ones regularly cut off the text on the x-axis labels, that's not good). In a business setting if you turn one of these in, and it's the right kind of graph to answer the question you're going for, it's not really an issue.
+
+But for *this class*, we learn all sorts of ways to make graphs look better than that. And *part of the assignment* for *every assignment* in this class is to not just *make a graph* but to look at your work and think "could this be better? Is the story as clear as possible? Are the aesthetics appropriate? How could I improve this?" We learn all sorts of tools and ideas for doing so. I suppose it's not impossible that you looked at your all-defaults basic bar graph and said "yep, that's as good as it could be, no room for improvement" but I kinda suspect you didn't and instead just wanted to be done with your homework. So I'm cutting off this particular easy-button option. Don't do it.
+
+```{r}
+ggplot(gss_cat, aes(x = race)) + geom_bar()
+```
+
+**Fixing it in ggplot**: If you're just going to turn in a standard bar graph it had better look good! Maybe add bar labels with `geom_text()`. The default theming in **ggplot** is *never* right for a bar graph - at the very least there's no purpose to the panel gridlines that go in the same direction as your bars, so get rid of them or pick a packaged theme that does so (default theming in **Tableau** is fine). Try using color, shading, bar ordering, annotation, *something* to direct readers towards your story rather than just going "here are some bars, bye." Make sure the titles and axis labels are all looking good with `labs()`.
+
+How about coloring the bars? Making them all the same, well-chosen color is a nice touch but is a pretty low-effort attempt at skirting this option. Making every bar a different color rarely adds anything useful and you're more likely to fall afoul of #13 above (and definitely get rid of the legend with `guides(fill = 'none')` if you do this). Ideally, when coloring your bars ask yourself if you can use all that color for something useful, like drawing the audience's attention to a bar that's a particularly important part of the story.
+
+And while there's no way I can prove you did it one way or another, don't just change something random so you technically aren't breaking this rule any more. The rule is here because I want you to *think about what you're doing and try to make a good graph.* So please, I'm begging you, do that.

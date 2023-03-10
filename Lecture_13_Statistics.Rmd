@@ -60,6 +60,7 @@ Things to Get Right:
 - *Read the data documentation*. Don't just rely on column names! These give you an indication of what the variable is, but not all the details of what it means, what question was asked to get it, and so on.
 - This includes both documentation about the variables themselves *and* information about how the data was collected - who's in the sample, how they were interviewed
 - Be critical! Was there a likely agenda behind data collection or how things were measured? How big is the sample?
+- Lots of data is just bad - in any decent analytics house they'll start on any new data set by testing it against some base truth. They won't take it for granted, and you shouldn't either
 
 ## Properly Using and Understanding the Data
 
@@ -157,16 +158,6 @@ So what now?
 - (this isn't a toy problem, by the way - marketing departments have a heck of a time proving whether ads have any effect at all for this very reason)
 - Maybe doing some sort of experiment where ads aren't set by anticipation for a while, or having some way of adjusting for anticipation. These are the alternate calculations that we think might *identify* our theory
 
-## In General
-
-- For this reason it's a good idea to avoid "causal language" unless you have a good idea that you are identified
-- Business schools tend to skip this warning in my experience, leading to common problems like "do ads actually work?"
-- Yes, you found that sales are higher with ads. Does that mean you should advertise more? There's an identification gap between the first and second thing.
-
-## More Accurate Communication
-
-- You can be more accurate by saying what you actually found - "sales were higher when there were more ads" - instead of "ads improved sales" (causal language which implies a direction for the relationship). Then you can discuss what that actually means in terms of decision-making (*should* we increase ads? What *can* the data tell us about that question? What else would we want to know first?)
-
 ## Or Just a Gut Check
 
 - Another way to avoid identification error is to think about what you're really implying with your results and seeing if it makes sense
@@ -184,7 +175,7 @@ So what now?
 
 - More broadly, whether we're talking about identification or not
 - A great indication that something is wrong about your data or analysis, or that you're not identified, is simply in whether your results *make any darn sense*
-- Data is wrong sometimes, and errors can become clear only in retrospect! So a good gut-checking instinct is really key, especially in areas like business where you know you'll get things a *little* wrong and have imperfect data, but need to know if it's *too wrong to be useful*
+- Data is wrong sometimes, and errors can become clear only in retrospect! So a good gut-checking instinct (or a good *noticing* instinct) is really key, especially in areas like business where you know you'll get things a *little* wrong and have imperfect data, but need to know if it's *too wrong to be useful*
 
 ## Creating Plausible Results
 
@@ -208,6 +199,7 @@ Always be asking yourself:
 ## Creating Plausible Results
 
 - For example, if you find that your sales are only nonzero in two weeks of the year, that's probably wrong. Or that the ad sales are 5x the non-ad sales, that's probably wrong too!
+- If your result on when movie releases peaked found that 2021 was the year with the most movies ever, at 65 total movies... that's wrong!
 - Or if you've chosen to make a recommendation on the basis of your method, but your method recommends something impossible (I recommend that you hire for your new CEO... Thomas Edison!) or clearly wrong (I recommend that you hire for your new CEO... a cat!) that doesn't mean you've come to a great surprising conclusion, it means your method is bad and you should start over with a different method
 
 ## Doing the Right Calculations

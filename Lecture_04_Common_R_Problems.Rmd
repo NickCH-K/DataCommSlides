@@ -51,7 +51,7 @@ If you get an error like `could not find function "functionname"`, that means it
 The Fix:
 
 1. Did you spell the function name correctly? Maybe you made a typo.
-1. If the function is in a package, did you load the package? Remember, the package must be re-loaded every time you restart R. If you're working in RMarkdown, you must load the package inside of your RMarkdown script, since RMarkdown starts from a blank slate.
+1. If the function is in a package, did you load the package? Remember, the package must be re-loaded every time you restart R. If you're working in Quarto, you must load the package inside of your Quarto script, since Quarto starts from a blank slate.
 
 ## Object not found
 
@@ -60,7 +60,7 @@ If you get an error like `object 'objectname' not found`, that means that you've
 The Fix:
 
 1. Did you spell the object's name correctly? Maybe you made a typo.
-1. Did you remember to create the object before referring to it? For example, the code `mean(x); x <- 1:10` would not work, because you try to take the mean of `x` before it's been created. If you're working in RMarkdown, remember that it will start from a blank slate, so you must create all objects inside of your Rmarkdown script.
+1. Did you remember to create the object before referring to it? For example, the code `mean(x); x <- 1:10` would not work, because you try to take the mean of `x` before it's been created. If you're working in Quarto, remember that it will start from a blank slate, so you must create all objects inside of your Quarto script.
 
 ## Column doesn't exist
 
@@ -106,20 +106,21 @@ The Fix:
 
 1. Did you spell the filename correctly? Maybe you made a typo. Or, perhaps, you're trying to open an Excel fie (`.xlsx`) but telling R to look for a CSV (`.csv`). Or you wrote "file.csv" but the file is "file (1).csv". 
 1. Is the file perhaps open in Excel? Sometimes, Microsoft Office will hold files hostage and not let them be opened in other programs while they're open in Office. Close the Excel window that has the file open.
-1. **Most often**, this is a working directory issue. If you tell R to look for `'filename.csv'`, it will look for that file in the *working directory*. Or, if you tell it to look for `'data/filename.csv'`, it will look for a folder called "data" in the working directory, and for filename.csv inside of that. In recent versions of RStudio, the current working directory is listed right on top of the Console. Did you check whether the file is actually in that folder? If you're running RMarkdown, it will set the working directory to the folder where the .RMD file is located. Did you put the file in the right spot relative to where the RMD is stored? See my [video on filepaths](https://www.youtube.com/watch?v=NG7Y0kkGR8g) for more help.
+1. **Most often**, this is a working directory issue. If you tell R to look for `'filename.csv'`, it will look for that file in the *working directory*. Or, if you tell it to look for `'data/filename.csv'`, it will look for a folder called "data" in the working directory, and for filename.csv inside of that. In recent versions of RStudio, the current working directory is listed right on top of the Console. Did you check whether the file is actually in that folder? If you're running Quarto, it will set the working directory to the folder where the .qmd file is located. Did you put the file in the right spot relative to where the qmd is stored? See my [video on filepaths](https://www.youtube.com/watch?v=NG7Y0kkGR8g) for more help.
 
 
-## My code works fine in RStudio, but my RMarkdown won't knit
+## My code works fine in RStudio, but my Quarto won't render
 
-If your code runs fine when you run it by hand, but your RMarkdown throws errors, these are the most common issues:
+If your code runs fine when you run it by hand, but your Quarto throws errors, these are the most common issues:
 
-1. You may have loaded a library while working on your code, but not loaded that same library in your RMarkdown. Include all necessary `library()` functions inside your RMarkdown document.
-1. You may have created an object while working on your code, but not created that same object in your RMarkdown. Make sure all objects are created within the RMarkdown itself.
+1. You may have loaded a library while working on your code, but not loaded that same library in your Quarto. Include all necessary `library()` functions inside your Quarto document.
+1. You may have created an object while working on your code, but not created that same object in your Quarto. Make sure all objects are created within the Quarto itself.
 1. To troubleshoot both (1) and (2) above, restart your R session (Session -> Restart R) and clear your environment (hit the broom icon in the Environment tab), and THEN run your code line by line to see where the error is.
-1. If you're loading in a file, you may have a different working directory than the RMarkdown is using. Remember, RMarkdown sets the working directory to the folder where the file is saved. See the previous "File does not exist" issue above.
-1. RMarkdown hates when you try to install packages inside the RMarkdown (and it's a bad idea anyway). Make sure there are no `install.packages()` or `remotes::install_github()` lines in your RMarkdown doc
+1. If you're loading in a file, you may have a different working directory than the Quarto is using. Remember, Quarto sets the working directory to the folder where the file is saved. See the previous "File does not exist" issue above.
+1. Quarto hates when you try to install packages inside the Quarto (and it's a bad idea anyway). Make sure there are no `install.packages()` or `remotes::install_github()` lines in your Quarto doc.
+1. Did you make sure your code is inside of a chunk? Code outside of a chunk won't run.
 
-If none of those fix it, then look in the "Render" tab to see what exactly the error message is. Keep in mind that, in Rmarkdown, the line number associated with the error message is the line number for the **start of the chunk where the error is**, not the **actual line where the error occurs.**
+If none of those fix it, then look in the "Render" tab to see what exactly the error message is. Keep in mind that, in Quarto, the line number associated with the error message is the line number for the **start of the chunk where the error is**, not the **actual line where the error occurs.**
 
 ## Object of type 'closure' is not subsettable
 

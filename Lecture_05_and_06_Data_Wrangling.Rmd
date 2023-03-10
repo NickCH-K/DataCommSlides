@@ -16,7 +16,7 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, warning =FALSE, message = FALSE)
 library(tidyverse)
 library(DT)
 library(purrr)
@@ -98,6 +98,15 @@ For the purposes of this class:
 - From data to tidy data
 - From tidy data to data for your analysis
 
+## What we Can and Can't Cover
+
+- We could be at this for literally weeks and not cover everything
+- And you wouldn't remember it anyway
+- I will cover the stuff we can use immediately and will use all the time
+- The rest will be reducing *unknown unknowns*
+- **If you need to do something later, and we didn't cover it, maybe come back and check these slides!!**
+- The video series, linked on Canvas and [here](https://www.youtube.com/watch?v=EdPKcy1WKD0&list=PLcTBLulJV_AJ4M_a7oYpURLZ36YvUG78S), will go into these things in more detail when you need them 
+
 
 # From Data to Tidy Data 
 
@@ -164,7 +173,9 @@ datatable(multicat)
 
 ## Tidying Non-tidy Data
 
-There are many more elements to this, but I will cover two tools: `pivot` and `join`
+There are many more elements to this, but I will cover two tools: `pivot` (briefly) and `join` (in more detail)
+
+Pivot will be our first **review in a flash here, just remember that it exists, come back later or watch the video when you actually need it**
 
 ## Tidying Non-Tidy Data
 
@@ -173,15 +184,6 @@ There are many more elements to this, but I will cover two tools: `pivot` and `j
 - This can also be referred to as going from "wide" data to "long" data
 - Long to wide is also an option
 - In every statistics package, pivot functions are notoriously fiddly. Always read the help file, and do trial-and-error! Make sure it worked as intended.
-
-## Tidying Non-Tidy Data
-
-Check our steps!
-
-- We looked at the data
-- Think about how we want the data to look - one row per (keys) category and month, and a column for the actual sales value
-- How can we carry information from where it is to where we want it to be? With a pivot!
-- And afterwards we'll look at the result (and, likely, go back and fix our pivot code - the person who gets a pivot right the first try is a mysterious genius)
 
 ## Pivot
 
@@ -287,11 +289,12 @@ a %>% left_join(b, by = 'Name')
 
 ## Try It!
 
-Pivot `data1` to one observation per month per category, then join with `data2`, maintaining both categories
+Join `data1` with `data2`, maintaining both categories
 
 ```{r, echo = TRUE, eval = TRUE}
 data1 <- tibble(Month = 1:4, MonthName = c('Jan','Feb','Mar','Apr'),
-                Sales = c(6,8,1,2), RD = c(4,1,2,4))
+                Sales = c(6,8,1,2), RD = c(4,1,2,4)) %>%
+  pivot_longer(cols = c(Sales, RD), names_to = 'Department')
 data2 <- tibble(Department = 'Sales', Director = 'Lavy')
 ```
 
@@ -299,7 +302,6 @@ data2 <- tibble(Department = 'Sales', Director = 'Lavy')
 
 ```{r, echo = TRUE}
 data1 %>%
-  pivot_longer(cols = c(Sales, RD), names_to = 'Department') %>%
   left_join(data2) # full_join would also work to retain RD despite no match
 ```
 
@@ -310,13 +312,14 @@ data1 %>%
 - Okay! We now have, hopefully, a nice tidy data set with one column per variable, one row per observation, we know what the observation level is!
 - That doesn't mean our data is ready to go! We likely have plenty of cleaning and manipulation to go before we are ready for analysis
 - We will be doing this mostly with **dplyr**
+- You'll (a) **definitely want to know this**, and (b) will almost certainly find it easier to do with these **dplyr** tools than with something else you Google
 
 ## dplyr
 
 - **dplyr** uses a *small set of "verbs"* to very flexibly do all kinds of data cleaning and manipulation
 - The primary verbs are: `filter(), select()`, `arrange()`, `mutate()`, `group_by()`, and `summarize()`.
 - Other important functions in **dplyr**: `pull()` (which we covered), `case_when()`, `rename()`, and `slice()`
-- See the [dplyr cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/data-transformation.pdf)
+- See the [dplyr cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
 
 # Subsetting Data
 
@@ -371,7 +374,6 @@ print(no_income)
 ## arrange()
 
 - `arrange()` sorts the data. That's it! Give it the column names and it will sort the data by those columns.
-- It's often a good idea to sort your data before saving it (or looking at it) as it makes it easier to navigate
 - Can be handy with `slice()`. `arrange(-Income) %>% slice(1:5)` gives you the five rows with the highest income, for example
 - There are also some data manipulation tricks that rely on the position of the data
 
@@ -505,6 +507,15 @@ construction %>%
   summarize(`Price Average` = mean(`Price Average`))
 ```
 
+## group_by stuff
+
+As I mentioned, students tend to forget that `group_by()` followed by `summarize()` or `mutate()` solves *so many problems*. Like what?
+
+- "Find the (average / maximum / sum / first / etc.) for each (group)"
+- Count the number of observations by group (`group_by(X) %>% summarize(n = n())`)
+- Calculate the change each period by group (`arrange(date) %>% group_by(X) %>%` `mutate(change = Y - shift(Y))`)
+- Really any time you want to do something repeatedly, once per group
+
 # Factors, Dates, and Strings
 
 ## Manipulating Variables
@@ -581,28 +592,26 @@ tibble(Income = c('50k-100k','Less than 50k', '50k-100k', '100k+', '100k+')) %>%
 
 - Specified with `''` or `""`
 - Use `paste0()` to stick stuff together! `paste0('h','ello', sep = '_')` is ''h_ello'`
-- Messy data often defaults to character. For example, a "1,000,000" in your Excel sheet might not be parsed as `1000000` but instead as a literal "1,000,000" with commas
+- Note that `'\n'` can be used for line breaks
+- Pasting together annotations and graph titles is a great idea!
 - (btw you really don't want your numbers to be strings!! Don't put quotes around numbers!)
-
-## Characters/strings
-
-- Even if your data isn't textual, working with strings is a very common aspect of preparing data for analysis
-- Some are straightforward, for example using `mutate()` and `case_when()` to fix typos/misspellings in the data
-- But other common tasks in data cleaning include: getting substrings, splitting strings, cleaning strings, and detecting patterns in strings
-- For this we will be using the **stringr** package in **tidyverse**, see the [cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/strings.pdf)
-
-## Making Strings
-
-- `paste()` and `paste0()` are your friends for sticking strings together, a common task in visualization
-- `paste('a','b','c',sep = '-')` is `'a-b-c'`. Default `sep` is `' '` for `paste()`, or `''` for `paste0` (the only difference!)
-- You can include some special characters, notably `'\n'` for line breaks.
-- Pasting together annotations and table titles is a great idea!
 
 ## stringr
 
-- Just like **forcats** for categories and **lubridate** for dates, **stringr** (in the **tidyverse** as well) makes working with strings as easy as possible
+- Just like **forcats** for categories and **lubridate** for dates, **stringr** (in the **tidyverse** as well) makes working with strings as easy as possible. See the [cheatsheet](https://raw.githubusercontent.com/rstudio/cheatsheets/main/strings.pdf)
 - When working with textual data, first ask: hmm why don't I try looking in **stringr** to see if there's a relevant function?
 - Conveniently most relevant functions start with `str_` so you can just type `stringr::str_` and let RStudio's autocomplete give some suggestions.
+
+## Common String Manipulation Needs
+
+The next few slides we're going to skip past, but they're here to come back to in case you need:
+
+- A substring. `str_sub('hello',2,4)` is `'ell'`, `word('hello hi',2)` is `'hi'`
+- Splitting strings in two with `str_split()` and `separate()`
+- Decluttering strings and removing whitespace with `str_trim()/str_squish()`
+- Fixing strings: `str_replace('MSFT stock','MSFT','Microsoft')` is `'Microsoft Stock'`
+- Prettifying strings by making them title case, upper case, etc.
+
 
 ## Getting Substrings
 
@@ -704,11 +713,11 @@ Load the `gss_cat` data. Then :
 
 ## Try It!
 
-Then, create `income_num` equal to the first number: 
+Then, if you're going into the string stuff, create `income_num` equal to the first number: 
 
 1. use `word()` to get the first word, 
 1. `str_sub()` or `str_replace_all()` to get rid of the "$", and
-1. `as.numeric() to make the result a number 
+1. `as.numeric()` to make the result a number 
 
 (you'll get some NAs for the non-numbers, and let's ignore the "Lt $1000" case we miss for now)
 
@@ -740,7 +749,14 @@ gss_cat %>%
 - Data cleaning is often very repetitive
 - You shouldn't let it be!
 - Not just to save yourself work and tedium, but also because standardizing your process so you only have to write the code *once* both reduces errors and means that if you have to change something you only have to change it once
-- So let's automate! Three ways we'll do it here: `across()`, writing functions, and **purrr**
+
+## Breezing Past
+
+We've already gone through a lot! Just remember: **if you're doing the same thing a bunch of times in a row, please don't copy/paste or actually type it all out. Come back to these slides**. That includes:
+
+- Doing the same `summarize/mutate` calculation to a lot of different variables (use `across()`)
+- Reusing the same few lines of code (or big chunk of code) over and over in different parts of your analysis (writing functions)
+- Performing the same actions to many different objects or elements of a vector (**purrr**)
 
 ## across()
 
@@ -805,7 +821,6 @@ person_year_data %>%
 
 ## purrr
 
-- Handy for processing many files, perhaps use `list.files()` to make a list of cSV files to read in, and then `map_df(read_csv)`!
 - Or looping more generally for diagnostic or wrangling purposes. Perhaps you have a `summary_profile()` function you've made, and want to check each state's data to see if its data looks right. You could do 
 
 ```{r, echo = TRUE, eval = FALSE}
@@ -824,17 +839,23 @@ my_function <- function(i) {
 1:10 %>% map(my_function)
 ```
 
-- See the [purrr cheatsheet](https://github.com/rstudio/cheatsheets/raw/master/purrr.pdf)
+- See the [purrr cheatsheet](https://github.com/rstudio/cheatsheets/blob/main/purrr.pdf)
 
 # Finishing Up, and an Example!
 
 ## Some Final Notes
 
-- What to do when you're done and want to save your processed data?
-- Saving data in R format: `save()` saves many objects, which are all put back in the environment with `load()`. 
-- Alternately, `saveRDS()` which saves a single `data.frame()` or `tibble()` in compressed format, loadable with `df <- readRDS()`. Makes more sense coding-wise, but can't be opened in, say, Tableau, and is less standard and more confusing
-- Saving data for sharing: `write_csv()` makes a CSV. Yay!
-- If you wanna get fancy, `arrow::write_parquet()`/`arrow::read_parquet()`
+- Importing and exporting data is way easier than it used to be, with **rio**
+- `import()` for any filename will import it (watch your working directory!)
+- `import_list()`, given a list of filenames or a single Excel workbook with multiple sheets, will import them all to a list (access each one with `[[1]]`, `[[2]]`, etc., or if they're row-bindable, just stack them all on top of each other into one data set with `rbind = TRUE`)
+- Then `export()` to save when you're done
+- Note: `import()` can get a file that's currently inside a `.zip` to save space, or `export()` to `.zip`
+
+## Data File Types
+
+- `.Rdata`: very compact, and flexible (can contain more than just one data set), but specific to R and can't be used most other places
+- `.csv`: the most general and can be used by anything, but large filesizes and you lose some data detail (like, factors don't carry over)
+- `.parquet`: very compact and also fairly general, but also new and not everyone will know what to do with it
 
 ## Some Final Notes
 
@@ -850,20 +871,21 @@ my_function <- function(i) {
 1. Use `mutate(across())` to add 1 to all columns ending in 'p', using the function you wrote
 1. Put steps 2 and 3 inside another function that takes `a` as an argument, change "add 1" to "add `a`" and returns the resulting data
 1. Use `map_df` to stack together data sets with `a` values from 1 to 5
-1. Save the result as a CSV with `write_csv()`
+1. Save the result as a CSV with `export()` from **rio**
 
 ## Let's Try It!
 
 ```{r, eval = FALSE, echo = TRUE}
+library(rio)
 x_plus_a <- function(x, a) { x + a }
 
 add_to_mtcars <- function(a) {
   data(mtcars)
-  adjusted <- mtcars %>% mutate(across(ends_with('p'), x_plus_a, a = a))
+  adjusted <- mtcars %>% mutate(across(ends_with('p'), \(x) x_plus_a(x,a)))
   return(adjusted)
 }
 
-1:5 %>% map_df(add_to_mtcars) %>% write_csv('myfile.csv')
+1:5 %>% map_df(add_to_mtcars) %>% export('myfile.csv')
 ```
 
 ```{r, echo = FALSE, eval = TRUE}

@@ -207,7 +207,7 @@ mtcars %>% group_by(vs, am) %>%
 
 ## Multivariate Exploratory Analysis
 
-- When it comes to densities, typical geoms look cluttered. I recommend `geom_density_ridges` in **ggridges** or `geom_violin` (or use facets)
+- When it comes to densities, typical geoms look cluttered. I recommend `geom_density_ridges` in **ggridges**, or `geom_violin` (or use facets)
 
 ```{r, echo = TRUE, fig.height = 3}
 library(ggridges); library(patchwork)
@@ -258,7 +258,7 @@ Be aware of what EDA does not do:
 - Consider doing EDA on a random subset data for this reason, so you can check if something interesting actually is there in the other/full data and don't trick yourself
 - Hardly ever establishes a *causal relationship* - avoid causal language unless you can really back it up!
 
-## Let's Do It (if there's time)
+## Let's Do More (if there's time)
 
 - [https://vincentarelbundock.github.io/Rdatasets/csv/Stat2Data/Clothing.csv](https://vincentarelbundock.github.io/Rdatasets/csv/Stat2Data/Clothing.csv)
 - Data description: [https://rdrr.io/rforge/Stat2Data/man/Clothing.html](https://rdrr.io/rforge/Stat2Data/man/Clothing.html)

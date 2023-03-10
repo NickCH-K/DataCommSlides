@@ -36,12 +36,12 @@ cat("
 - It is based on the *grammar of graphics*
 - Lots of major publications use it (538, The Economist, BBC, ...)
 - Zillions of extensions for doing anything you like
-- (also runs in Python using **plotnine**, so everything you learn here will also teach you plotting in Python)
+- (also runs in Python using **plotnine**, and the newest version of **seaborn** is based on teh Grammar of Graphics, so everything you learn here will also teach you plotting in Python)
 
 ## Resources
 
 - [An overview of the Grammar of Graphics concept](https://towardsdatascience.com/a-comprehensive-guide-to-the-grammar-of-graphics-for-effective-visualization-of-multi-dimensional-1f92b4ed4149)
-- [ggplot2 cheat sheet from RStudio](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+- [ggplot2 cheat sheet from RStudio](https://github.com/rstudio/cheatsheets/blob/master/data-visualization.pdf)
 - [ggplot2 book by Hadley Wickham](https://ggplot2-book.org/)
 - [LOST-Stats Figures](https://lost-stats.github.io/Presentation/Figures/Figures.html)
 - [R Graphics Cookbook](https://r-graphics.org/)
@@ -131,14 +131,14 @@ See `help()` for a given geometry to see what it accepts. But common are:
 - `label`: text labels
 - `size`: guess what this does
 - `alpha`: Transparency
-- `linetype`: for lines or outlines, the type of line (solid, dashed...)
+- `linetype`, `linewidth`: for lines or outlines, the type/thickness of line (solid, dashed...)
 - `xmin`/`xmax`/`xend` (and same for `y`): For line segments or shaded ranges, where do they start/end?
 
 
 ## Geometry
 
 - The *geometry* is what actually gets drawn. In the last slide, `geom_point()` drew points.
-- There are many different geometries. Let's look at the [ggplot2 cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf)
+- There are many different geometries. Let's look at the [ggplot2 cheat sheet](https://github.com/rstudio/cheatsheets/blob/master/data-visualization.pdf)
 - Common: `geom_point`, `geom_line`, `geom_col`, `geom_text`
 
 ## Geometry: geom_line
@@ -199,6 +199,18 @@ ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position 
 ## Demonstrating Distributions
 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg)) + geom_histogram()
+```
+
+## Demonstrating Distributions
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg)) + geom_dotplot()
+```
+
+## Demonstrating Distributions
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
 ggplot(mtcars, aes(x = mpg)) + geom_density()
 ```
 
@@ -209,17 +221,6 @@ ggplot(mtcars, aes(y = mpg, x = factor(am))) + geom_violin()
 ```
 
 
-## Demonstrating Distributions
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-ggplot(mtcars, aes(x = mpg)) + geom_histogram()
-```
-
-## Demonstrating Distributions
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-ggplot(mtcars, aes(x = mpg)) + geom_dotplot()
-```
 
 ## Discrete Distributions: geom_bar
 

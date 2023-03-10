@@ -1,5 +1,5 @@
 ---
-title: "Lecture 4: R and RMarkdown"
+title: "Lecture 4: R and Quarto"
 author: "Nick Huntington-Klein"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:   
@@ -43,7 +43,7 @@ cat("
 - As we go through the course, we're going to need to kep data visualization and communication principles close at hand
 - But it's also unavoidable that actually using them will require some technical skill on our part
 - In this class we'll be using R
-- Specifically, the **tidyverse** set of packages, and RMarkdown
+- Specifically, the **tidyverse** set of packages, and Quarto
 - I don't expect you to become R experts. You're not learning R so much as learning **dplyr** and **ggplot2** and some extra details
 
 ## R
@@ -62,11 +62,25 @@ cat("
 - Using basic R elements
 - I'll also show you how to set up the **swirl** package so you can do some walkthroughs on your own
 
-## RMarkdown
+## Loading in data
 
-- RMarkdown is a text and code processing system
+- For the most part the **tidyverse** package will cover all our needs
+- For loading in (and saving) data, I strongly suggest the use of the **rio** package
+- This package is new, so you won't find it on a lot of Google searches for "R load CSV file"
+- But it's super easy. Doesn't even matter what file format it is. `import('filename.csv')` or `.Rdata` or `.xlsx` etc. all work immediately. `import_list()` can import all the sheets of an Excel workbook, or a bunch of files, all at once
+
+## My Promise
+
+- There are many ways to do anything in R
+- But if I've shown it in class, almost certainly the way I'm showing it is the easiest, especially in the context of this class, as I've chosen stuff that makes sense for us specifically
+- Don't make yourself work too hard! If you're trying to figure something out, ask "did we cover this in class?" If so, go back to this material - it will probably be less work than whatever Google solution you find
+- Like, seriously. The number of times students spend hours and hours trying to stitch together a solution from dozens of StackExchange answers, when it's something I've given a one-line solution to in class, is *a lot*
+
+## Quarto
+
+- Quarto is a text and code processing system
 - Text and code in -> Formatted output out (HTML, Word, PDF, slides, books, etc.)
-- These slides are made in RMarkdown. I write books and papers in it too.
+- These slides are made in Quarto. I write books and papers in it too.
 
 ## Markdown
 
@@ -84,48 +98,30 @@ cat("
 
 ## The YAML
 
-- The YAML is the set of text at the top of an RMarkdown that tells it how to interpret all that text. Here's the YAML for these slides:
-
-```{r, eval = FALSE, echo = TRUE}
----
-title: "Lecture 4: R and RMarkdown"
-author: "Nick Huntington-Klein"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output:   
-  revealjs::revealjs_presentation:
-    theme: simple
-    transition: slide
-    self_contained: true
-    smart: true
-    fig_caption: true
-    reveal_options:
-      slideNumber: true
----
-```
-
-## The YAML
-
-- Here's a more standard YAML, the default from File -> New Rmarkdown:
-- Common option: toc: TRUE to turn on the table of contents on the left
+- The YAML is the set of text at the top of a Quarto that tells it how to interpret all that text. Here's an example YAML:
 
 ```{r, eval = FALSE, echo = TRUE}
 ---
 title: "Untitled"
-author: "Nick Huntington-Klein"
-date: "7/5/2021"
-output: html_document
+format: 
+  html:
+    embed-resources: true
+    toc: true
+editor: visual
 ---
 ```
+
 
 ## Code Chunks
 
 - Include code in-line (fantastic for memos) with `r rinline('mean(1:3)')` which makes `r mean(1:3)`
-- Include code chunks with triple backticks. Let's take a look at an example RMarkdown doc
+- Start a new code chunk with a forward slash, /. Let's take a look at an example Quarto doc
+- *Code goes inside the chunks, writing goes outside*
 - Note: want a data frame to nicely format as a table? use `knitr::kable()`.
 
 ## Code Chunks
 
-- Common options to set in each code chunk, or altogther in `knitr::opts_chunk$set()`:
+- Common options to set in each code chunk, or altogether in the YAML:
 - `echo`: Show code or not?
 - `eval`: Evaluate the code inside or not?
 - `warning` and `message`: Show warnings and messages from the code?
@@ -134,10 +130,11 @@ output: html_document
 ## Common Mistakes
 
 - Let's take a look at the [Common Errors and Mistakes Cheatsheet](https://nickch-k.github.io/DataCommSlides/Lecture_04_Common_R_Problems.html)
+- Common Quarto mistakes: forgetting the be sure that *all the code you need to run from fresh are in the Quarto*, including `install.packages()` (don't do it!), working directory issues, using the "Import Data" wizard
 
 ## Let's do it
 
-- Make a new RMarkdown HTML document
+- Make a new Quarto HTML document
 - YAML: Turn the toc on, title it and add your name
 - Make one big section and title it (#) and two small (##)
 - In the setup chunk, load the **tidyverse** and load `data(storms)`

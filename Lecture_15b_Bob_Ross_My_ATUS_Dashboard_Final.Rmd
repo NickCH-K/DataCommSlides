@@ -1,0 +1,138 @@
+---
+title: "ATUS Activity Dashboard "
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: 
+      version: 4
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+{
+  library(flexdashboard)
+  library(atus)
+  library(tidyverse)
+  library(scales)
+  library(plotly)
+  library(shiny)
+  library(ggiraph)
+  library(dygraphs)
+}
+
+data(atusact)
+
+# Check that everything is 5 or 6 digits long
+# atusact %>% pull(tiercode) %>% nchar() %>% table()
+
+# Check that we can use the first four digits of tucaseid to find hte year
+# data(atusresp)
+# atusresp <- atusresp %>%
+#   mutate(year_from_id = str_sub(tucaseid, 1, 4))
+# table(atusresp$tuyear, atusresp$year_from_id)
+
+
+# Get RID of last two digits
+atusact <- atusact %>% 
+  ungroup() %>%
+  mutate(tiercode = floor(tiercode/100)) %>% # Get four-digit codes
+  mutate(code_2digit = floor(tiercode/100)) %>% # Get two-digit codes
+  mutate(tiercode = factor(tiercode),
+         code_2digit = factor(code_2digit)) %>%
+  mutate(Year = as.numeric(str_sub(tucaseid, 1, 4))) # Get the year
+
+# Alternate approach using string manipulation
+# atusact %>%
+#   mutate(six_digit_code = str_pad(tiercode, 6, 'left', '0')) %>%
+#   mutate(tiercode_2digit = str_sub(six_digit_code, 1, 2)) %>%
+#   mutate(tiercode_4digit = str_sub(six_digit_code, 1, 4))
+
+
+# Get share of each two-digit code that is hte four-digit code (as a function of dur)
+# Overall
+overall_share <- atusact %>%
+  group_by(tiercode, code_2digit) %>%
+  summarize(total = sum(dur)) %>%
+  group_by(code_2digit) %>%
+  mutate(share = total/sum(total))
+
+# Within year
+overall_share_by_year <- atusact %>%
+  group_by(tiercode, code_2digit, Year) %>%
+  summarize(total = sum(dur)) %>%
+  group_by(code_2digit, Year) %>%
+  mutate(share = total/sum(total))
+
+
+# Get total time spent on each two-digit code each year
+total_time_per_year <- atusact %>%
+  group_by(code_2digit, Year) %>%
+  summarize(`Total Minutes (Millions)` = sum(dur)/1000000) %>%
+  ungroup() %>%
+  mutate(Date = lubridate::ym(paste0(Year, '-01'))) %>%
+  select(-Year)
+```
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput('twodigit', 'Select a Category of Activities:',
+            sort(unique(overall_share$code_2digit)))
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Share of Each Activity Over Time
+
+```{r}
+renderPlotly({
+  p1 <- overall_share_by_year %>%
+    filter(code_2digit == input$twodigit) %>%
+    mutate(Share = round(share*100, 1)) %>%
+    ggplot(aes(x = Year, y = Share, fill = tiercode)) + 
+    geom_area() + 
+    scale_y_continuous(labels = label_percent(scale = 1)) + 
+    theme_classic() + 
+    labs(fill = 'Activity')
+  ggplotly(p1)
+})
+```
+
+### Total Amount of Activity Over Time
+
+```{r}
+renderDygraph({
+  total_time_per_year %>%
+    filter(code_2digit == input$twodigit) %>%
+    tbl2xts::tbl_xts() %>%
+    dygraph() %>%
+    dyRangeSelector()
+})
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Share of Each Activity
+
+```{r}
+renderggiraph({
+p3 <- overall_share %>%
+  filter(code_2digit == input$twodigit) %>% 
+  mutate(tooltip = paste0('Total Minutes (Mil.): ', 
+                          number(total, scale = 1/1000000, accuracy = .1),
+                          '\nPercentage: ',
+                          percent(share, accuracy = .1))) %>%
+  ggplot(aes(x = reorder(tiercode, share), y = share, tooltip = tooltip)) + 
+  geom_col_interactive(fill = 'lightblue', color = 'black') + 
+  scale_y_continuous(labels = label_percent()) + 
+  labs(x = 'Activity', y = 'Share') + 
+  theme_classic() + 
+  coord_flip()
+ggiraph(ggobj = p3)
+})
+```
+

@@ -77,6 +77,15 @@ So when you do **anything** with data - load a file, create a variable, make a g
 
 Never think "I pushed the button/wrote the line that made the thing go. I'm done." It's on you to fulfill the requirement in a way that's **good**. Take pride in your work, or it will be bad.
 
+## Noticing
+
+More than anything else, this class is about *noticing things*. I'm serious. 
+
+- Data analysis is full of opportunities to mess up. Mistakes are unavoidable, and results that make no sense just happen
+- Being a good analyst means noticing mistakes, and noticing what your output looks like, and taking responsibility for fixing it
+- Be careful in your work. Take time. Review.
+- That's what I'm hoping to teach, and something I *will* be assessing you on
+
 ## What We're Doing
 
 It takes no technical/coding skill, or extensive explanation from me, to see why this graph is bad. If you produce this graph, you should take it upon yourself to fix it. Ask: how can I improve this?
@@ -160,7 +169,7 @@ In addition to the course website and Healy's [Data Visualization](https://kiera
 ## How Does This Faucet Work?
 
 ```{r, out.width="650px"}
-knitr::include_graphics("Lecture_01_Faucet.jpg")
+knitr::include_graphics("Lecture_1_Faucet.jpg")
 ```
 
 ## Understand the context

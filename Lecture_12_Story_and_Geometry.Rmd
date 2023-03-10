@@ -140,7 +140,8 @@ ggplot(sal, aes(x = Year, y = Salary, color = Person)) +
 ## Landing on the Story
 
 - It's very easy for us to write a graph that *demonstrates the thing we already know* but doesn't *inspire that same idea in others*
-- Like, if my daughter asks where grandma is, and I say grandma is at home, I want her to understand that grandma is currently at her own home in California. But my daughter might think she's at *our* home. I demonstrated, correctly, what the right answer was, but because it did not lead her to the right conclusion, it was bad communication on my part
+- We need to do everything we can and get it all working right if that's our goal!
+- We talked about removing clutter - this is one reason why. Anything *else* on the graph is something besides your idea they can get distracted by
 
 ## Tips
 
@@ -148,16 +149,10 @@ ggplot(sal, aes(x = Year, y = Salary, color = Person)) +
 - The best way to build intuition for how to do this is to *show other people your work and see if they come to the same conclusion you intended*
 - Ask them what they think the graph means! Not just what it shows but what it *means*. The answer will often shock you
 
-## Tips
-
-- As we've discussed, *remove clutter*
-- Think about the idea you're trying to get across and *remove everything that doesn't help make that idea clear*
-- It's a common misconception that you must graph *all* the data, but let's say you want to show that your company's product is more expensive than the leading competitor. Which shows this more clearly - the prices of all 20 companies in the market, or just you vs. them? You can drop data! Or at least de-emphasize it.
-- Separating things out is another good approach - facets are nice!
 
 ## Picking Geometries
 
-- Moving along slightly but still in the same vein, the choice of *geometry* has a lot to do with what stories can be effectively communicated and how they come across
+- In the same vein, the choice of *geometry* has a lot to do with what stories can be effectively communicated and how they come across
 - There are also some common errors made with certain geometries
 - So let's talk about them.
 - We must ask: what does this geometry let us *compare* and *contrast*, and what do we *want* to compare and contrast?
@@ -206,7 +201,7 @@ Common mistakes:
 
 ## Bar Graph Mistakes Examples
 
-- This requires us to do some visual gymnatics to compare the right stuff. A line graph would do this better.
+- This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better.
 
 ```{r, fig.height=4}
 data(storms)
@@ -222,7 +217,7 @@ storms %>%
 
 ## Bar Graph Mistakes Examples
 
-- This requires us to do some visual gymnatics to compare the right stuff. A line graph would do this better.
+- This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better.
 
 ```{r, fig.height=4}
 data(storms)
@@ -528,83 +523,11 @@ ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) +
   geom_text_repel() + labs(x = 'MPG',y='HP')
 ```
 
-## geom_label_repel adds boxes
-
-- That was still pretty busy. Text graphs really only work with a smaller number of labels (or short ones)
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-ggplot(mtcars[1:10,], aes(x = mpg, y = hp, color = Transmission, label = CarName)) + 
-  geom_label_repel() + labs(x = 'MPG',y='HP', caption = 'First ten cars only')
-```
-
-
-## ggridges
-
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-#A common need is to graph distributions across groups
-library(ggridges)
-ggplot(mtcars, aes(x = mpg, y = factor(cyl), fill = factor(cyl))) + 
-  geom_density_ridges(alpha = .6) + 
-  labs(x = 'Miles per Gallon', y = 'Cylinders') + 
-  guides(fill = FALSE)
-```
-
-
 ## ggmap
 
 - **ggplot2** has *extensive* mapping capabilities
 - Including straightforward-ish map *animations* with the **tmap** package
 - Also see libraries **choloropleth**, **tigris**, **tmap**, **sf**, **fiftystater**
-
-
-
-## ggforce
-
-- **ggforce** is a package with LOTS of extras, especially for facets
-- An especially handy one is `facet_zoom` for showing all data but focusing in on some
-- Focus focus focus your audience!
-- Can also be used to focus on a range with `xlim` or `ylim`
-
-
-## ggalt
-
-- **ggalt** is another package with lots of additional geoms
-- Including some functions to automatically encircle your data (setting things apart!)
-- Two nice ones are `geom_lollipop` for lollipop charts (a nice-looking alternative to a bar chart)
-- and `geom_dumbbell` for dumbbell charts (nice for "to-and-from" changes within groups)
-
-## geom_lollipop
-
-```{r, echo = TRUE, eval = FALSE}
-library(ggalt); data(gss_cat, package='forcats')
-gss_cat <- gss_cat %>%
-  group_by(marital) %>%
-  summarize(PropAbove = mean(rincome == '$25000 or more')) 
-ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
-  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
-```
-
-## geom_lollipop
-
-```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
-library(ggalt); data(gss_cat, package='forcats')
-gss_cat <- gss_cat %>%
-  group_by(marital) %>%
-  summarize(PropAbove = mean(rincome == '$25000 or more')) 
-ggplot(gss_cat, aes(y=PropAbove, x = reorder(marital,PropAbove))) + 
-  geom_lollipop() + labs(x = 'Marital Status', y ='Proportion Earning $25k+')
-```
-
-## geom_dumbbell
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-top_bottom <- mtcars %>% group_by(cyl) %>%
-  summarize(worst = max(mpg), best = min(mpg))
-ggplot(top_bottom, aes(y = cyl, x = best, xend = worst)) + 
-  geom_dumbbell(size = 3, color = 'gray',colour_x = 'blue', colour_xend = 'red')
-
-```
 
 ## gganimate
 
