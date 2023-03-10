@@ -64,4 +64,4 @@ Also, check out the accompanying [video series](https://nickchk.com/videos.html#
 
 ## Additional Materials
 
-[Easy Mistakes to Avoid, and Things You Must Not Do](https://nickch-k.github.io/DataCommSlides/Easy_Mistakes_to_Avoid.html/)
+[Easy Mistakes to Avoid, and Things You Must Not Do](https://nickch-k.github.io/DataCommSlides/Easy_Mistakes_to_Avoid.html)
