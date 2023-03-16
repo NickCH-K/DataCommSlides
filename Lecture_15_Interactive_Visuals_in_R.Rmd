@@ -108,13 +108,19 @@ leaflet() %>% addTiles() %>%
 ```
 
 
+## plotly
+
+- Plotly is a big confusing graphing system of its very own that you have to learn from the ground up
+- Or you can just use the `ggplotly()` function in **plotly** to immediately turn your **ggplot** interactive
+- It's not super *flexible* but it is *fast*
+- You lose control over some stuff - tooltips, legends
+
 ## ggiraph
 
 - Shouldn't we just be able to make an interactive **ggplot2** graph? Yes!
 - **ggiraph** slots super easily in to standard **ggplot2** usage, and adds interactivity
-- It's not fully interactive (you can check out `ggplotly` in **plotly** for that, although you lose a lot of the customization) but it adds highlighting and tooltips, which often is all you need
+- It's not fully interactive but it adds highlighting and tooltips, which often is all you need
 - Just replace the geometry with an `_interactive` version and add a `tooltip` aesthetic. That's it!
-- (note: line graphs are a bit tricky, but you can also easily overlay a `geom_point_interactive` on top of a `geom_line`)
 
 ## ggiraph
 
@@ -151,6 +157,13 @@ p <- iris %>% group_by(Species) %>% summarize(`Sepal Length` = mean(Sepal.Length
   theme_minimal()
 ggiraph(ggobj = p)
 ```
+
+## ggiraph downsides
+
+- Line graphs are a bit tricky, but you can also easily overlay a `geom_point_interactive` on top of a `geom_line`
+- While it works great out of the box in a memo, getting the sizing right inside of a **flexdashboard** isn't automatic, and in particular it doesn't like fitting in very *wide* dashboard spaces
+- You can adjust the width with either `width` or `width_svg` and `height_svg` in the `ggiraph()` function, but it's not perfect
+- Or just put it in a squarish space
 
 ## Shiny
 
@@ -241,7 +254,9 @@ This will show a table of all the data, letting you pick whether to show indepen
 
 ## Practice
 
-- Play around! Load up some data with `data()`. 
-- Make an **htmlwidget**
-- Make a **ggiraph** plot
-- Open up the default **flexdashboard**, make it shiny, add a graph and a control to filter the data for that graph
+- Open a new **flexdashboard**
+- Set `runtime: shiny`
+- Rename that setup chunk `global` and load up `data(storms)`. 
+- Add a `selectInput()` to select a `status`
+- Make some graph that only uses the data from that `status`
+- Then make it a **ggiraph**!

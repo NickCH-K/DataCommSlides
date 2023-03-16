@@ -100,7 +100,7 @@ knitr::include_graphics('Lecture_14_KPI.png')
 
 - Let's explore each of these examples and see what works and what might not
 - [Year-to-Date Income Statement](https://public.tableau.com/views/IncomeStatement_4/IncomeStatement?:embed=y&:display_count=yes&publish=yes&:showVizHome=no)
-- [NBA Scoring Dashboard](https://beta.rstudioconnect.com/jjallaire/htmlwidgets-d3heatmap/htmlwidgets-d3heatmap.html)
+- [NBA Scoring Dashboard](https://rpubs.com/jcheng/nba1)
 - [Economic Indicators for the USA](https://research.stlouisfed.org/dashboard/1151)
 
 ## Dashboards in R
