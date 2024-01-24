@@ -217,7 +217,7 @@ storms %>%
 
 ## Bar Graph Mistakes Examples
 
-- This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better.
+- This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better. Although this is still quite busy! Perhaps a revision could simplify.
 
 ```{r, fig.height=4}
 data(storms)
@@ -227,11 +227,8 @@ sp <- storms %>%
   summarize(pressure = mean(wind, na.rm = TRUE))
 ggplot(sp, aes(x = decade, y = pressure, color = status)) + 
   geom_line() + 
-  geom_text(mapping = aes(x = decade + 1, y = pressure, label = status),
-            data = sp %>% filter(decade == max(decade)),
-            hjust = 0) +
   scale_x_continuous(limits = c(1970, 2020)) +
-  guides(label = 'none',color = 'none') +
+  guides(label = 'none') +
   theme_classic() + 
   labs(x = 'Decade',y= 'Mean Wind Speed', color = 'Hurricane Type')
 ```
@@ -317,7 +314,7 @@ mtcars %>% group_by(cyl) %>% summarize(N = n()) %>%
 
 - Too many lines
 - Lines that cross back and forth with each other and obscure each other a lot
-- Legends (label the lines! It's easy! `geom_text()`)
+- Legends (label the lines! It's easy! `geom_text()`). Skip only if there are too many lines.
 - Huge range in the y-axis (or too little range)
 - Multiple y-axes
 - An unordered x-axis (don't use a line graph for bar graph jobs!) - remember, the line implies continuity!
@@ -328,15 +325,18 @@ mtcars %>% group_by(cyl) %>% summarize(N = n()) %>%
 ```{r}
 data(storms)
 sp <- storms %>%
+  filter(status %in% c('tropical storm','extratropical','disturbance')) %>%
   mutate(decade = floor(year/10)*10) %>%
   group_by(status, decade) %>%
-  summarize(pressure = mean(wind, na.rm = TRUE))
+  summarize(pressure = mean(wind, na.rm = TRUE)) %>%
+  group_by(status) %>%
+  mutate(lastdecade = max(decade))
 ggplot(sp, aes(x = decade, y = pressure, color = status)) + 
   geom_line() + 
   geom_text(mapping = aes(x = decade + 1, y = pressure, label = status),
-            data = sp %>% filter(decade == max(decade)),
+            data = sp %>% filter(lastdecade == decade),
             hjust = 0) +
-  scale_x_continuous(limits = c(1970, 2020)) +
+  scale_x_continuous(limits = c(1970, 2030)) +
   guides(label = 'none',color = 'none') +
   theme_classic() + 
   labs(x = 'Decade',y= 'Mean Wind Speed', color = 'Hurricane Type')
@@ -373,6 +373,7 @@ ggplot(aes(x = mpg, y = hp, color =Transmission)) +
 ## Too many points! 
 
 ```{r}
+# devtools::install_github('NickCH-K/pmdplyr')
 data(Scorecard, package = 'pmdplyr')
 ggplot(Scorecard, aes(x = earnings_med, y = repay_rate)) + 
   geom_point() + 
