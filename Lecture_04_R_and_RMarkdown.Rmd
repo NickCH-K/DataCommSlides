@@ -37,6 +37,15 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
@@ -44,12 +53,12 @@ cat("
 - But it's also unavoidable that actually using them will require some technical skill on our part
 - In this class we'll be using R
 - Specifically, the **tidyverse** set of packages, and Quarto
-- I don't expect you to become R experts. You're not learning R so much as learning **dplyr** and **ggplot2** and some extra details
+- I don't expect you to become R experts. You're not learning R so much as learning **dplyr** and just enough **ggplot2** to evaluate / help the AI
 
 ## R
 
 - Why R instead of Python?
-- It's good to know more than one language (nothing ever lasts!)
+- It's good to know more than one language (nothing ever lasts!). And AI makes translating between languages super easy anyway
 - **ggplot2** is a top-tier visualization package and makes it much easier to implement our principles
 - Data-cleaning is a bit more intuitive than in **pandas** (and faster too if you're using **data.table** but we aren't)
 - Python > R in designing software for production, or in some machine learning apps. But we aren't doing those!
@@ -73,21 +82,29 @@ cat("
 
 - There are many ways to do anything in R
 - But if I've shown it in class, almost certainly the way I'm showing it is the easiest, especially in the context of this class, as I've chosen stuff that makes sense for us specifically
-- Don't make yourself work too hard! If you're trying to figure something out, ask "did we cover this in class?" If so, go back to this material - it will probably be less work than whatever Google solution you find
+- Don't make yourself work too hard! If you're trying to figure something out, ask "did we cover this in class?" If so, go back to this material - it will probably be less work than whatever Google/AI solution you find
 - Like, seriously. The number of times students spend hours and hours trying to stitch together a solution from dozens of StackExchange answers, when it's something I've given a one-line solution to in class, is *a lot*
+
+## Using AI
+
+- AI is a very good coding tool!
+- I expect you will be using AI in your careers
+- However, to use it properly you have to be able to *evaluate its output*, either the code itself or the result (or, better, both)
+- Evaluating the result is *very hard* with data cleaning, so we need to know enough to be able to evaluate and understand its code
 
 ## Quarto
 
 - Quarto is a text and code processing system
 - Text and code in -> Formatted output out (HTML, Word, PDF, slides, books, etc.)
 - These slides are made in Quarto. I write books and papers in it too.
+- Text-based word processing works very well with AI
 
 ## Markdown
 
 - Markdown is a "markup language" like HTML or LaTeX. All your formatting goes in as raw text, and then you run it through an interpreter to get output
 - Markdown is *super super simple*
 - Let's walk through the [Markdown cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-- Note HTML code also works!
+- Note HTML code also works (if the output is HTML)!
 
 ## Markdown
 
@@ -95,6 +112,7 @@ cat("
 - Can be automated. Includes code and output directly in the document, including for in-line numbers
 - Much easier to share via something like, e.g., GitHub
 - Output is in standard formats like Word or HTML so they don't need any sort of setup to see it
+- AI interfaces better with fully plaintext-based things rather than JSON-based JuPyteR
 
 ## The YAML
 
@@ -117,7 +135,7 @@ editor: visual
 - Include code in-line (fantastic for memos) with `r rinline('mean(1:3)')` which makes `r mean(1:3)`
 - Start a new code chunk with a forward slash, /. Let's take a look at an example Quarto doc
 - *Code goes inside the chunks, writing goes outside*
-- Note: want a data frame to nicely format as a table? use `knitr::kable()`.
+- Note: want a data frame to nicely format as a table? use `knitr::kable()` or `gt::gt()` (other options too).
 
 ## Code Chunks
 

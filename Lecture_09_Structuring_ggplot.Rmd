@@ -1,5 +1,5 @@
 ---
-title: "Lecture 9: Structuring ggplot2"
+title: "Lecture 9: How ggplot2 Graphs are Built and Modified"
 author: "Nick Huntington-Klein"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:   
@@ -44,7 +44,13 @@ cat("
 - Scales and coordinates, labels and legends, new geometries
 - There are infinite possibilities here, we can't cover everything
 - The goal is to reduce unknown unknowns so you know where to look/Google
-- Also, just start typing in RStudio and see what autocompletes!
+
+## Why?
+
+- If we're going to be using AI to edit and make our graphs look really good, why learn this?
+- This will let you know what to ask for and how to be specific about asking
+- And also will help you know how to validate the code you're seeing and be sure you know what it's doing
+- Plus, these are the *kinds of structures* you'll be looking for if you switch languages / graphing packages
 
 ## The Key Pieces
 
@@ -79,11 +85,6 @@ ggplot(data, aes(x = xvar, y = yvar, color = colorvar)) +
 - Name the scale
 - Label values (for dicrete values, or perhaps as percents?)
 
-## Setting Values Manually
-
-- `scale_x_manual` for discrete plots will let you set things by hand
-- For example if `x` is different companies and you want to pick each company's brand color for its bar
-
 ## Examples
 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
@@ -105,16 +106,17 @@ ggplot(data, aes(x = person, y = quality, fill = category)) + geom_col(position 
 
 ## Setting Scales
 
-- `limits` in the `scale` function can be used to specify the vector of values to be included, or as a range for continuous variables
-- `labels` is also handy. `labels = c('Red Apple',` `'Yellow Banana','Orange Carrot')` would relabel the legend (or axis labels)
--  In a continuous function, say for dollars, `scale_x_continuous(labels = scales::label_dollar())` would put it in dollar terms. More on this in a moment
-- Or dates: `scale_x_date(labels = function(x)` `paste(month.abb[month(x)],year(x)))`
+- **Please customize your scales to the kind of data you're showing**
+- `labels` is handy. `labels = c('Red Apple',` `'Yellow Banana','Orange Carrot')` would relabel the legend (or axis labels)
+-  In a continuous function, say for dollars, `scale_x_continuous(labels = scales::label_dollar())` would put it in dollar terms. More on this in a moment 
+- Or setting date formats: `scale_x_date(date_labels = '%m/%Y')`
 
 ## Setting Color or Fill Scales
 
 - Selecting a color scale is important - we've discussed discrete and continuous palettes
 - There are a bunch of `scale_color_`/`scale_fill_` functions that solely exist to help with this!
 - (not to mention entire packages like **paletteer**)
+- You might browse the palettes yourself - AI isn't great at picking palettes to match an intent yet
 
 ## Setting Color or Fill Scales
 
@@ -155,8 +157,7 @@ ggplot(data, aes(x = person, y = quality, group = category, fill = quality)) + g
 
 - We can transform values as we plot them
 - Many `scale_something_continuous` entries have a `trans` option, set to `date`, `log`, `probability`, `reciprocal`, `sqrt`, `reverse`, etc. etc. to perform that transformation before plotting 
-- You can also do things like `scale_x_log10` or `scale_y_reverse` for some common transforms
-- `scale_something_binned()` takes a continuous value and puts it in bins, handy sometimes for simplification
+- Some transformations have special `scale_` functions. TBH the only transformations I see frequently are `scale_something_log10()` or `scale_something_binned()`
 
 ## Transformations
 
@@ -181,15 +182,6 @@ When to use log scales?
 
 - When data is highly skewed, so a few huge observations are drawing all focus
 - When the relationship is multiplicative so you want to show, say, percentage growth
-
-## Labeling Scales for Continuous Variables
-
-Scale functions have a `labels=` option. 
-
-- USE IT!!
-- This is the quickest and easiest way to make your graph look a zillion times better and more professional
-- We already covered this for categorical variables. `labels = c('A','B')` gives the categories the names A and B, in that order (tip: check the order first)
-- For continuous variables, the **scales** package helps us immensely here
 
 ## scales
 
@@ -220,8 +212,7 @@ ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) + geom_point() +
 
 - There are a zillion options
 - Be sure to use `help(whatever)` before using something
-- Not sure what the function is? Check the **ggplot2** documentation page
-- Or just start typing `scales_` or whatever and see what pops up in autocomplete in RStudio
+- For our purposes graphing with AI this will mostly be for the purposes of figuring out **what is possible** and if we can guide the AI to implement something in a specific way
 
 ## Labels with labs()
 
@@ -239,31 +230,6 @@ ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
   scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
   labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight',
        title = 'Title', subtitle = 'Subtitle', caption = 'Caption')
-```
-
-## Moving the Legend
-
-- Working with **ggplot2** legends is one of the trickier things
-- we'll do a lot more with aesthetic details next time but for now let's just move it and outline it.
-
-## Moving the Legend
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
-  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
-  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight',
-       title = 'Title', subtitle = 'Subtitle', caption = 'Caption') +
-  theme(legend.position = c(.9,.3), legend.box.background = element_rect(color='black'))
-```
-
-## Or Removing It
-
-
-```{r, echo = TRUE, fig.height = 4, fig.width = 6}
-ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
-  scale_x_log10() + scale_y_reverse() + scale_color_binned() + 
-  labs(x = 'Miles per Gallon', y = 'Horsepower', color = 'Car Weight') +
-  guides(color = 'none')
 ```
 
 ## Overlaid Graphs
@@ -293,6 +259,7 @@ ggplot(mtcars, aes(x = mpg, y = hp, color = wt)) + geom_point() +
 ## Facets
 
 - Separate graphs by group!
+- For sticking together multiple completely disparate graphs, don't use facets, instead load **patchwork** and combine them as desired - we'll discuss this later
 
 ```{r, echo = TRUE, fig.height = 4, fig.width = 6}
 ggplot(mtcars, aes(x = mpg, y = hp)) + geom_point() + 
@@ -310,13 +277,249 @@ ggplot(iris, aes(Petal.Length, Petal.Width, colour = Species)) +
   facet_zoom(x = Species == 'versicolor')
 ```
 
-## Multiple-Graph Notes
-
-- For overlaying the *same type* of graph, say two line graphs for two variables, don't `+` different geometries, you're almost always better off doing a `pivot_longer()` first and just using `aes()`.
-- For sticking together multiple completely disparate graphs, don't use facets, instead load **patchwork** and combine them as desired - we'll discuss this later
-
 ## Imitation and Flattery
 
 - Pick one of these graphs or from the previous lecture
 - Go into the geometry's help file and recreate an example, or the graph in these slides
 - Mess with the scales and labels! Try to get it to work!
+
+## Make it Look Good
+
+- Let's talk about how to set aesthetic attributes along every axis
+- As well as overall styling and theming
+- Highlighting, putting graphs together, making them interactive, annotating...
+- **Think about this stuff**. Your graphs will look unprofessional if you don't, and I'll start grading down all-default styling or missed opportunities for improvement.
+
+## Aesthetic Characteristics
+
+- As you'd expect, we'll be setting the values of certain aesthetic properties
+- Which ones apply depend on the geometry. See [this page](https://ggplot2.tidyverse.org/articles/ggplot2-specs.html). Some common ones:
+- color, linetype, fill, size, shape (and soon: linewidth)
+- Text aesthetics: family (font), fontface, hjust, vjust (see **extrafont** package to use all your system fonts)
+
+## Decorating Axes vs. Decorating Geometries
+
+- When a characteristic is set *inside* of an `aes()`, it becomes an axis and must be mapped to a variable name
+- *Outside* of an `aes()` (and in the geometry), it's a setting applied to the entire geometry
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+# We've seen this before
+mtcars <- mtcars %>%
+  mutate(Transmission = factor(am, labels = c('Automatic','Manual')))
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + 
+  geom_point()
+```
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, 
+                   size = wt, shape = Transmission)) + 
+  geom_point()
+```
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, 
+                   size = wt)) + 
+  geom_point(shape = 10)
+```
+
+## Aesthetic Characteristics
+
+```{r, echo = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars, aes(x = Transmission, fill = factor(cyl))) + 
+  geom_bar(position = 'dodge', linetype = 'dashed', color = 'black')
+```
+
+## Theming
+
+- Pretty much all elements of presentation that aren't in a geometry can be controlled with `theme()`
+- The options are endless! See `help(theme)`
+- We set different aspects of the theme using `element_` functions like `element_text()`, `element_line()`, `element_rect()` which take aesthetic settings like `size`, `color`, etc.
+- This stuff can be used on its own or in conjunction with prepackaged themese like `theme_classic()` or `theme_minimal()` or `theme_void()`
+
+## Axes
+
+- Change axis and tick lines with `axis.line` and `element_line`
+- Most everything can be changed generally (`axis.line` or even `line`) or specifically (`axis.ticks.x`)
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+library(ggalt)
+mtcars2 <- mtcars %>% group_by(Transmission) %>% summarize(count = n())
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  labs(x = '', y = '') + 
+  scale_y_continuous(breaks = c(10,20), limits = c(0,20)) + 
+  theme(axis.line = element_line(color = 'red'),
+        axis.ticks.x = element_line(size = 5))
+```
+
+## Axes
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+library(ggalt)
+mtcars2 <- mtcars %>% group_by(Transmission) %>% summarize(count = n())
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  labs(x = '', y = '') + 
+  scale_y_continuous(breaks = c(10,20), limits = c(0,20)) + 
+  theme(axis.line = element_line(color = 'red'),
+        axis.ticks.x = element_line(size = 5))
+```
+
+## Background
+
+- Work on the `panel` to change what goes behind that geometry! `element_rect` might come up!
+- Pretty much ANY element can be eliminated with `element_blank()`
+- This gonna be ugly
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  theme(panel.background = element_rect(color = 'blue', fill = 'yellow'),
+        panel.grid.major.x = element_line(color = 'green'),
+        panel.grid.major.y = element_blank())
+```
+
+## Background
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  theme(panel.background = element_rect(color = 'blue', fill = 'yellow'),
+        panel.grid.major.x = element_line(color = 'green'),
+        panel.grid.major.y = element_blank())
+```
+
+## Legends
+
+- Think carefully about your legend!
+- We'll leave the legend coding to AI - it's unnecessarily complicated. But ask yourself questions like:
+- Do I need a legend?
+- Where should the legend be placed?
+- How can I make the legend easy to read?
+
+## General Theming Notes
+
+- How can we think about theming generally?
+- We want, as always, to drive focus towards our story
+- This means not making the theme distracting it, but using it to drive attention to what we want
+- Need focus on the x-axis labels? Make em bold!
+- Often we don't need distracting background color (as there is in the default theme). Usually get rid of it!
+
+## Other Styling
+
+- Let's move on to some other ways we can build focus and clarity
+- Highlight and annotations!
+
+## Highlighting
+
+- Highlight certain values and gray others with the **gghighlight** package
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+library(gghighlight); data(gapminder, package = 'gapminder')
+ggplot(gapminder, aes(x = year, y = lifeExp, color=country)) + geom_line(size = 1.5) + 
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2015),
+                     breaks = c(1950,1970,1990,2010))+
+  gghighlight(country %in% c('United States','Canada','Mexico'),
+              unhighlighted_params = aes(size=.1), 
+              label_params=list(direction='y',nudge_x=10)) + 
+  theme_minimal(base_family='serif') 
+```
+
+## Highlighting 
+
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+library(gghighlight); data(gapminder, package = 'gapminder')
+ggplot(gapminder, aes(x = year, y = lifeExp, color=country)) + geom_line(size = 1.5) + 
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2015),
+                     breaks = c(1950,1970,1990,2010))+
+  gghighlight(country %in% c('United States','Canada','Mexico'),
+              unhighlighted_params = aes(size=.1), 
+              label_params=list(direction='y',nudge_x=10)) + 
+  theme_minimal(base_family='serif') 
+```
+
+## Highlighting
+
+- Or do it manually with `scale_X_manual()`
+
+```{r, echo = TRUE, eval = FALSE, fig.height = 4, fig.width = 6}
+gapminder %>% mutate(color_name = ifelse(country %in% c('United States','Canada','Mexico'), as.character(country), 'Other')) %>%
+ggplot(aes(x = year, y = lifeExp, group = country, color=color_name, size = color_name, alpha = color_name)) + geom_line() + 
+  geom_text(aes(label = ifelse(year == 2007 & color_name != 'Other', color_name,'')), 
+                           hjust = 0, size = 13/.pt) +
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2025),
+                     breaks = c(1950,1970,1990,2010))+
+  scale_color_manual(values = c('red','forestgreen','gray','blue')) + 
+  scale_size_manual(values = c(1.5,1.5,.1,1.5)) +
+  scale_alpha_manual(values = c(1,1,.2,1)) +
+  theme_minimal(base_family='serif') + 
+  guides(color = 'none', size = 'none', alpha = 'none')
+```
+
+## Highlighting
+
+```{r, echo = FALSE, eval = TRUE, fig.height = 4, fig.width = 6}
+gapminder %>% mutate(color_name = ifelse(country %in% c('United States','Canada','Mexico'), as.character(country), 'Other')) %>%
+ggplot(aes(x = year, y = lifeExp, group = country, color=color_name, size = color_name, alpha = color_name)) + geom_line() + 
+  geom_text(aes(label = ifelse(year == 2007 & color_name != 'Other', color_name,'')), 
+                           hjust = 0, size = 13/.pt) +
+  labs(x = NULL, y = "Life Expectancy", title = "North America Only") + 
+  scale_x_continuous(limits=c(1950,2025),
+                     breaks = c(1950,1970,1990,2010))+
+  scale_color_manual(values = c('red','forestgreen','gray','blue')) + 
+  scale_size_manual(values = c(1.5,1.5,.1,1.5)) +
+  scale_alpha_manual(values = c(1,1,.2,1)) +
+  theme_minimal(base_family='serif') + 
+  guides(color = 'none', size = 'none', alpha = 'none')
+```
+
+## Annotation
+
+- There are also many options for *annotating* our data
+- For direct data point annotation, especially of line graphs, you can do this with some data manipulation and `geom_text` (see previous slide)
+- AI should be able to put labels and arrows one by one on your graph; you may have to twiddle on your own with coordinates to make it line up properly
+
+
+## Patchwork
+
+```{r, echo = FALSE, eval = TRUE}
+p1 <- ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission)) + geom_point() +
+  theme_classic()
+p2 <- ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, 
+                   size = wt, shape = Transmission)) + 
+  geom_point()
+p3 <- ggplot(mtcars2, aes(x = Transmission,y=count)) + 
+  geom_lollipop(color = 'red', size = 2) + coord_flip() + 
+  theme(panel.background = element_rect(color = 'blue', fill = 'yellow'),
+        panel.grid.major.x = element_line(color = 'green'),
+        panel.grid.major.y = element_blank())
+p4 <- ggplot(mtcars, aes(x = Transmission, fill = factor(cyl))) + 
+  geom_bar(position = 'dodge', linetype = 'dashed', color = 'black')
+```
+
+
+```{r, echo= TRUE, eval = TRUE, fig.height = 5, fig.width = 12}
+library(patchwork)
+# Named and saved these earlier
+(p1 | p2 - p3)/p4
+```
+
+
+## What Did We Learn?
+
+- Scales, setting labels, values, and transformations
+- Axis labels
+- Facets
+- Theming
+- Thinking about legends
+- Annotation and highlighting (do it!)

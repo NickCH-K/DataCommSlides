@@ -1,0 +1,904 @@
+---
+title: "Lecture 10: Using AI for Graphs"
+author: "Nick Huntington-Klein"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:   
+  revealjs::revealjs_presentation:
+    theme: simple
+    transition: slide
+    self_contained: true
+    smart: true
+    fig_caption: true
+    reveal_options:
+      slideNumber: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(ggrepel)
+library(ggpubr)
+```
+
+## Using AI for Graphs
+
+```{r, results = 'asis'}
+cat("
+<style>
+.reveal section img {
+  border: none !important;
+  box-shadow: none;
+}
+</style>")
+```
+
+-   Writing graphs with code offers maximum flexibility
+-   Learning graphing packages can be hard!
+-   AI to the rescue
+
+## Downsides
+
+-   We won't understand its code or if it's doing it right (except we learned how to read ggplot code so we *can* check)
+-   It may not give us the graph we want (except we can check the output and know enough to ask for specific revisions)
+-   It takes us out of the loop so we won't understand the analysis we've done (except we keep ourselves in the loop so we do!)
+-   We didn't do AI data cleaning because it's hard to notice if there's an error *but with graphs we can look at the output and check it easily!*
+
+## Our Process
+
+1.  Conceive *on our own* of the kind of graph we want (possibly with AI suggestions but not *AI decisions*)
+2.  Have AI construct graphing code for us
+3.  Review and check for factual issues
+4.  Consider possible improvements (possibly with AI review)
+5.  Ask for revisions from the AI
+6.  Repeat steps 3-5 until we have the best possible graph we can think of
+
+## Why Have it Make Code?
+
+-   We can check the code to make sure it's doing what we want
+-   Code-based graphs are more reproducible, easy to share, and also AI works better with code anyway!
+-   We can make revisions to the code ourselves if we want to, and we can ask the AI to make specific revisions to the code if we want to, or transfer graphs between different AI models if we like
+
+## It's Not Just Set and Forget
+
+-   AI is a tool, not a magic wand. We have to be involved in the process to get the best results.
+-   We have to check the output, and we have to know enough to ask for revisions
+-   Including checking for errors in data processing or usage
+-   If you just take the AI's first pass and consider it done, you will luck out sometimes but also have BIG PROBLEMS other times
+
+## What is our Goal?
+
+-   The best graphs!
+-   Not being encumbered by limitations in the tools we know about
+-   Maximal clarity with repeated eyes-on-the-graph checks for clarity and story
+
+## Checking Output!!
+
+-   This is the relevant human skill for graph construction in the age of AI
+-   We have to check the output to make sure it's doing what we want, to make sure it's not making any mistakes, and to iterate towards a clear understanding the best we can
+
+## Best Practices with AI
+
+-   Always check the output *and the code* to see if there are errors or room for improvement
+- Resist the impulse to say this is the computer's work. This is *your* work and you need to be willing to put your name on it and *own it*. So "this is what the computer did" is not an excuse! If there's a problem or potential improvement it's your job to spot it and go for it
+- Resist the impulse to go along with all of its suggestions - many won't be great!
+- *Be specific* in your asks. This is the way to get good output.
+
+## Creating Prompts
+
+1.  Describe the data
+2.  Describe the intended story
+3.  Describe the intended geometry and layout. Include which language or packages you want it to use.
+4.  Add detail
+5.  Add warnings
+
+## What to Provide?
+
+-   Provide *either* the data *or* at least a set of column names and variable information so it can use things properly
+-   Provide the prompt
+-   Sometimes you can provide a "target graph" and ask it to mimic it
+
+## Walking Through an Example
+
+```{r, echo = TRUE}
+library(causaldata)
+data(avocado)
+head(avocado)
+
+```
+
+## Walking Through an Example
+
+```{r}
+ggplot(avocado, aes(x = AveragePrice, y = TotalVolume, color = factor(month(Date)))) + 
+  geom_point()
+```
+
+## Intended Story
+
+-   "Avocado demand is pretty price-insensitive in the winter (Oct-Dec)"
+
+Ways we could show this:
+
+-   The scatterplot we showed, highlighting the winter and annotating that there's little y-axis movement there
+
+-   Faceting a scatterplot by winter/non-winter
+
+-   Histogram of quantities, split by winter/non-winter, compared against histograms of prices
+
+## Creating Prompts
+
+1.  Describe the data
+2.  Describe the intended story
+3.  Describe the intended geometry and layout. Include which language or packages you want it to use.
+4.  Add detail
+5.  Add warnings
+
+## Walking through an Example
+
+<small>"I have attached a data set of avocado prices, with columns for Date, AveragePrice, and TotalVolume. I want to use this data to show that avocado sales are less price-sensitive in the winter months (October-December). Please give me R code for three different graphs that get this idea across: (a) showing a scatterplot of prices vs. quantities, with the winter months highlighted, and annotation that emphasizes little quantity variation in those months compared to the other months, (b) the same as a, but use facets to show winter vs. non-winter months separately, and (c) a faceted histogram of winter vs. non-winter months separately, with histograms for both quantity and then price, showing that there's lots of price variation in winter but little quantity variation.
+
+Write code using R and the tidyverse, with graphs created using ggplot2. Add comments to your code so I can understand it. Choose attractive theming and coloring options, as well as adding appropriate graph and axis titles. Double-check your work to ensure that it gets across the ideas I'm intending to get across. Be aware that the price is in dollars and is an average price across the whole market."</small>
+
+## Checking Code
+
+<style>
+pre {
+  white-space: pre !important;
+  overflow-y: scroll !important;
+  height: 50vh !important;
+}
+</style>
+
+```{r, echo = TRUE}
+library(causaldata)
+library(tidyverse)
+data(avocado)
+
+avocado <- avocado %>%
+  mutate(
+    Date       = as.Date(Date),
+    month      = month(Date),
+    # Label October–December as "Winter (Oct–Dec)", everything else as "Rest of Year"
+    season     = if_else(month %in% 10:12, "Winter (Oct–Dec)", "Rest of Year"),
+    # Ordered factor so Winter always appears second in facets / legends
+    season     = factor(season, levels = c("Rest of Year", "Winter (Oct–Dec)"))
+  )
+
+# Shared colour palette: muted teal for rest-of-year, warm amber for winter
+season_colors  <- c("Rest of Year"       = "#6BAED6",   # steel blue
+                    "Winter (Oct–Dec)"   = "#FD8D3C")   # warm orange
+
+# A clean, minimal base theme we'll reuse across all three plots
+theme_avo <- theme_minimal(base_size = 13) +
+  theme(
+    plot.title       = element_text(face = "bold", size = 15, margin = margin(b = 6)),
+    plot.subtitle    = element_text(color = "grey40", size = 11, margin = margin(b = 10)),
+    plot.caption     = element_text(color = "grey55", size = 9,  hjust = 0),
+    legend.position  = "bottom",
+    legend.title     = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.text       = element_text(face = "bold", size = 12)
+  )
+```
+
+## Plot A
+
+```{r, echo = TRUE, eval = FALSE}
+# Compute annotation values:
+#   • coefficient of variation (CV = SD/Mean) for each season
+#   • we'll use these to drive the annotation text
+cv_stats <- avocado %>%
+  group_by(season) %>%
+  summarise(
+    cv_vol   = sd(TotalVolume)  / mean(TotalVolume),
+    cv_price = sd(AveragePrice) / mean(AveragePrice),
+    mid_vol  = median(TotalVolume),
+    mid_price = median(AveragePrice),
+    .groups = "drop"
+  )
+
+# For the annotation box we'll position it in the upper-right corner
+annot_x <- max(avocado$TotalVolume) * 0.62
+annot_y <- max(avocado$AveragePrice) * 0.96
+
+plot_a <- ggplot(avocado, aes(x = TotalVolume, y = AveragePrice, color = season)) +
+  # Non-winter points drawn first (behind) so winter stays visible on top
+  geom_point(data = filter(avocado, season == "Rest of Year"),
+             size = 2.8, alpha = 0.55) +
+  geom_point(data = filter(avocado, season == "Winter (Oct–Dec)"),
+             size = 3.2, alpha = 0.85) +
+  # Annotation box calling out the key insight
+  annotate(
+    "label",
+    x     = annot_x,
+    y     = annot_y,
+    label = paste0(
+      "Winter months (Oct–Dec):\n",
+      "  Volume CV  = ", scales::percent(cv_stats$cv_vol[cv_stats$season   == "Winter (Oct–Dec)"], accuracy = 1), "\n",
+      "  Price CV   = ", scales::percent(cv_stats$cv_price[cv_stats$season == "Winter (Oct–Dec)"], accuracy = 1), "\n\n",
+      "Rest of year:\n",
+      "  Volume CV  = ", scales::percent(cv_stats$cv_vol[cv_stats$season   == "Rest of Year"], accuracy = 1), "\n",
+      "  Price CV   = ", scales::percent(cv_stats$cv_price[cv_stats$season == "Rest of Year"], accuracy = 1)
+    ),
+    hjust = 0.5, vjust = 1,
+    size  = 3.4, lineheight = 1.35,
+    fill  = "white", color = "grey25",
+    label.padding = unit(0.45, "lines"),
+    label.r       = unit(0.2,  "lines"),
+    label.size    = 0.4
+  ) +
+  scale_color_manual(values = season_colors) +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  scale_y_continuous(labels = scales::dollar_format(accuracy = 0.01)) +
+  labs(
+    title    = "Avocado Prices vs. Sales Volume",
+    subtitle = "Winter weeks (Oct–Dec) cluster tightly in volume despite wide price swings,\nsuggesting lower price sensitivity in those months.",
+    x        = "Total Weekly Volume (avocados sold)",
+    y        = "Average Price (USD)",
+    caption  = "CV = coefficient of variation (SD ÷ Mean); higher CV = more relative variability."
+  ) +
+  theme_avo
+
+plot_a
+```
+
+## Plot A
+
+```{r, echo = FALSE, eval = TRUE}
+# Compute annotation values:
+#   • coefficient of variation (CV = SD/Mean) for each season
+#   • we'll use these to drive the annotation text
+cv_stats <- avocado %>%
+  group_by(season) %>%
+  summarise(
+    cv_vol   = sd(TotalVolume)  / mean(TotalVolume),
+    cv_price = sd(AveragePrice) / mean(AveragePrice),
+    mid_vol  = median(TotalVolume),
+    mid_price = median(AveragePrice),
+    .groups = "drop"
+  )
+
+# For the annotation box we'll position it in the upper-right corner
+annot_x <- max(avocado$TotalVolume) * 0.62
+annot_y <- max(avocado$AveragePrice) * 0.96
+
+plot_a <- ggplot(avocado, aes(x = TotalVolume, y = AveragePrice, color = season)) +
+  # Non-winter points drawn first (behind) so winter stays visible on top
+  geom_point(data = filter(avocado, season == "Rest of Year"),
+             size = 2.8, alpha = 0.55) +
+  geom_point(data = filter(avocado, season == "Winter (Oct–Dec)"),
+             size = 3.2, alpha = 0.85) +
+  # Annotation box calling out the key insight
+  annotate(
+    "label",
+    x     = annot_x,
+    y     = annot_y,
+    label = paste0(
+      "Winter months (Oct–Dec):\n",
+      "  Volume CV  = ", scales::percent(cv_stats$cv_vol[cv_stats$season   == "Winter (Oct–Dec)"], accuracy = 1), "\n",
+      "  Price CV   = ", scales::percent(cv_stats$cv_price[cv_stats$season == "Winter (Oct–Dec)"], accuracy = 1), "\n\n",
+      "Rest of year:\n",
+      "  Volume CV  = ", scales::percent(cv_stats$cv_vol[cv_stats$season   == "Rest of Year"], accuracy = 1), "\n",
+      "  Price CV   = ", scales::percent(cv_stats$cv_price[cv_stats$season == "Rest of Year"], accuracy = 1)
+    ),
+    hjust = 0.5, vjust = 1,
+    size  = 3.4, lineheight = 1.35,
+    fill  = "white", color = "grey25",
+    label.padding = unit(0.45, "lines"),
+    label.r       = unit(0.2,  "lines"),
+    label.size    = 0.4
+  ) +
+  scale_color_manual(values = season_colors) +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  scale_y_continuous(labels = scales::dollar_format(accuracy = 0.01)) +
+  labs(
+    title    = "Avocado Prices vs. Sales Volume",
+    subtitle = "Winter weeks (Oct–Dec) cluster tightly in volume despite wide price swings,\nsuggesting lower price sensitivity in those months.",
+    x        = "Total Weekly Volume (avocados sold)",
+    y        = "Average Price (USD)",
+    caption  = "CV = coefficient of variation (SD ÷ Mean); higher CV = more relative variability."
+  ) +
+  theme_avo
+
+plot_a
+```
+
+## Plot B
+
+```{r, echo = TRUE, eval = FALSE}
+# Add a vertical reference band showing the winter volume range on both facets
+winter_vol_range <- avocado %>%
+  filter(season == "Winter (Oct–Dec)") %>%
+  summarise(lo = min(TotalVolume), hi = max(TotalVolume))
+
+# Data frame for faceted annotation labels
+facet_annots <- cv_stats %>%
+  mutate(
+    label = paste0(
+      "Volume CV: ",  scales::percent(cv_vol,   accuracy = 1), "\n",
+      "Price CV: ",   scales::percent(cv_price, accuracy = 1)
+    ),
+    # Position annotations near the top of each panel
+    x = if_else(season == "Winter (Oct–Dec)", winter_vol_range$lo * 1.05,
+                min(avocado$TotalVolume) * 1.15),
+    y = max(avocado$AveragePrice) * 0.97
+  )
+
+plot_b <- ggplot(avocado, aes(x = TotalVolume, y = AveragePrice, color = season)) +
+  # Shade the x-range occupied by winter weeks in BOTH panels for comparison
+  annotate("rect",
+           xmin = winter_vol_range$lo, xmax = winter_vol_range$hi,
+           ymin = -Inf, ymax = Inf,
+           fill = season_colors["Winter (Oct–Dec)"], alpha = 0.08) +
+  geom_point(size = 2.8, alpha = 0.7) +
+  # Per-facet CV label
+  geom_label(data = facet_annots,
+             aes(x = x, y = y, label = label),
+             inherit.aes = FALSE,
+             hjust = 0, vjust = 1,
+             size = 3.3, lineheight = 1.3,
+             fill = "white", color = "grey25",
+             label.padding = unit(0.4, "lines"),
+             label.r       = unit(0.15, "lines"),
+             label.size    = 0.35) +
+  facet_wrap(~season, ncol = 2) +
+  scale_color_manual(values = season_colors, guide = "none") +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  scale_y_continuous(labels = scales::dollar_format(accuracy = 0.01)) +
+  labs(
+    title    = "Price vs. Volume by Season",
+    subtitle = "Winter weeks show much less volume variation than the rest of the year,\neven as prices fluctuate — the hallmark of inelastic demand.",
+    x        = "Total Weekly Volume (avocados sold)",
+    y        = "Average Price (USD)",
+    caption  = "Shaded band = volume range observed during winter weeks.\nCV = coefficient of variation (SD ÷ Mean)."
+  ) +
+  theme_avo +
+  theme(legend.position = "none")   # colour already encoded in facet labels
+
+plot_b
+```
+
+## Plot B
+
+```{r, echo = FALSE, eval = TRUE}
+# Add a vertical reference band showing the winter volume range on both facets
+winter_vol_range <- avocado %>%
+  filter(season == "Winter (Oct–Dec)") %>%
+  summarise(lo = min(TotalVolume), hi = max(TotalVolume))
+
+# Data frame for faceted annotation labels
+facet_annots <- cv_stats %>%
+  mutate(
+    label = paste0(
+      "Volume CV: ",  scales::percent(cv_vol,   accuracy = 1), "\n",
+      "Price CV: ",   scales::percent(cv_price, accuracy = 1)
+    ),
+    # Position annotations near the top of each panel
+    x = if_else(season == "Winter (Oct–Dec)", winter_vol_range$lo * 1.05,
+                min(avocado$TotalVolume) * 1.15),
+    y = max(avocado$AveragePrice) * 0.97
+  )
+
+plot_b <- ggplot(avocado, aes(x = TotalVolume, y = AveragePrice, color = season)) +
+  # Shade the x-range occupied by winter weeks in BOTH panels for comparison
+  annotate("rect",
+           xmin = winter_vol_range$lo, xmax = winter_vol_range$hi,
+           ymin = -Inf, ymax = Inf,
+           fill = season_colors["Winter (Oct–Dec)"], alpha = 0.08) +
+  geom_point(size = 2.8, alpha = 0.7) +
+  # Per-facet CV label
+  geom_label(data = facet_annots,
+             aes(x = x, y = y, label = label),
+             inherit.aes = FALSE,
+             hjust = 0, vjust = 1,
+             size = 3.3, lineheight = 1.3,
+             fill = "white", color = "grey25",
+             label.padding = unit(0.4, "lines"),
+             label.r       = unit(0.15, "lines"),
+             label.size    = 0.35) +
+  facet_wrap(~season, ncol = 2) +
+  scale_color_manual(values = season_colors, guide = "none") +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  scale_y_continuous(labels = scales::dollar_format(accuracy = 0.01)) +
+  labs(
+    title    = "Price vs. Volume by Season",
+    subtitle = "Winter weeks show much less volume variation than the rest of the year,\neven as prices fluctuate — the hallmark of inelastic demand.",
+    x        = "Total Weekly Volume (avocados sold)",
+    y        = "Average Price (USD)",
+    caption  = "Shaded band = volume range observed during winter weeks.\nCV = coefficient of variation (SD ÷ Mean)."
+  ) +
+  theme_avo +
+  theme(legend.position = "none")   # colour already encoded in facet labels
+
+plot_b
+```
+
+## Plot C
+
+```{r, eval = FALSE, echo = TRUE}
+# Reshape to long format so we can facet on BOTH variable and season simultaneously
+avocado_long <- avocado %>%
+  select(season, AveragePrice, TotalVolume) %>%
+  pivot_longer(
+    cols      = c(AveragePrice, TotalVolume),
+    names_to  = "variable",
+    values_to = "value"
+  ) %>%
+  mutate(
+    # Human-readable facet labels
+    variable = recode(variable,
+                      AveragePrice  = "Average Price (USD)",
+                      TotalVolume   = "Total Weekly Volume")
+  )
+
+# Pre-compute mean value per panel (season × variable) for the vertical reference lines
+mean_lines <- avocado_long %>%
+  group_by(season, variable) %>%
+  summarise(mean_val = mean(value), .groups = "drop")
+
+# We use free_x so each variable gets its own x-axis scale
+plot_c <- ggplot(avocado_long, aes(x = value, fill = season)) +
+  geom_histogram(
+    aes(y = after_stat(density)),   # density so panels with different spreads are comparable
+    bins  = 18,
+    color = "white",
+    linewidth = 0.3,
+    alpha = 0.80
+  ) +
+  # Vertical mean lines to anchor visual comparison; drawn from pre-computed data frame
+  geom_vline(data = mean_lines,
+             aes(xintercept = mean_val),
+             linetype  = "dashed",
+             linewidth = 0.7,
+             color     = "grey30") +
+  facet_wrap(season ~ variable, scales = "free", ncol = 2,
+             # Put season in the row label, variable in the column label
+             labeller = labeller(
+               season   = label_value,
+               variable = label_value
+             )) +
+  scale_fill_manual(values = season_colors, guide = "none") +
+  scale_x_continuous(labels = scales::label_number(big.mark = ",")) +
+  labs(
+    title    = "Distribution of Price and Volume by Season",
+    subtitle = paste0(
+      "Winter (Oct–Dec) shows WIDE price variation but NARROW volume variation.\n",
+      "The rest of the year shows wide variation in both — a sign of elastic demand.\n",
+      "Dashed lines mark the seasonal mean."
+    ),
+    x       = NULL,
+    y       = "Density",
+    caption = "Each panel uses its own x-axis scale. Density (not count) used so panels are visually comparable."
+  ) +
+  theme_avo +
+  theme(
+    panel.spacing   = unit(1.2, "lines"),
+    axis.text.x     = element_text(size = 9),
+    plot.subtitle   = element_text(lineheight = 1.4)
+  )
+
+plot_c
+```
+
+## Plot C
+
+```{r, eval = TRUE, echo = FALSE}
+# Reshape to long format so we can facet on BOTH variable and season simultaneously
+avocado_long <- avocado %>%
+  select(season, AveragePrice, TotalVolume) %>%
+  pivot_longer(
+    cols      = c(AveragePrice, TotalVolume),
+    names_to  = "variable",
+    values_to = "value"
+  ) %>%
+  mutate(
+    # Human-readable facet labels
+    variable = recode(variable,
+                      AveragePrice  = "Average Price (USD)",
+                      TotalVolume   = "Total Weekly Volume")
+  )
+
+# Pre-compute mean value per panel (season × variable) for the vertical reference lines
+mean_lines <- avocado_long %>%
+  group_by(season, variable) %>%
+  summarise(mean_val = mean(value), .groups = "drop")
+
+# We use free_x so each variable gets its own x-axis scale
+plot_c <- ggplot(avocado_long, aes(x = value, fill = season)) +
+  geom_histogram(
+    aes(y = after_stat(density)),   # density so panels with different spreads are comparable
+    bins  = 18,
+    color = "white",
+    linewidth = 0.3,
+    alpha = 0.80
+  ) +
+  # Vertical mean lines to anchor visual comparison; drawn from pre-computed data frame
+  geom_vline(data = mean_lines,
+             aes(xintercept = mean_val),
+             linetype  = "dashed",
+             linewidth = 0.7,
+             color     = "grey30") +
+  facet_wrap(season ~ variable, scales = "free", ncol = 2,
+             # Put season in the row label, variable in the column label
+             labeller = labeller(
+               season   = label_value,
+               variable = label_value
+             )) +
+  scale_fill_manual(values = season_colors, guide = "none") +
+  scale_x_continuous(labels = scales::label_number(big.mark = ",")) +
+  labs(
+    title    = "Distribution of Price and Volume by Season",
+    subtitle = paste0(
+      "Winter (Oct–Dec) shows WIDE price variation but NARROW volume variation.\n",
+      "The rest of the year shows wide variation in both — a sign of elastic demand.\n",
+      "Dashed lines mark the seasonal mean."
+    ),
+    x       = NULL,
+    y       = "Density",
+    caption = "Each panel uses its own x-axis scale. Density (not count) used so panels are visually comparable."
+  ) +
+  theme_avo +
+  theme(
+    panel.spacing   = unit(1.2, "lines"),
+    axis.text.x     = element_text(size = 9),
+    plot.subtitle   = element_text(lineheight = 1.4)
+  )
+
+plot_c
+```
+
+## Targeting Revisions
+
+- I like the first version best but the it's hard to see the story with the big annotation in the way
+- Plus it would make more sense with the axes reversed.
+- I'll tell it to reverse the axes, and change the annotation to be a line showing the limited quantity range in winter months.
+
+## Targeting Revisions
+
+<small>"Let's keep only Plot A. Reverse the axes so that price is on the x-axis and quantity is on the y-axis. Add a vertical line showing the limited range of quantities in the winter months. Change the annotation text box to be a text blurb saying "Quantity range in winter is limited", keeping line breaks and spacing in mind, and add an arrow from the text box to the vertical line we added. Keep the same theming and styling as before, just make those specific changes."</small>
+
+## Just Plot A
+
+```{r, echo = FALSE, eval = TRUE}
+
+# Compute the min and max volume for winter weeks;
+# we'll draw a horizontal band between these to show the limited range
+winter_vol <- avocado %>%
+  filter(season == "Winter (Oct–Dec)") %>%
+  summarise(lo = min(TotalVolume), hi = max(TotalVolume))
+
+# Midpoint of the winter volume band — the arrow will point here
+winter_mid <- (winter_vol$lo + winter_vol$hi) / 2
+
+# Position the text annotation: to the right of centre, well above the winter band
+# so the arrow has a clear diagonal path down to the horizontal line
+annot_x <- max(avocado$AveragePrice) * 0.82   # near right edge (price is now x)
+annot_y <- winter_mid * 1.55                  # above the winter band
+
+plot_a <- ggplot(avocado, aes(x = AveragePrice, y = TotalVolume, color = season)) +
+
+  # ── Winter volume range: horizontal line at the midpoint of winter volumes,
+  #    spanning the full width of the plot, to visually anchor the limited range
+  geom_hline(yintercept = winter_vol$lo,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+  geom_hline(yintercept = winter_vol$hi,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+
+  # Subtle shaded band between the two winter-range lines
+  annotate("rect",
+           xmin = -Inf, xmax = Inf,
+           ymin = winter_vol$lo, ymax = winter_vol$hi,
+           fill = season_colors["Winter (Oct–Dec)"], alpha = 0.07) +
+
+  # ── Scatter: non-winter behind, winter on top
+  geom_point(data = filter(avocado, season == "Rest of Year"),
+             size = 2.8, alpha = 0.55) +
+  geom_point(data = filter(avocado, season == "Winter (Oct–Dec)"),
+             size = 3.2, alpha = 0.85) +
+
+  # ── Arrow from text annotation down to the midpoint of the winter band
+  annotate("segment",
+           x    = annot_x,       xend = annot_x * 0.935,
+           y    = annot_y * 0.9, yend = winter_mid * 1.06,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"),
+           color = "grey35", linewidth = 0.55) +
+
+  # ── Text annotation (plain text, no box) calling out the key insight
+  annotate("label",
+           x     = annot_x,
+           y     = annot_y,
+           label = "Quantity range in\nwinter is limited",
+           hjust = 0.5, vjust = 0.5,
+           size  = 3.6, lineheight = 1.4,
+           fill  = "white", color = "grey20",
+           label.padding = unit(0.45, "lines"),
+           label.r       = unit(0.2,  "lines"),
+           label.size    = 0.4) +
+
+  scale_color_manual(values = season_colors) +
+  # x-axis: price in dollars
+  scale_x_continuous(labels = scales::dollar_format(accuracy = 0.01),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  # y-axis: volume in millions
+  scale_y_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.08))) +
+  labs(
+    title    = "Avocado Sales Volume vs. Price",
+    subtitle = "Winter weeks (Oct–Dec) cluster within a narrow volume band despite wide price swings,\nsuggesting lower price sensitivity in those months.",
+    x        = "Average Price (USD)",
+    y        = "Total Weekly Volume (avocados sold)",
+    caption  = "Shaded band and boundary lines show the full volume range observed during winter weeks."
+  ) +
+  theme_avo
+
+plot_a
+```
+
+## Just Plot A
+
+```{r, echo = TRUE, eval = FALSE}
+
+# Compute the min and max volume for winter weeks;
+# we'll draw a horizontal band between these to show the limited range
+winter_vol <- avocado %>%
+  filter(season == "Winter (Oct–Dec)") %>%
+  summarise(lo = min(TotalVolume), hi = max(TotalVolume))
+
+# Midpoint of the winter volume band — the arrow will point here
+winter_mid <- (winter_vol$lo + winter_vol$hi) / 2
+
+# Position the text annotation: to the right of centre, well above the winter band
+# so the arrow has a clear diagonal path down to the horizontal line
+annot_x <- max(avocado$AveragePrice) * 0.82   # near right edge (price is now x)
+annot_y <- winter_mid * 1.55                  # above the winter band
+
+plot_a <- ggplot(avocado, aes(x = AveragePrice, y = TotalVolume, color = season)) +
+
+  # ── Winter volume range: horizontal line at the midpoint of winter volumes,
+  #    spanning the full width of the plot, to visually anchor the limited range
+  geom_hline(yintercept = winter_vol$lo,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+  geom_hline(yintercept = winter_vol$hi,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+
+  # Subtle shaded band between the two winter-range lines
+  annotate("rect",
+           xmin = -Inf, xmax = Inf,
+           ymin = winter_vol$lo, ymax = winter_vol$hi,
+           fill = season_colors["Winter (Oct–Dec)"], alpha = 0.07) +
+
+  # ── Scatter: non-winter behind, winter on top
+  geom_point(data = filter(avocado, season == "Rest of Year"),
+             size = 2.8, alpha = 0.55) +
+  geom_point(data = filter(avocado, season == "Winter (Oct–Dec)"),
+             size = 3.2, alpha = 0.85) +
+
+  # ── Arrow from text annotation down to the midpoint of the winter band
+  annotate("segment",
+           x    = annot_x,       xend = annot_x * 0.935,
+           y    = annot_y * 0.9, yend = winter_mid * 1.06,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"),
+           color = "grey35", linewidth = 0.55) +
+
+  # ── Text annotation (plain text, no box) calling out the key insight
+  annotate("label",
+           x     = annot_x,
+           y     = annot_y,
+           label = "Quantity range in\nwinter is limited",
+           hjust = 0.5, vjust = 0.5,
+           size  = 3.6, lineheight = 1.4,
+           fill  = "white", color = "grey20",
+           label.padding = unit(0.45, "lines"),
+           label.r       = unit(0.2,  "lines"),
+           label.size    = 0.4) +
+
+  scale_color_manual(values = season_colors) +
+  # x-axis: price in dollars
+  scale_x_continuous(labels = scales::dollar_format(accuracy = 0.01),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  # y-axis: volume in millions
+  scale_y_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.08))) +
+  labs(
+    title    = "Avocado Sales Volume vs. Price",
+    subtitle = "Winter weeks (Oct–Dec) cluster within a narrow volume band despite wide price swings,\nsuggesting lower price sensitivity in those months.",
+    x        = "Average Price (USD)",
+    y        = "Total Weekly Volume (avocados sold)",
+    caption  = "Shaded band and boundary lines show the full volume range observed during winter weeks."
+  ) +
+  theme_avo
+
+plot_a
+```
+
+## Finer Adjustments
+
+- We might want to continue editing, making small tweaks
+- I think including the outliers is distracting and makes the range seem wider than it really is. So I'll change to being the 10th to 90th percentiles and add that note to the caption, as well as a summary stat.
+
+## Finer Adjustments
+
+```{r, eval=FALSE, echo = TRUE}
+# Compute the min and max volume for winter weeks;
+# we'll draw a horizontal band between these to show the limited range
+winter_vol <- avocado %>%
+  filter(season == "Winter (Oct–Dec)") %>%
+  summarise(lo = quantile(TotalVolume, .1), hi = quantile(TotalVolume, .9))
+
+# Midpoint of the winter volume band — the arrow will point here
+winter_mid <- (winter_vol$lo + winter_vol$hi) / 2
+
+# Get nonwinter same thing for comparison
+nonwinter_vol <- avocado %>%
+  filter(season != "Winter (Oct–Dec)") %>%
+  summarise(lo = quantile(TotalVolume, .1), hi = quantile(TotalVolume, .9))
+
+winter_range = scales::comma(winter_vol$hi - winter_vol$lo)
+nonwinter_range = scales::comma(nonwinter_vol$hi - nonwinter_vol$lo)
+
+# Position the text annotation: to the right of centre, well above the winter band
+# so the arrow has a clear diagonal path down to the horizontal line
+annot_x <- max(avocado$AveragePrice) * 0.82   # near right edge (price is now x)
+annot_y <- winter_mid * 1.55                  # above the winter band
+
+plot_a <- ggplot(avocado, aes(x = AveragePrice, y = TotalVolume, color = season)) +
+
+  # ── Winter volume range: horizontal line at the midpoint of winter volumes,
+  #    spanning the full width of the plot, to visually anchor the limited range
+  geom_hline(yintercept = winter_vol$lo,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+  geom_hline(yintercept = winter_vol$hi,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+
+  # Subtle shaded band between the two winter-range lines
+  annotate("rect",
+           xmin = -Inf, xmax = Inf,
+           ymin = winter_vol$lo, ymax = winter_vol$hi,
+           fill = season_colors["Winter (Oct–Dec)"], alpha = 0.07) +
+
+  # ── Scatter: non-winter behind, winter on top
+  geom_point(data = filter(avocado, season == "Rest of Year"),
+             size = 2.8, alpha = 0.55) +
+  geom_point(data = filter(avocado, season == "Winter (Oct–Dec)"),
+             size = 3.2, alpha = 0.85) +
+
+  # ── Arrow from text annotation down to the midpoint of the winter band
+  annotate("segment",
+           x    = annot_x,       xend = annot_x * 0.935,
+           y    = annot_y * 0.9, yend = winter_mid * 1.06,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"),
+           color = "grey35", linewidth = 0.55) +
+
+  # ── Text annotation (plain text, no box) calling out the key insight
+  annotate("label",
+           x     = annot_x,
+           y     = annot_y,
+           label = "Quantity range in\nwinter is limited",
+           hjust = 0.5, vjust = 0.5,
+           size  = 3.6, lineheight = 1.4,
+           fill  = "white", color = "grey20",
+           label.padding = unit(0.45, "lines"),
+           label.r       = unit(0.2,  "lines"),
+           label.size    = 0.4) +
+
+  scale_color_manual(values = season_colors) +
+  # x-axis: price in dollars
+  scale_x_continuous(labels = scales::dollar_format(accuracy = 0.01),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  # y-axis: volume in millions
+  scale_y_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.08))) +
+  labs(
+    title    = "Avocado Sales Volume vs. Price",
+    subtitle = "Winter weeks (Oct–Dec) cluster within a narrow volume band despite wide price swings,\nsuggesting lower price sensitivity in those months.",
+    x        = "Average Price (USD)",
+    y        = "Total Weekly Volume (avocados sold)",
+    caption  = paste0("Shaded band and boundary lines show the 10th to 90th percentile observed during winter weeks. This is a span of ", winter_range, " vs. ", nonwinter_range, " for the rest of the year.")
+  ) +
+  theme_avo
+
+plot_a
+```
+
+## Finer Adjustments
+
+```{r, eval=TRUE, echo = FALSE}
+# Compute the min and max volume for winter weeks;
+# we'll draw a horizontal band between these to show the limited range
+winter_vol <- avocado %>%
+  filter(season == "Winter (Oct–Dec)") %>%
+  summarise(lo = quantile(TotalVolume, .1), hi = quantile(TotalVolume, .9))
+
+# Midpoint of the winter volume band — the arrow will point here
+winter_mid <- (winter_vol$lo + winter_vol$hi) / 2
+
+# Get nonwinter same thing for comparison
+nonwinter_vol <- avocado %>%
+  filter(season != "Winter (Oct–Dec)") %>%
+  summarise(lo = quantile(TotalVolume, .1), hi = quantile(TotalVolume, .9))
+
+winter_range = scales::comma(winter_vol$hi - winter_vol$lo)
+nonwinter_range = scales::comma(nonwinter_vol$hi - nonwinter_vol$lo)
+
+# Position the text annotation: to the right of centre, well above the winter band
+# so the arrow has a clear diagonal path down to the horizontal line
+annot_x <- max(avocado$AveragePrice) * 0.82   # near right edge (price is now x)
+annot_y <- winter_mid * 1.55                  # above the winter band
+
+plot_a <- ggplot(avocado, aes(x = AveragePrice, y = TotalVolume, color = season)) +
+
+  # ── Winter volume range: horizontal line at the midpoint of winter volumes,
+  #    spanning the full width of the plot, to visually anchor the limited range
+  geom_hline(yintercept = winter_vol$lo,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+  geom_hline(yintercept = winter_vol$hi,
+             linetype = "solid", linewidth = 0.6,
+             color = season_colors["Winter (Oct–Dec)"], alpha = 0.7) +
+
+  # Subtle shaded band between the two winter-range lines
+  annotate("rect",
+           xmin = -Inf, xmax = Inf,
+           ymin = winter_vol$lo, ymax = winter_vol$hi,
+           fill = season_colors["Winter (Oct–Dec)"], alpha = 0.07) +
+
+  # ── Scatter: non-winter behind, winter on top
+  geom_point(data = filter(avocado, season == "Rest of Year"),
+             size = 2.8, alpha = 0.55) +
+  geom_point(data = filter(avocado, season == "Winter (Oct–Dec)"),
+             size = 3.2, alpha = 0.85) +
+
+  # ── Arrow from text annotation down to the midpoint of the winter band
+  annotate("segment",
+           x    = annot_x,       xend = annot_x * 0.935,
+           y    = annot_y * 0.9, yend = winter_mid * 1.06,
+           arrow = arrow(length = unit(0.22, "cm"), type = "closed"),
+           color = "grey35", linewidth = 0.55) +
+
+  # ── Text annotation (plain text, no box) calling out the key insight
+  annotate("label",
+           x     = annot_x,
+           y     = annot_y,
+           label = "Quantity range in\nwinter is limited",
+           hjust = 0.5, vjust = 0.5,
+           size  = 3.6, lineheight = 1.4,
+           fill  = "white", color = "grey20",
+           label.padding = unit(0.45, "lines"),
+           label.r       = unit(0.2,  "lines"),
+           label.size    = 0.4) +
+
+  scale_color_manual(values = season_colors) +
+  # x-axis: price in dollars
+  scale_x_continuous(labels = scales::dollar_format(accuracy = 0.01),
+                     expand = expansion(mult = c(0.02, 0.05))) +
+  # y-axis: volume in millions
+  scale_y_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"),
+                     expand = expansion(mult = c(0.02, 0.08))) +
+  labs(
+    title    = "Avocado Sales Volume vs. Price",
+    subtitle = "Winter weeks (Oct–Dec) cluster within a narrow volume band despite wide price swings,\nsuggesting lower price sensitivity in those months.",
+    x        = "Average Price (USD)",
+    y        = "Total Weekly Volume (avocados sold)",
+    caption  = paste0("Shaded band and boundary lines show the 10th to 90th percentile observed during winter weeks. This is a span of ", winter_range, " vs. ", nonwinter_range, " for the rest of the year.")
+  ) +
+  theme_avo
+
+plot_a
+```
+
+## Now You
+
+- Load the `causaldata` package and then `data(restaurant_inspections)`. Read the `help(restaurant_inspections)` file
+- Look around and think of a story to tell
+- Walk through the techniques we covered
+- (hmm - how to give AI the contents of the data?)

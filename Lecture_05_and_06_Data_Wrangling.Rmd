@@ -33,6 +33,15 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
@@ -71,7 +80,7 @@ mtcars %>%
 ## Limitations
 
 - We only have so much time! I won't be going into *great* detail on the use of all the technical commands, but by the end of this you will know what's out there and generally how it's used
-- *As with any computer skill, a teacher's comparative advantage is in letting you know what's out there. The* **real learning** *comes from practice and Googling. So take what you see here today, find yourself a project, and do it! It will be awful but you will learn an astounding amount by the end*
+- *As with any computer skill, a teacher's comparative advantage is in letting you know what's out there. The* **real learning** *comes from practice and Googling/prompting. So take what you see here today, find yourself a project, and do it! It will be awful but you will learn an astounding amount by the end*
 
 ## The Core of Data Wrangling
 
@@ -91,6 +100,14 @@ I help a lot of people with their problems with data wrangling. Their issues are
 - Check if it takes a certain value ever: `sum(data$variable == value)`
 - Look for: What values are there, what the observations look like, presence of missing or unusable data, how the data is structured
 
+## Using AI for Data Wrangling
+
+- AI is *pretty* good at data wrangling for small projects
+- However, it is *probably a bad idea* to rely on it
+- It's much easier for mistakes and misinterpretations to *hide invisibly* in the final product of a data wrangling task
+- If you didn't follow, interact, check, and revise *every step of the way* so that you truly *understand* your own data, you didn't do it right
+- And if you *are* doing this, it saves you little effort or time to have the AI code for you anyway
+
 ## The Stages of Data Wrangling
 
 For the purposes of this class:
@@ -107,6 +124,9 @@ For the purposes of this class:
 - **If you need to do something later, and we didn't cover it, maybe come back and check these slides!!**
 - The video series, linked on Canvas and [here](https://www.youtube.com/watch?v=EdPKcy1WKD0&list=PLcTBLulJV_AJ4M_a7oYpURLZ36YvUG78S), will go into these things in more detail when you need them 
 
+## Using these slides
+
+- (the next few slides are organized into categories. To actually get into them push *up and down*, not left/right)
 
 # From Data to Tidy Data 
 
@@ -661,22 +681,8 @@ tibble(number = c('1,000', '2,003,124')) %>%
 
 - Often we want to do something a bit more complex. Unfortunately, this requires we dip our toes into the bottomless well that is *regular expressions*
 - Regular expressions are ways of describing patterns in strings so that the computer can recognize them. Technically this is what we did with `str_replace_all(',','')` - `','` is a regular expression saying "look for a comma"
-- There are a *lot* of options here. See the [guide](https://stringr.tidyverse.org/articles/regular-expressions.html)
+- There are a *lot* of options here that we won't go into. See the [guide](https://stringr.tidyverse.org/articles/regular-expressions.html)
 - Common: `[0-9]` to look for a digit, `[a-zA-Z]` for letters, `*` to repeat until you see the next thing... hard to condense here. Read the guide.
-
-## Detecting Patterns in Strings
-
-- For example, some companies are publicly listed and we want to indicate that but not keep the ticker. `separate()` won't do it here, not easily!
-- On the next page we'll use the regular expression `'\\([A-Z].*\\)'`
-- `'\\([A-Z].*\\)'` says "look for a (" (note the `\\` to treat the usually-special ( character as an actual character), then "Look for a capital letter `[A-Z]`", then "keep looking for capital letters `.*`", then "look for a )"
-
-## Detecting Patterns in Strings
-
-```{r, echo = TRUE}
-tibble(name = c('Amazon (AMZN) Holdings','Cargill Corp. (cool place!)')) %>%
-  mutate(publicly_listed = str_detect(name, '\\([A-Z].*\\)'),
-         name = str_replace_all(name, '\\([A-Z].*\\)', ''))
-```
 
 ## For Example
 
@@ -817,14 +823,6 @@ stockgrowth %>%
 ```{r, echo = TRUE}
 person_year_data %>%
   map_chr(class)
-```
-
-## purrr
-
-- Or looping more generally for diagnostic or wrangling purposes. Perhaps you have a `summary_profile()` function you've made, and want to check each state's data to see if its data looks right. You could do 
-
-```{r, echo = TRUE, eval = FALSE}
-data %>% pull(state) %>% unique() %>% map(summary_profile)
 ```
 
 ## purrr

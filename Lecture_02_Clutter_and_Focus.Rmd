@@ -32,6 +32,15 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
@@ -142,6 +151,7 @@ knitr::include_graphics('Lecture_02_Minard.gif')
 - And visually, they are at least visually comparable
 - Putting two similar things close together says "these things are very similar!"
 - Putting two distinct things close together says "compare these please!"
+- Basically all good visualizations are about *making a comparison*. Here's one way you can show people *what comparison they're supposed to make
 
 ## Proximity
 
@@ -437,6 +447,7 @@ ggplot(naep %>%
 ## Your Turn
 
 - Story: Sales and Marketing may be more expensive, but they haven't grown as much as R&D and HR.
+- Think: what is the *comparison* we want to encourage, and can we see it on your graph?
 
 
 ```{r}

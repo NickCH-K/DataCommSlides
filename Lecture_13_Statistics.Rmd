@@ -29,6 +29,15 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
@@ -98,10 +107,9 @@ Things to Get Right:
 
 ## Answering the Question
 
-- If you have a question about *individuals*, but report *totals*, your answer combines both an answer about individuals with an answer about how many individuals there are
+- One of the most common mistakes I see business students make is to have a question about *individuals*, but report *totals*
 - If you're deciding which type of franchise to open, you'd probably be more interested in *average* sales per store than *total* sales, right? So show that!
 - If you want to know which college is more expensive, you'd want *average* tuition per student instead of *total* tuition for the college
-- (reporting sums instead of averages, when an average is called for, is a common tendency among business students I find)
 - Many other versions of this average/sum problem with different statistics!
 
 ## Theory and Hypothesis
@@ -174,13 +182,6 @@ Something I see a *lot* in student submissions:
 
 (and why does nobody ever say to focus on the middling products??)
 
-## Or Just a Gut Check
-
-- Another way to avoid identification error is to think about what you're really implying with your results and seeing if it makes sense and is supported with the data
-- A common error I see from business students on this is the "predictors of success" problem
-- If you are trying to say something about what makes a successful business/strategy, and you find that $X$ is correlated with success, does that *really* mean that $X$ causes, or even is a useful *predictor* of, success?
-- Will wearing black turtlenecks make you more likely to be as successful as Steve Jobs?
-
 ## Creating Plausible Results
 
 - More broadly, whether we're talking about identification or not
@@ -210,7 +211,7 @@ Always be asking yourself:
 
 - For example, if you find that your sales are only nonzero in two weeks of the year, that's probably wrong. Or that the ad sales are 5x the non-ad sales, that's probably wrong too!
 - If your result on when movie releases peaked found that 2021 was the year with the most movies ever, at 65 total movies... that's wrong!
-- Or if you've chosen to make a recommendation on the basis of your method, but your method recommends something impossible (I recommend that you hire for your new CEO... Thomas Edison!) or clearly wrong (I recommend that you hire for your new CEO... a cat!) that doesn't mean you've come to a great surprising conclusion, it means your method is bad and you should start over with a different method
+- Or if you've chosen to make a recommendation on the basis of your method, but your method recommends something impossible (I recommend that you hire for your new CEO... Thomas Edison!) or clearly wrong (I recommend that you hire for your new CEO... a cat!), it means your method is bad and you should start over with a different method
 
 ## Doing the Right Calculations
 
@@ -265,13 +266,10 @@ Notice what's not in there:
 - Ways of communicating uncertainty that people tend to be able to understand are *distribution percentiles* and *confidence bands*
 - Distribution percentiles are things of the form "X% of the time, this variable will be below Y"
 - So for example "average sales are 1000 dollars per month, but 10% of the time they're below 500 dollars"
-- In actual data, that calculation can come from just the proportion of observations below/above a certain value
-- In an estimated value, you can use the sampling distribution (like, calculating a mean and standard deviation and using the normal distribution) to calculate percentiles
 
 ## Communicating Uncertainty
 
 - Confidence bands are related to statistical significance but come at it in a different way that maybe communicates the uncertainty more accurately (and in more detail than just an up/down significant/insignificant)
-- Basically, you want to describe the distribution of the estimate from a low percentile to a high one so as to get across how much it might vary from sample to sample
 - Plus, these are easy to graph
 - And work with forecasts too (although technically these are "forecast intervals")
 

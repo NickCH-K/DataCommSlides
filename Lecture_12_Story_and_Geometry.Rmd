@@ -19,7 +19,6 @@ library(tidyverse)
 library(ggpubr)
 ```
 
-
 ## Making it All Make Sense
 
 ```{r, results = 'asis'}
@@ -29,51 +28,66 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
-- Now that we've spent some time on technical detail and how to get things working...
-- Let's bring it back to the point of all this, which is not to show off our R skills but to communicate effectively
-- Don't be so proud of your ability to code something up that you forget to make the product good!
+-   Now that we've spent some time on technical detail and how to get things working...
+-   Let's bring it back to the point of all this, which is not to show off our R skills but to communicate effectively
+-   Don't be so proud of your ability to code something up, or delighted at the ease of getting AI to produce something, that you forget to make the product good!
 
 ## Story and Data
 
-- First off, remember our goals:
-- Get across *an idea*
-- Communicate *clearly*
+-   First off, remember our goals:
+-   Get across *an idea*
+-   Communicate *clearly*
 
 ## Story and Data
 
-- It's surprisingly common for people to forget the goal of getting across an idea
-- Granted, this isn't *always* necessary - some visualizations are just fun to look at even if we don't care what they say. But that's more like art than communication
-- But in most settings we want to transmit an idea
+-   It's surprisingly common for people to forget the goal of getting across an idea
+-   Granted, this isn't *always* necessary - some visualizations are just fun to look at even if we don't care what they say. But that's more like art than communication
+-   But in most settings we want to transmit an idea
 
 ## Story and Data
 
-- What kind of ideas work well? 
-- You can think of a story as something you *learn* from the data. It reveals something about the world.
-- There's an important distinction between *showing the data* and *demonstrating an idea*
-- Ask "what would I learn from viewing this visualization" and, crucially, "if I learned that thing, would I care?"
+-   What kind of ideas work well?
+-   You can think of a story as something you *learn* from the data. It reveals something about the world.
+-   There's an important distinction between *showing the data* and *demonstrating an idea*
+-   Ask "what would I learn from viewing this visualization" and, crucially, "if I learned that thing, would I care?"
 
 ## Good Stories
 
 Good stories:
 
-- *Use data* to *broaden our understanding* of something, rather than using data to... show us data
-- Provide an understanding that is interesting or actionable
-- Don't prompt responses of "why should I care about this?"
+-   *Use data* to *broaden our understanding* of something, rather than using data to... show us data
+-   Provide an understanding that is interesting or actionable
+-   Don't prompt responses of "why should I care about this?"
 
 ## Visualization Implies the Story
 
-- Your decision of what to include or exclude, and what to compare or contrast, *implies a story*
-- Make sure it's the one you want to get across!
-- Sometimes, you can just straight up say the idea in a title or annotation and just *demonstrate* with the visualization
-- But a more satisfying (and convincing) result comes if the viewer comes to the conclusion on their own by viewing the viz
-- Think "if I want people to come to this conclusion, what about my visualization points them there?"
+-   Your decision of what to include or exclude, and what to compare or contrast, *implies a story*
+-   Make sure it's the one you want to get across!
+-   Sometimes, you can just straight up say the idea in a title or annotation and just *demonstrate* with the visualization
+-   But a more satisfying (and convincing) result comes if the viewer comes to the conclusion on their own by viewing the viz
+-   Think "if I want people to come to this conclusion, what about my visualization points them there?"
+
+## Stories Usually Need a Comparison
+
+-   Most data analyses that say something useful invite us to *compare* things
+-   Number A is higher than number B, or higher than it used to be, or more dispersed over here than over there
+-   Different geometries help us more easily show different kinds of comparisons
 
 ## Visualization Implies the Story
 
-- What conclusion would this (fictional) graph make us come to?
+-   What conclusion would this (fictional) graph make us come to?
 
 ```{r, fig.height = 4.5}
 set.seed(1000)
@@ -99,9 +113,9 @@ sal %>%
 
 ## Visualization Implies the Story
 
-- How about this?
+-   How about this?
 
-```{r}
+```{r, fig.height = 4.5}
 ggplot(sal %>% filter(Person == 'Aja'), aes(x = Year, y = Salary, color = Person)) + 
   geom_line(size = 1) + 
   geom_text(aes(x = Year + .1, y = Salary, label = Person),
@@ -116,9 +130,9 @@ ggplot(sal %>% filter(Person == 'Aja'), aes(x = Year, y = Salary, color = Person
 
 ## Visualization Implies the Story
 
-- And this one?
+-   And this one?
 
-```{r}
+```{r, fig.height = 4.5}
 ggplot(sal, aes(x = Year, y = Salary, color = Person)) + 
   geom_line(size = 1) + 
   geom_text(aes(x = Year + .1, y = Salary, label = Person, color = Person),
@@ -133,42 +147,42 @@ ggplot(sal, aes(x = Year, y = Salary, color = Person)) +
 
 ## Visualization Implies the Story
 
-- If our goal was to show that Aja's career has really taken off, which visualization works best?
-- Is that a good story to try to tell?
-- What might someone do with that information?
+-   If our goal was to show that Aja's career has really taken off, which visualization works best?
+-   Is that a good story to try to tell?
+-   What does each invite us to compare?
+-   What might someone do with that information?
 
 ## Landing on the Story
 
-- It's very easy for us to write a graph that *demonstrates the thing we already know* but doesn't *inspire that same idea in others*
-- We need to do everything we can and get it all working right if that's our goal!
-- We talked about removing clutter - this is one reason why. Anything *else* on the graph is something besides your idea they can get distracted by
+-   It's very easy for us to write a graph that *demonstrates the thing we already know* but doesn't *inspire that same idea in others*
+-   We need to do everything we can and get it all working right if that's our goal!
+-   We talked about removing clutter - this is one reason why. Anything *else* on the graph is something besides your idea they can get distracted by
 
 ## Tips
 
-- Don't underestimate how difficult it is to get an idea across, especially indirectly by hoping someone sees *your intention* on a graph
-- The best way to build intuition for how to do this is to *show other people your work and see if they come to the same conclusion you intended*
-- Ask them what they think the graph means! Not just what it shows but what it *means*. The answer will often shock you
-
+-   Don't underestimate how difficult it is to get an idea across, especially indirectly by hoping someone sees *your intention* on a graph
+-   The best way to build intuition for how to do this is to *show other people your work and see if they come to the same conclusion you intended*
+-   Ask them what they think the graph means! Not just what it shows but what it *means*. The answer will often shock you
 
 ## Picking Geometries
 
-- In the same vein, the choice of *geometry* has a lot to do with what stories can be effectively communicated and how they come across
-- There are also some common errors made with certain geometries
-- So let's talk about them.
-- We must ask: what does this geometry let us *compare* and *contrast*, and what do we *want* to compare and contrast?
-- We can only evaluate a few but this will help us learn to evaluate them overall (and pick up some specific tips)
+-   In the same vein, the choice of *geometry* has a lot to do with what stories can be effectively communicated and how they come across
+-   There are also some common errors made with certain geometries
+-   So let's talk about them.
+-   We must ask: what does this geometry let us *compare* and *contrast*, and what do we *want* to compare and contrast?
+-   We can only evaluate a few but this will help us learn to evaluate them overall (and pick up some specific tips)
 
 ## In General
 
-- If a geometry shows *lots of separate distinct objects* (like a bar graph), it wants you to compare those objects
-- If a geometry draws *a continuous path* (like a line graph, or a cluster of points with a shape to it), it wants you to follow that path and see how it changes smoothly along some axis
-- If a geometry shows *an area divided into many parts* (like a pie chart, treemap, or a stacked bar graph) it wants you to see how a whole object is divided up
+-   If a geometry shows *lots of separate distinct objects* (like a bar graph), it wants you to compare those objects
+-   If a geometry draws *a continuous path* (like a line graph, or a cluster of points with a shape to it), it wants you to follow that path and see how it changes smoothly along some axis
+-   If a geometry shows *an area divided into many parts* (like a pie chart, treemap, or a stacked bar graph) it wants you to see how a whole object is divided up
 
-## In General 
+## In General
 
-- If a geometry represents *something real* (like a map) then it expects us to interpret it as that real thing
-- If a geometry shows *differing colors, sizes, or shades* (like a lot of stuff), it's expecting us to notice that something is *more* and compare it to something that is *less*
-- If a geometry shows *crowded areas* and *sparse areas* (like a density plot, or clusters of points), it's expecting us to see which areas are well-populated and which aren't
+-   If a geometry represents *something real* (like a map) then it expects us to interpret it as that real thing
+-   If a geometry shows *differing colors, sizes, or shades* (like a lot of stuff), it's expecting us to notice that something is *more* and compare it to something that is *less*
+-   If a geometry shows *crowded areas* and *sparse areas* (like a density plot, or clusters of points), it's expecting us to see which areas are well-populated and which aren't
 
 ## Bar Graphs
 
@@ -183,9 +197,9 @@ ggplot(mtcars, aes(x = factor(cyl))) +
 
 Good for:
 
-- Categorical x-axis variables
-- For which you want to show a single count or summary statistic for each group
-- Or possibly do a grouped bar chart (`position = 'dodge'`) to compare that summary statistic for that group within another grouping
+-   Categorical x-axis variables
+-   For which you want to show a single count or summary statistic for each group
+-   Or possibly do a grouped bar chart (`position = 'dodge'`) to compare that summary statistic for that group within another grouping
 
 (Tech tips: `geom_col()` lets you calculate bar height directly, `reorder()` in `aes()` lets you order the bars by size)
 
@@ -193,15 +207,15 @@ Good for:
 
 Common mistakes:
 
-- Overuse when other graphs (line graph, treemap) might be more appropriate
-- Needing to compare values separated across long distances (next slide)
-- Long labels on x-axis (try flipping the coordinates! `+coord_flip()`)
-- Not using labeling to call attention to important parts
-- Stacked bar charts outside a few good applications
+-   Overuse when other graphs (line graph, treemap) might be more appropriate
+-   Needing to compare values separated across long distances (next slide)
+-   Long labels on x-axis (try flipping the coordinates! `+coord_flip()`)
+-   Not using labeling to call attention to important parts
+-   Stacked bar charts outside a few good applications
 
 ## Bar Graph Mistakes Examples
 
-- This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better.
+-   This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better.
 
 ```{r, fig.height=4}
 data(storms)
@@ -217,7 +231,7 @@ storms %>%
 
 ## Bar Graph Mistakes Examples
 
-- This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better. Although this is still quite busy! Perhaps a revision could simplify.
+-   This requires us to do some visual gymnastics to compare the right stuff. A line graph would do this better. Although this is still quite busy! Perhaps a revision could simplify.
 
 ```{r, fig.height=4}
 data(storms)
@@ -264,17 +278,17 @@ storms %>%
 
 ## Stacked Bar Charts
 
-- Stacked bar charts make comparisons difficult
-- You can track the size of the bottom category but not the rest
-- Requires you to track a whole lot of information
-- ONLY good for if you are ONLY interested in bottom category AND the total, but NOT any other categories
-- Also, please please only apply this to outcome variables where it makes sense to stack (sum them) together. "Average price by category" doesn't work.
+-   Stacked bar charts make comparisons difficult
+-   You can track the size of the bottom category but not the rest
+-   Requires you to track a whole lot of information
+-   ONLY good for if you are ONLY interested in bottom category AND the total, but NOT any other categories
+-   Also, please please only apply this to outcome variables where it makes sense to stack (sum them) together. "Average price by category" doesn't work.
 
 ## Stacked Bar Charts
 
-- More broadly, a common mistake with stacked bar charts that I also see with pie charts, tree maps, and other geometries that divide an *area* up into *sections*:
-- Dividing an area up into sections implies you are *dividing a whole into pieces* and also that you can *add the pieces back together to get the whole*
-- This doesn't work with stuff like averages! If you stack "average male income" on top of "average female income" you don't get "average overall income". 
+-   More broadly, a common mistake with stacked bar charts that I also see with pie charts, tree maps, and other geometries that divide an *area* up into *sections*:
+-   Dividing an area up into sections implies you are *dividing a whole into pieces* and also that you can *add the pieces back together to get the whole*
+-   This doesn't work with stuff like averages! If you stack "average male income" on top of "average female income" you don't get "average overall income".
 
 ## Some Bar Graph Alternatives
 
@@ -299,26 +313,25 @@ mtcars %>% group_by(cyl) %>% summarize(N = n()) %>%
   guides(fill = 'none') + paletteer::scale_fill_paletteer_d('colorblindr::OkabeIto')
 ```
 
-
 ## Line Graphs
 
-- Line graphs are good for one-to-one relationships between the x and y axis
-- One x in, one y out $\rightarrow$ a bunch of x in, one line out
-- Almost always x is in consistent discrete jumps (i.e. 1 2 3 not 1 3 100)
-- Often, x is time
-- Change over time
-- When change occurred
-- How different groups change (multiple line graphs on the same axes)
+-   Line graphs are good for one-to-one relationships between the x and y axis
+-   One x in, one y out $\rightarrow$ a bunch of x in, one line out
+-   Almost always x is in consistent discrete jumps (i.e. 1 2 3 not 1 3 100)
+-   Often, x is time
+-   Change over time
+-   When change occurred
+-   How different groups change (multiple line graphs on the same axes)
 
 ## Common Mistakes with Line Graphs
 
-- Too many lines
-- Lines that cross back and forth with each other and obscure each other a lot
-- Legends (label the lines! It's easy! `geom_text()`). Skip only if there are too many lines.
-- Huge range in the y-axis (or too little range)
-- Multiple y-axes
-- An unordered x-axis (don't use a line graph for bar graph jobs!) - remember, the line implies continuity!
-- Curved lines can give illusion of continuity if it's not there
+-   Too many lines
+-   Lines that cross back and forth with each other and obscure each other a lot
+-   Legends (label the lines! It's easy! `geom_text()`). Skip only if there are too many lines.
+-   Huge range in the y-axis (or too little range)
+-   Multiple y-axes
+-   An unordered x-axis (don't use a line graph for bar graph jobs!) - remember, the line implies continuity!
+-   Curved lines can give illusion of continuity if it's not there
 
 ## A Line Graph
 
@@ -344,11 +357,11 @@ ggplot(sp, aes(x = decade, y = pressure, color = status)) +
 
 ## Scatterplots
 
-- Scatterplots show the relationship between two **continuous** variables, plotting every observation
-- Use when that's your goal, explaining how two variables move together AND you can see that relationship on the graph
-- The shape of the relationship between them (positive, negative, null, U-shaped, etc.) should be clear
-- Can also be handy for pointing out outliers (with annotation)
-- Adding best-fit lines: when? If you want to refer to its slope, or if the shape is still *clear* but could maybe use a little help, or to contrast a couple of groups
+-   Scatterplots show the relationship between two **continuous** variables, plotting every observation
+-   Use when that's your goal, explaining how two variables move together AND you can see that relationship on the graph
+-   The shape of the relationship between them (positive, negative, null, U-shaped, etc.) should be clear
+-   Can also be handy for pointing out outliers (with annotation)
+-   Adding best-fit lines: when? If you want to refer to its slope, or if the shape is still *clear* but could maybe use a little help, or to contrast a couple of groups
 
 ## Scatterplots
 
@@ -366,11 +379,11 @@ ggplot(aes(x = mpg, y = hp, color =Transmission)) +
 
 ## Common Scatterplot Mistakes
 
-- Expecting too much of the audience (scatterplots are easy to *understand* but it usually takes experience to *walk away with the story* from a scatterplot)
-- Doing it with too many points - likely either a confusing mess, or at least some data will be obscured
-- Non-continuous X or Y variables! `geom_jitter()` only helps a bit
+-   Expecting too much of the audience (scatterplots are easy to *understand* but it usually takes experience to *walk away with the story* from a scatterplot)
+-   Doing it with too many points - likely either a confusing mess, or at least some data will be obscured
+-   Non-continuous X or Y variables! `geom_jitter()` only helps a bit
 
-## Too many points! 
+## Too many points!
 
 ```{r}
 # devtools::install_github('NickCH-K/pmdplyr')
@@ -382,10 +395,9 @@ ggplot(Scorecard, aes(x = earnings_med, y = repay_rate)) +
   labs(x = 'Miles per Gallon',y = 'Horsepower')
 ```
 
-
 ## Alternative for too many points
 
-- Density coloring with `geom_bin2d`, although this requires some sophistication to read
+-   Density coloring with `geom_bin2d`, although this requires some sophistication to read
 
 ```{r, fig.height=4}
 data(Scorecard, package = 'pmdplyr')
@@ -399,15 +411,14 @@ ggplot(Scorecard, aes(x = earnings_med, y = repay_rate)) +
 
 ## Alternatives for Factors
 
-- Factor vs. continuous: ridge or violin density plots (next section)
-- Factor vs. factor: heatmaps as above, [balloon plots](https://rpkgs.datanovia.com/ggpubr/reference/ggballoonplot.html)
-
+-   Factor vs. continuous: ridge or violin density plots (next section)
+-   Factor vs. factor: heatmaps as above, [balloon plots](https://rpkgs.datanovia.com/ggpubr/reference/ggballoonplot.html)
 
 ## Tables
 
-- When individual values are *important*
-- We want things to be easy to look up
-- and CONCISE. Tables are inherently too messy so trim out everything
+-   When individual values are *important*
+-   We want things to be easy to look up
+-   and CONCISE. Tables are inherently too messy so trim out everything
 
 ## Bad Table
 
@@ -418,17 +429,17 @@ knitr::kable(UN, row.names = TRUE)
 
 ## Table Fixes
 
-- Tables for a non-specialist audience should only have a few variables. Usually 1-2 "identifying" rows (state, year, rank, etc.) and 1-2 "data" rows
-- Make sure the numbers look nice, no eight digits after the decimal; add things like % signs and $ signs.
-- In R you can often do this with the **scales** package
+-   Tables for a non-specialist audience should only have a few variables. Usually 1-2 "identifying" rows (state, year, rank, etc.) and 1-2 "data" rows
+-   Make sure the numbers look nice, no eight digits after the decimal; add things like % signs and \$ signs.
+-   In R you can often do this with the **scales** package
 
 ## Easy to Read
 
-- Short:  Nobody likes to scroll through an enormous table
-- Consider not showing ALL the data here, maybe just a "top ten" if that's relevant
-- If all the data really is necessary, try to make its presentation shorter and encourage scrolling while everything else stays in place
-- Consider "striping" to make different rows easy to distinguish with `kableExtra::kable_styling(bootstrap_options = 'striped')
-- More coloring and customization with `ggtexttable` in **ggpubr** (note this makes the table as an image)
+-   Short: Nobody likes to scroll through an enormous table
+-   Consider not showing ALL the data here, maybe just a "top ten" if that's relevant
+-   If all the data really is necessary, try to make its presentation shorter and encourage scrolling while everything else stays in place
+-   Consider "striping" to make different rows easy to distinguish with \`kableExtra::kable_styling(bootstrap_options = 'striped')
+-   More coloring and customization with `ggtexttable` in **ggpubr** (note this makes the table as an image) or the highly flexible **gt** package
 
 ## Easy to Read
 
@@ -445,64 +456,59 @@ UN %>%
   kableExtra::kable_styling(bootstrap_options = c('striped','hover'))
 ```
 
-- This could be even better - generally you want as few borders as possible (but RMarkdown is not cooperating)
-
+-   This could be even better - generally you want as few borders as possible (but RMarkdown is not cooperating)
 
 ## Hall of Shame
 
-- Pie charts: not *the worst* but rarely better than a bar chart or treemap. We just don't distinguish angles that well. Works best with ONLY one category you care about, and with percentages labeled. At least people understand them
-- Word clouds: I have no idea what anyone would learn from one of these. Looks pretty?
-- [Bubble charts](https://help.tableau.com/current/pro/desktop/en-us/buildexamples_bubbles.htm). Carries little info in a lot of space, and in very hard-to-see ways (compare circle areas?). Tableau recommends them for some reason.
+-   Pie charts: not *the worst* but rarely better than a bar chart or treemap. We just don't distinguish angles that well. Works best with ONLY one category you care about, and with percentages labeled. At least people understand them
+-   Word clouds: I have no idea what anyone would learn from one of these. Looks pretty?
+-   [Bubble charts](https://help.tableau.com/current/pro/desktop/en-us/buildexamples_bubbles.htm). Carries little info in a lot of space, and in very hard-to-see ways (compare circle areas?). Tableau recommends them for some reason.
 
 ## Let's evaluate
 
 How about density plots?
 
-- `geom_density()` and `geom_histogram`, `geom_dotplot`, extras like `geom_violin` and the **ggridges** package
-- What would these work well for and what would they not?
-- What problems might we run into?
+-   `geom_density()` and `geom_histogram`, `geom_dotplot`, extras like `geom_violin` and the **ggridges** package
+-   What would these work well for and what would they not?
+-   What problems might we run into?
 
 ## Let's evaluate
 
-- How about heatmaps on actual maps? Same question
+-   How about heatmaps on actual maps? Same question
 
-![Map-based state heatmap](Lecture_12_State_Heatmap.png)
+![Map-based state heatmap](Lecture_12_State_Heatmap.png){width="560"}
 
 ## Let's evaluate
 
-- And what would a version like this solve for us?
+-   And what would a version like this solve for us?
 
-![Hex-based state map](Lecture_12_Hexmap.png)
+![Hex-based state map](Lecture_12_Hexmap.png){width="636"}
 
 ## Gallery
 
-- There are LOTS of other options out there. For example, [paired plots](ggpubr::ggpaired https://rpkgs.datanovia.com/ggpubr/reference/ggpaired.html), Sankey diagrams, path diagrams, etc. etc.
-- We can see the [gallery](https://exts.ggplot2.tidyverse.org/gallery/) but our key here is being able to evaluate whether a geometry works for what *we want to get across* and can do it in a clear way
+-   There are LOTS of other options out there. For example, [paired plots](ggpubr::ggpaired%20https://rpkgs.datanovia.com/ggpubr/reference/ggpaired.html), Sankey diagrams, path diagrams, etc. etc.
+-   We can see the [gallery](https://exts.ggplot2.tidyverse.org/gallery/) but our key here is being able to evaluate whether a geometry works for what *we want to get across* and can do it in a clear way
 
 ## Practice
 
-- Download this file of robocall complaints to the FCC: [https://www.kaggle.com/fcc/robocall-complaints](https://www.kaggle.com/fcc/robocall-complaints)
-- Think of a basic story (it's ok if it's not stellar)
-- Think about the best geometry to tell that story
-- Sketch a graph to tell that story as clearly as possible
-- If you have time, make it
-- You can load it with `read_csv()` and, if necessary, use `ymd` in **lubridate** to make the date a date
-
-
-
-HEY HEY HEY
+-   Download this file of robocall complaints to the FCC: <https://www.kaggle.com/fcc/robocall-complaints>
+-   Think of a basic story (it's ok if it's not stellar)
+-   Think about the best geometry to tell that story
+-   Sketch a graph to tell that story as clearly as possible
+-   If you have time, make it
+-   You can load it with `read_csv()` and, if necessary, use `ymd` in **lubridate** to make the date a date
 
 ## Downloadable Geometries
 
-- There are so, so many **ggplot2** geometries available
-- Way too many to cover - see the [ggplot2 extension gallery](https://exts.ggplot2.tidyverse.org/gallery/) in addition to the base-**ggplot2** cheat sheet from last time
-- I will go over some popular ones. Google package names for more detailed explanations
-- We won't go deeply into how to use these, this is more to show you they exist and an example so you can look further yourself if you're interested
+-   There are so, so many **ggplot2** geometries available
+-   Way too many to cover - see the [ggplot2 extension gallery](https://exts.ggplot2.tidyverse.org/gallery/) in addition to the base-**ggplot2** cheat sheet from last time
+-   I will go over some popular ones. Google package names for more detailed explanations
+-   We won't go deeply into how to use these, this is more to show you they exist and an example so you can look further yourself if you're interested
 
 ## geom_text to geom_repel
 
-- We covered geom_text last time
-- But the text gets in the way! How did I handle this in that `mtcars` graph I just did?
+-   We covered geom_text last time
+-   But the text gets in the way! How did I handle this in that `mtcars` graph I just did?
 
 ```{r, echo = FALSE, fig.height = 4, fig.width = 6}
 data(mtcars)
@@ -526,15 +532,15 @@ ggplot(mtcars, aes(x = mpg, y = hp, color = Transmission, label = CarName)) +
 
 ## ggmap
 
-- **ggplot2** has *extensive* mapping capabilities
-- Including straightforward-ish map *animations* with the **tmap** package
-- Also see libraries **choloropleth**, **tigris**, **tmap**, **sf**, **fiftystater**
+-   **ggplot2** has *extensive* mapping capabilities
+-   Including straightforward-ish map *animations* with the **tmap** package
+-   Also see libraries **choloropleth**, **tigris**, **tmap**, **sf**, **fiftystater**
 
 ## gganimate
 
-- The **gganimate** package makes it fairly straightforward to animate your graphs
-- Take a graph and use a `transition_` command to have it assign one axis to *time*
-- Make sure this actually adds something! This limits where the graph can be shown
+-   The **gganimate** package makes it fairly straightforward to animate your graphs
+-   Take a graph and use a `transition_` command to have it assign one axis to *time*
+-   Make sure this actually adds something! This limits where the graph can be shown
 
 ## gganimate
 

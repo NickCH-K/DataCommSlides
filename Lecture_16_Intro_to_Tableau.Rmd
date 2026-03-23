@@ -39,6 +39,15 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
@@ -78,6 +87,7 @@ cat("
 - Until you're very familiar with the coding option, the canned option will be faster and easier...
 - *IF* the thing you want to do is something the canned-software authors anticipated and decided to make easy
 - If it's not, it will usually be *much* harder than just coding the thing up
+- Perhaps AI will kill the canned side? We'll see
 
 ## The Canned-Coded Scale
 

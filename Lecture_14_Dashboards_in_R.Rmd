@@ -34,6 +34,15 @@ cat("
   border: none !important;
   box-shadow: none;
 }
+.reveal section ul {
+    font-size: 22pt;
+}
+.reveal section ol {
+    font-size: 22pt;
+}
+.reveal section p {
+    font-size: 22pt;
+}
 </style>")
 ```
 
@@ -101,7 +110,7 @@ knitr::include_graphics('Lecture_14_KPI.png')
 - Let's explore each of these examples and see what works and what might not
 - [Year-to-Date Income Statement](https://public.tableau.com/views/IncomeStatement_4/IncomeStatement?:embed=y&:display_count=yes&publish=yes&:showVizHome=no)
 - [NBA Scoring Dashboard](https://rpubs.com/jcheng/nba1)
-- [Economic Indicators for the USA](https://research.stlouisfed.org/dashboard/1151)
+- [US Economic Indicators](https://www.census.gov/economic-indicators/)
 
 ## Dashboards in R
 
@@ -121,7 +130,6 @@ knitr::include_graphics('Lecture_14_KPI.png')
 ## On to dashboards
 
 - There are two approaches to doing dashboards in R. One is Shiny-focused, and the other is htmlwidgets focused (but lets you include Shiny stuff)
-- We'll be going with the latter, as it's easier, but the Shiny one is good too.
 - Our approach will be to use **flexdashboard**
 - Install **flexdashboard** with `install.packages('flexdashboard')`
 - Then you can open a new Flex Dashboard by going File $\rightarrow$ New File $\rightarrow$ R Markdown $\rightarrow$ From Template $\rightarrow$ Flex Dashboard.
