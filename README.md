@@ -34,7 +34,7 @@ Also, check out the accompanying [video series](https://nickchk.com/videos.html#
 
 [Lecture 9: Structuring ggplot2](https://nickch-k.github.io/DataCommSlides/Lecture_09_Structuring_ggplot.html#/)
 
-[Lecture 10: Styling ggplot2](https://nickch-k.github.io/DataCommSlides/Lecture_10_Styling_ggplot.html#/)
+[Lecture 10: Graphs with AI](https://nickch-k.github.io/DataCommSlides/Lecture_10_Graphs_with_AI.html#/)
 
 [Lecture 11: Bob Ross Day](https://nickch-k.github.io/DataCommSlides/Lecture_11_Bob_Ross.html#/) (this one may not translate to a non-classroom scenario; the idea here is that we create these graphs together one step at a time, building them up from scratch and showing the process)
 
